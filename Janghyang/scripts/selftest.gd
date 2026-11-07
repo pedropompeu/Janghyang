@@ -250,6 +250,9 @@ func _run() -> void:
 	_record(panel.broken, "three knocks break the hollow panel", "")
 	await get_tree().physics_frame
 	_expect_clear_shape(Vector3(6.7, 0.52, 0.0), crouch_shape, "a crouched child fits through the broken panel")
+	# U33: the crawl route, crouched, from the playroom through the broken panel into the passage.
+	_check_segment_shape(Vector3(6.7, 0.52, 0.9), Vector3(6.7, 0.52, -0.6), crouch_shape, "a crouched child walks from the playroom through the broken panel")
+	_check_segment_shape(Vector3(6.7, 0.52, -0.6), Vector3(8.4, 0.52, -0.6), crouch_shape, "the passage runs east at crouch height")
 	main.player.camera.rotation.x = 0.0
 	sounds.clear()
 	main.player._knock()
