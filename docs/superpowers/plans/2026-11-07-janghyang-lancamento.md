@@ -379,13 +379,13 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U60 — Preset de exportação
 **Arquivos:** `Janghyang/export_presets.cfg` (novo).
 
-- [ ] Preset Windows e preset Linux, nome do executável `Janghyang`.
+- [x] Preset Windows e preset Linux, nome do executável `Janghyang`. (Commit `1ed4c4c`; `Janghyang/build/` entrou no `.gitignore`.)
 - **Gate:** `godot --headless --path Janghyang --export-release "Linux" build/linux/Janghyang` (com U02 concluída) gera o binário.
 - **Commit:** `build: add Windows and Linux export presets`.
 
 #### U61 — Build testado
-- [ ] Rodar o binário exportado: abre, menu aparece, uma visita curta sem erro no log.
-- [ ] Repetir o selftest contra o binário quando possível.
+- [~] Rodar o binário exportado: abre, menu aparece, uma visita curta sem erro no log. **Parcial (i):** Linux abre por 20 s com `DISPLAY=:0` sem erro no log; o menu visível e a visita curta exigem olhar humano (Pedro), e o Windows não roda neste ambiente.
+- [x] Repetir o selftest contra o binário quando possível: `./build/linux/Janghyang --headless -- --selftest` = 282 checks, 0 failures.
 - **Gate:** dois binários abrindo sem erro.
 - **Commit:** nenhum.
 
