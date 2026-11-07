@@ -286,9 +286,10 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 
 - [x] **Teste (RED):** `W` fora de escada não sobe — `W off the ladder walks, Elias stays on the floor` (teclas por `Input.parse_input_event`, como o `tour.gd`). RED por mutante do volume da escada (`ladder.gd` sem contar): 5 FAIL.
 - [x] **Teste (RED):** dentro da escada, `W` sobe; no topo da escada da torre, `atlas.room_at` retorna `&"mecanismo"` (`W climbs the tower ladder`; `at the top of the tower ladder Elias is in the mechanism`).
-- [~] Segmento da rota: sala → escada → sótão → torre. **Parcial (i):** a escada da passagem e a da torre são percorridas com `W`; o chão do sótão entre elas **não** é percorrido por segmento, e a base da escada da torre é alcançada por teleporte. A porta da torre (`DoorTower`) é fechada e exige interação, que o selftest ainda não faz.
+- [x] Segmento da rota: sala → escada → sótão → torre. Fechado em 2026-11-07 (i): o chão do sótão é percorrido por segmento até a porta da torre (`the attic floor leads west to the tower door`); a porta começa fechada (`the shut tower door blocks its gap`), abre por `_toggle("DoorTower")` (`interacting opens the tower door`) e então o chão interno leva à base da `LadderTowerA` por segmentos. O teleporte que antes ia à base da escada agora parte do fim da caminhada. Restou só o trecho do topo do poço ao chão do sótão, que é um salto e não um segmento.
 - [x] **Gate:** selftest 258/0 (+7 sobre 251), código 0; unit 1075/0 sem mudança.
 - **Commit:** `test: climb the attic ladder and reach the mechanism in the selftest`.
+- **Fechamento parcial (2026-11-07):** commit `4f08627` (`test: walk the attic floor to the tower door and ladder in the selftest`). RED por mutantes em cópia descartável: porta com rotação fechada (`rot_b = ZERO`) = 2 FAIL (`the open tower door leaves its gap clear`, `the open door takes Elias into the tower`); porta sem colisão quando fechada (`disable_collision_at_a = true`) = 1 FAIL (`the shut tower door blocks its gap`). GREEN selftest 282/0 (código 0, +9 sobre 273); unit 1078/0; lint nada a reportar.
 
 #### U35 — Rota da gaveta
 **Arquivos:** `Janghyang/scripts/selftest.gd`; leitura de `Janghyang/scripts/areas/gaveta.gd` (alçapão, escada para baixo).
