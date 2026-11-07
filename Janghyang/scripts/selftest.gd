@@ -298,6 +298,29 @@ func _run() -> void:
 	await _frames(3)
 	main.player.set_physics_process(false)
 
+	# U35 (Review Focus 4): the bedroom trapdoor opens onto the ladder down to the drawer.
+	print("SELFTEST: drawer")
+	var trap := main.find_child("Trapdoor", true, false)
+	_record(trap != null and trap.is_in_group(&"Breakable"), "the bedroom has a trapdoor", "")
+	for i in 3:
+		trap.hit()
+	await _frames(2)
+	_record(trap.broken, "three knocks break the trapdoor", "")
+	main.player.set_physics_process(true)
+	main.player.rotation.y = PI * 0.5
+	main.player.global_position = Vector3(14.925, 0.0, 0.52)
+	await _frames(3)
+	_record(main.player.ladders > 0, "the drawer ladder counts Elias as on the ladder", str(main.player.ladders))
+	_key_event(KEY_S, true)
+	var low: float = await _sink_until(-3.0)
+	_key_event(KEY_S, false)
+	_record(low <= -3.0, "S on the ladder goes down into the drawer", "low y %.2f" % low)
+	_record(main.atlas.room_at(main.player.global_position) == &"gaveta", "the foot of the ladder is the drawer", str(main.atlas.room_at(main.player.global_position)))
+	main.player.global_position = saved_l
+	main.player.rotation.y = saved_rot
+	await _frames(3)
+	main.player.set_physics_process(false)
+
 	print("SELFTEST: story")
 	var quest = main.get("quest")
 	var gastos = main.get("gastos")
@@ -604,6 +627,16 @@ func _climb_until(height: float) -> float:
 		if top >= height:
 			break
 	return top
+
+## Waits (at most 4 s) while S is held; returns the lowest y Elias reached.
+func _sink_until(depth: float) -> float:
+	var low := 0.0
+	for i in 240:
+		await get_tree().physics_frame
+		low = minf(low, main.player.global_position.y)
+		if low <= depth:
+			break
+	return low
 
 func _expect_clear(pos: Vector3, label: String) -> void:
 	_expect_clear_shape(pos, query_shape, label)
