@@ -82,3 +82,23 @@ func test_the_shop_ticks_out_of_step(t) -> void:
 		lo = minf(lo, g)
 		hi = maxf(hi, g)
 	t.ok(hi - lo > 0.1, "they do not agree with each other")
+
+## A-007: every loop the house starts is silenced before the game exits. The
+## unit runner has no scene tree yet, so playback cannot be observed here: the
+## probe records the stop() call instead. The real silence is checked by the
+## headful exit gate.
+class StopProbe extends Node:
+	var stops := 0
+	func stop() -> void:
+		stops += 1
+
+func test_stop_all_silences_loops(t) -> void:
+	var bank = Sfx.new()
+	bank.silent = false
+	var loop := StopProbe.new()
+	bank.register_loop(loop)
+	bank.stop_all()
+	t.eq(loop.stops, 1, "stop_all stops the registered loop")
+	t.ok(bank.silent, "nothing new sounds after stop_all")
+	loop.free()
+	bank.free()

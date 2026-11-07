@@ -188,7 +188,7 @@ func _build() -> void:
 		get_tree().reload_current_scene()))
 	buttons.add_child(_button("Sair do jogo", func() -> void:
 		close()
-		get_tree().quit()))
+		main.shutdown()))
 
 func _sync_controls() -> void:
 	for row in ROWS:

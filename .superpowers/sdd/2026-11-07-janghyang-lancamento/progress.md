@@ -25,3 +25,9 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U16: start | baseline selftest 243/0 unit 1060/0 lint(1 pré-existente)
 [2026-11-07] U16: Ruling: a parte de código (gate de 3600 s e peças) já é coberta por test_visit_state.gd (test_pieces_gate, test_catalog_alone_no_longer_opens_the_gate, test_time_limit_is_an_hour); não se duplica teste — custo se errado: nenhum (o achado é de documentação).
 [2026-11-07] U16: complete | gates: unit 1060/0 (sem mudança de código); lint sem erro novo; decisoes.md:70 com ~superseded; A-019 registrado e corrigido | commit: pendente
+[2026-11-07] U15: start | baseline selftest 243/0 unit 1060/0 lint(1 pré-existente) | gate de saída: 5 vazamentos (A-007)
+[2026-11-07] U15: Ruling: desligamento explícito e centralizado (`SfxBank.stop_all` + `main.shutdown`), não `_exit_tree` (já testado sem efeito) — custo se errado: uma função para reverter.
+[2026-11-07] U15: Ruling: teste RED com sonda `Node` que conta `stop()` (GDScript não deixa sobrescrever `stop()` nativo; `playing` exige árvore de cena, indisponível no runner unit) — custo se errado: nenhum, o silêncio real é medido pelo gate headful.
+[2026-11-07] U15: complete | gates: RED = `register_loop` inexistente; GREEN unit 1062/0 (+2 checks); selftest 243/0; headful `--shot-clock` com 0 vazamentos (linha de base 5), código 0; lint sem erro novo | commit: fix: stop looping audio before exit so no playback leaks (A-007)
+[2026-11-07] Hashes finais das unidades (correção do registro "commit: pendente"): U10 1a730be, U11 7f8a234, U12 8968f2b, U13 1b4ef31, U14 abcc0f1, U16 75013c5, U15 (ver git log).
+[2026-11-07] Nota de processo: o gate headful regenera `blockout-clock.png` (versionado); restaurado com `git checkout` para não entrar no commit.

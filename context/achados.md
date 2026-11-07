@@ -81,7 +81,8 @@ relacionado:
 - **Reprodução:** `DISPLAY=:0 timeout 30 godot --path . --resolution 1280x720 -- --shot-clock`; o aviso aparece no fim do log.
 - **Por que importa:** o aviso polui a saída e pode esconder um vazamento real no futuro.
 - **Fix recomendado:** no headless (testes), `sfx.silent` não toca nada e a saída fica limpa. Para a janela, falta encerrar o áudio antes do `quit()` (parar os players e esperar um frame). Custo: minutos.
-- **Estado:** aberto (contornado no headless).
+- [2026-11-07] (e) ← U15 do plano de lançamento: `SfxBank.register_loop` / `stop_all` e `main.shutdown()` (para os loops, espera um frame, `quit()`); gate headful `DISPLAY=:0 timeout 30 godot --path . --resolution 1280x720 -- --shot-clock` com 0 vazamentos (linha de base 5). Unidade `1062 checks, 0 failures`; selftest `243/0`.
+- [2026-11-07 ~superseded 2026-11-07] ~~**Estado:** aberto (contornado no headless).~~ → **Estado:** corrigido na U15 do plano de lançamento. (e)
 
 ### [A-013] Em sessão muito longa, os ecos retocados no final "corda" derivam de trecho {#a-013}
 

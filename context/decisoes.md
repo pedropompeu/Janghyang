@@ -226,3 +226,8 @@ criado: 2026-09-12
   **Por quê:** A-015. O som sem corpo contradizia "nada inventado" (spec de expansão).
   **Fecha:** som do lápis durante o 03:33.
   **Descartado:** tocar o lápis sempre (defeito); suprimir também a escrita enquanto o duplo não senta (perderia entradas do caderno).
+
+- [2026-11-07] (i) **A saída do jogo passa por `main.shutdown()`: para os loops (`SfxBank.stop_all`), espera um frame e chama `quit()`.** Os players de loop se registram em `SfxBank.register_loop`. Fechar a janela (`NOTIFICATION_WM_CLOSE_REQUEST`, com `auto_accept_quit = false`), "Sair do jogo" e a captura `--shot-clock` usam o mesmo caminho.
+  **Por quê:** A-007. O aviso `ObjectDB instances were leaked` vinha de playbacks de loop vivos no `quit()`; parar em `_exit_tree` não resolveu.
+  **Fecha:** vazamento de áudio na saída (gate headful: 0, linha de base 5).
+  **Descartado:** confiar em `_exit_tree` (testado sem efeito); silenciar só no headless (não cobre a janela).

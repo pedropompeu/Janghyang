@@ -145,6 +145,7 @@ var score
 var _black: ColorRect
 var _hugging := false
 var settings_ui
+var _shutting_down := false
 
 func _ready() -> void:
 	clock_model = preload("res://scripts/wind_clock_model.gd").new()
@@ -157,6 +158,7 @@ func _ready() -> void:
 	sfx = SfxBank.new()
 	sfx.name = "Sfx"
 	add_child(sfx)
+	get_tree().auto_accept_quit = false
 	_make_materials()
 	_make_environment()
 	_build_house()
@@ -1213,6 +1215,7 @@ func _wire_sound() -> void:
 	breath.volume_db = -24.0
 	breath.autoplay = not sfx.silent
 	add_child(breath)
+	sfx.register_loop(breath)
 
 ## Doors groan when they move; closing, they shut on the frame.
 func _wire_door_sound(door: Node) -> void:
@@ -1233,6 +1236,20 @@ func _floor_group(group: StringName) -> bool:
 	var n: Node = hit.collider
 	return n.is_in_group(group) or (n.get_parent() != null and n.get_parent().is_in_group(group))
 
+## The one way out (A-007): silence the loops, let the frame finish, then quit.
+func shutdown() -> void:
+	if _shutting_down:
+		return
+	_shutting_down = true
+	sfx.stop_all()
+	await get_tree().process_frame
+	get_tree().quit()
+
+## The window's close button also comes through here, so the loops stop first.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		shutdown()
+
 func _loop_3d(kind: StringName, pos: Vector3, volume_db: float) -> void:
 	var p := AudioStreamPlayer3D.new()
 	p.stream = sfx.stream(kind)
@@ -1242,6 +1259,7 @@ func _loop_3d(kind: StringName, pos: Vector3, volume_db: float) -> void:
 	p.position = pos
 	p.autoplay = not sfx.silent
 	add_child(p)
+	sfx.register_loop(p)
 
 func _wire_mirror() -> void:
 	house_mirror = HouseMirror.new()
@@ -1755,4 +1773,4 @@ func _take_shot(mode: String) -> void:
 		print("shot: ", path, " err=", err)
 	else:
 		print("shot: no image")
-	get_tree().quit()
+	shutdown()

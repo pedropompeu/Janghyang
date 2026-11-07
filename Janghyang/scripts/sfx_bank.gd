@@ -15,6 +15,8 @@ const PENCIL_PATTERN := [0.0, 0.18, 0.31, 0.55, 0.7]
 var silent := DisplayServer.get_name() == "headless"
 var _streams := {}
 var _pool: Array[AudioStreamPlayer3D] = []
+## Every looping player the house starts; stop_all silences them at exit (A-007).
+var _loops: Array[Node] = []
 var _next := 0
 
 static func make(kind: StringName, seed: int = 7) -> AudioStreamWAV:
@@ -185,6 +187,21 @@ func _ready() -> void:
 		p.max_distance = 30.0
 		add_child(p)
 		_pool.append(p)
+
+## Hands a looping player to the bank so that stop_all can silence it.
+func register_loop(player: Node) -> void:
+	_loops.append(player)
+
+## Silences every registered loop and the pool, and stays silent: nothing
+## new starts after this (A-007). Called by main before the game quits.
+func stop_all() -> void:
+	silent = true
+	for p in _loops:
+		if is_instance_valid(p):
+			p.stop()
+	_loops.clear()
+	for p in _pool:
+		p.stop()
 
 func stream(kind: StringName) -> AudioStreamWAV:
 	return _streams.get(kind)
