@@ -91,3 +91,20 @@ func test_clock_keeps_running_after_exit(t) -> void:
 	var before: float = v.clock.spring
 	v.update(10.0, false)
 	t.ok(v.clock.spring < before, "leaving early: the clock keeps its wind and runs down")
+
+## U32 (Review Focus 2): a visit that skips every phase (no pieces, nothing
+## cataloged) reaches 03:33 only through the hour: the gate stays shut before
+## 3600 s and opens at 3600 s.
+func test_skipping_phases_reaches_the_hour_only_by_time(t) -> void:
+	var v := _new()
+	t.eq(_run(v, 3599), &"", "no 03:33 before the hour with nothing done")
+	t.ok(not v.clock.can_stop, "the gate is still shut at 3599 s")
+	v.update(1.0, false)
+	t.ok(v.clock.can_stop, "the gate opens at 3600 s")
+
+## U32: the pieces open the gate at once, with no time passed.
+func test_pieces_open_the_gate_at_once(t) -> void:
+	var v := _new()
+	v.on_pieces_ready()
+	t.eq(v.elapsed, 0.0, "no time has passed")
+	t.ok(v.clock.can_stop, "the pieces open the gate at once")
