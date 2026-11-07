@@ -34,3 +34,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U02: start | baseline selftest 243/0 unit 1062/0 lint(1 pré-existente)
 [2026-11-07] U02: Ruling: templates 4.7.2.stable instalados em ~/.local/share/godot/export_templates/4.7.2.stable/ a partir do .tpz oficial, SHA512 conferido com SHA512-SUMS.txt da release — custo se errado: reinstalar; fora do repositório.
 [2026-11-07] U02: complete | gates: diretório com windows_release_x86_64.exe e linux_release.x86_64 e version.txt (4.7.2.stable.official.ed1daf0bf); desbloqueia U60–U66 | commit: nenhum (ferramenta local)
+[2026-11-07] U03: start | baseline selftest 243/0 unit 1062/0 lint(1 pré-existente)
+[2026-11-07] U03: Ruling: buscas internas das lojas (WebFetch nas buscas da Steam; chrome-devtools nas do itch.io e GOG, que não renderizavam pelo WebFetch) em vez de WebSearch, que veio raso — custo se errado: nenhum, só mais uma verificação.
+[2026-11-07] U03: complete | gates: tabela 3 lojas × 2 termos com resultado e URL em decisoes.md; nenhuma colisão direta; vizinho de tema registrado | commit: docs: record store name collision check for Janghyang

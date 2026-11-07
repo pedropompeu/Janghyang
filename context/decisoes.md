@@ -231,3 +231,13 @@ criado: 2026-09-12
   **Por quê:** A-007. O aviso `ObjectDB instances were leaked` vinha de playbacks de loop vivos no `quit()`; parar em `_exit_tree` não resolveu.
   **Fecha:** vazamento de áudio na saída (gate headful: 0, linha de base 5).
   **Descartado:** confiar em `_exit_tree` (testado sem efeito); silenciar só no headless (não cobre a janela).
+
+- [2026-11-07] (e) **Checagem de colisão de nome nas lojas (U03): sem título igual a "Janghyang" nem "잔향" em Steam, itch.io e GOG.** Busca direta nas lojas, com a ferramenta de busca interna de cada uma:
+  | Loja | "janghyang" | "잔향" |
+  |---|---|---|
+  | Steam | 0 resultados — https://store.steampowered.com/search/?term=janghyang | 0 resultados — https://store.steampowered.com/search/?term=%EC%9E%94%ED%96%A5 |
+  | itch.io | 4 projetos, nenhum com título Janghyang (nomes parecidos: "Call it Fate", "BLOK", "The Mysterious valley", "What's Life") — https://itch.io/search?q=janghyang | 0 projetos — https://itch.io/search?q=%EC%9E%94%ED%96%A5 |
+  | GOG | 0 resultados — https://www.gog.com/en/games?query=janghyang | 0 resultados — https://www.gog.com/en/games?query=%EC%9E%94%ED%96%A5 |
+  Vizinho de tema, não de nome: "Gwihyang: Homecoming" (귀향, horror coreano, Steam) — https://store.steampowered.com/app/3060970 (registrado para a leitura de posicionamento, não é colisão).
+  **Ressalva:** a busca cobre o título e as grafias testadas; não cobre grafias alternativas (ex.: "Jang Hyang") nem a forma com Hanja. A busca web padrão e estendida não achou nada relevante; o resultado vale pelas buscas internas das lojas.
+  **Por quê:** U03 do plano de lançamento (nome Janghyang, D3).
