@@ -55,3 +55,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U32: start | baseline unit 1070/0 selftest 249/0
 [2026-11-07] U32: Ruling: dois testes em `test_visit_state.gd`: 3599 s sem portão e 3600 s com portão; peças abrem na hora — custo se errado: nenhum.
 [2026-11-07] U32: complete | gates: unit 1075/0 (+5); mutante que ignora as peças em `_check_gate`: 3 FAIL | commit: 16e2ec2
+[2026-11-07] U33: start | baseline selftest 249/0 unit 1075/0 lint nada a reportar
+[2026-11-07] U33: Ruling: rota agachada numa checagem própria logo após a quebra da parede, não em `LOOP` — `LOOP` alimenta `_feed_loop` (gravação do eco); mudar a rota ali alteraria o eco sem relação com a passagem. Desvio do texto do plano, marcado (i) — custo se errado: mover duas linhas para `LOOP` e ajustar `_feed_loop`.
+[2026-11-07] U33: complete | gates: RED mutante (`main.gd:635` com 999 pancadas) = FAIL `a crouched child walks from the playroom through the broken panel — blocked by HollowPanel`; GREEN selftest 251/0 (código 0, +2); unit 1075/0 (sem mudança); lint nada a reportar | commit: 1dc640e (código); docs no commit seguinte

@@ -276,9 +276,9 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U33 — Rota da passagem (selftest)
 **Arquivos:** `Janghyang/scripts/selftest.gd` (`LOOP` linha 23; `_run`); leitura de `Janghyang/scripts/areas/passagem.gd` (coordenadas da parede oca e da entrada agachada).
 
-- [ ] **Teste (RED):** segmento novo de `LOOP`: sala de brincar → parede oca (`main.hollow` ou equivalente) → passagem, agachado (`crouch_shape`). Hoje falha (sem caminho até a passagem, a parede está fechada).
-- [ ] Após quebrar a parede pelo pipeline de `hit()` (3 pancadas), o segmento deve ser transitável.
-- **Gate:** selftest com o check novo; contagem sobe; 0 falhas.
+- [x] **Teste (RED):** segmento agachado (`crouch_shape`) da sala de brincar (z 0.9) pela parede oca (z 0) até a passagem. **Desvio (i):** os segmentos ficam numa checagem própria logo após a quebra da parede, não em `LOOP`, porque `LOOP` alimenta `_feed_loop`, que grava a trajetória do eco. RED por mutante em cópia: parede com 999 pancadas → FAIL "blocked by HollowPanel".
+- [x] Após quebrar a parede pelo pipeline de `hit()` (3 pancadas), o segmento é transitável (GREEN).
+- [x] **Gate:** selftest 251/0 (+2), código 0; unit 1075/0 sem mudança.
 - **Commit:** `test: walk the passage route in the selftest`.
 
 #### U34 — Rota do sótão e do mecanismo, com escada (Review Focus 4)
