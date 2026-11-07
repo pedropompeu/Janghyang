@@ -12,3 +12,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U11: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
 [2026-11-07] U11: Ruling: sonda movida de z 8,88 para z 8,6 (cápsula de raio 0,28 não alcança a fachada em z≈9,03 e encosta no relógio, z 8,74–9,02) — custo se errado: ajuste de uma constante.
 [2026-11-07] U11: complete | gates: RED mutante (sem colisão do relógio) com sonda antiga = PASS; GREEN mutante com sonda nova = FAIL; selftest real 241/0 (código 0); unit 1059/0; lint sem erro novo | commit: pendente | evidência: scratchpad a005/m1 e a005/m2
+[2026-11-07] U12: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
+[2026-11-07] U12: Ruling: gate de `--tour` substituído por injeção de `R` num selftest de cópia (o tour pode não apertar R; a injeção prova o ramo) — custo se errado: log não aparece num tour real, só se confirma com o teclado; a investigação de A-017 segue aberta.
+[2026-11-07] U12: complete | gates: log `[reload] R via ...` confirmado em cópia; selftest 241/0; unit 1059/0; lint sem erro novo | commit: pendente | evidência: scratchpad a017/out.txt

@@ -131,7 +131,8 @@ relacionado:
 - **Reprodução:** não reproduzido. O tour roda no `DISPLAY=:0` real; uma tecla `R` vinda do teclado de verdade explicaria o reinício.
 - **Por que importa:** se for um evento sintético perdido, a demonstração recomeça sozinha diante de quem assiste.
 - **Fix recomendado:** se voltar, logar `event` no ramo do `R` (5 min) e conferir se vem de `parse_input_event`.
-- **Estado:** aberto.
+- **Estado:** aberto — diagnóstico instalado na U12 (`[reload] R via <evento>` em `player.gd`). Fecha quando o log aparecer numa rodada real de `--tour` ou numa sessão de Pedro.
+- [2026-11-07] (e) ← `Janghyang/scripts/player.gd` (ramo do `R`): com um evento de `R` injetado num selftest de cópia descartável, o log `[reload] R via InputEventKey: keycode=82 (R) ... pressed=true, echo=false` aparece antes do reload.
 
 ## Fechados
 

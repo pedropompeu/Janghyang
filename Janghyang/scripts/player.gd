@@ -92,6 +92,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	# R works even while locked: after the ending, too. Esc is the options
 	# sheet (settings_ui.gd).
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_R:
+		# A-017: log which event reloads the scene (diagnostic only, no behaviour change).
+		print("[reload] R via %s" % event)
 		get_tree().reload_current_scene()
 		return
 	if input_locked:
