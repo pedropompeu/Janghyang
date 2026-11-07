@@ -1,4 +1,4 @@
-# FAZ DE CONTA — slice Godot 4.7
+# Janghyang — slice Godot 4.7
 
 ## O slice em 6 linhas
 
@@ -40,12 +40,12 @@ desenhadas, marcas de altura — que apontam as passagens.
 ## Requisitos
 
 - Godot **4.7.2.stable** (ou 4.7.x compatível), renderer GL Compatibility.
-- Rodar a partir da pasta `faz-de-conta/`.
+- Rodar a partir da pasta `Janghyang/`.
 
 ## Rodar
 
 ```bash
-cd faz-de-conta
+cd Janghyang
 godot --path .                 # jogar
 godot --path . -- --labels     # jogar com as labels de leitura do blockout
 godot --path . -- --tour       # demonstração: Elias anda sozinho, bate, quebra o painel, faz de conta, abre o plano, F9
@@ -92,7 +92,7 @@ e capturas não leem nem gravam esse arquivo.
 ## Verificação automática
 
 ```bash
-cd faz-de-conta
+cd Janghyang
 timeout 60  godot --headless --path . -s res://tests/run_unit.gd   # unit: modelos puros
 timeout 150 godot --headless --path . -- --selftest               # cena: colisão, laço, 03:33, final
 cd .. && python lint.py                                             # integridade de context/
@@ -158,7 +158,7 @@ na raiz do projeto e fecha o Godot.
 ## Estrutura
 
 ```
-faz-de-conta/
+Janghyang/
 ├── project.godot, main.tscn
 ├── scripts/
 │   ├── main.gd                # constrói casa, tampo, oficina, móveis, UI; liga tudo

@@ -186,6 +186,7 @@ criado: 2026-09-12
   **Fecha:** natureza do projeto (profissional, não pessoal nem portfólio) e a data-alvo de lançamento.
   **Descartado:** projeto pessoal; portfólio sem lançamento.
   **Em aberto (não fechado por Pedro):** plataforma de distribuição, `git init` em `~/Dev/Jogo` e migração para `Projetos_holding/`.
+  **Atualização 2026-11-07:** `git init` e remoto `origin` feitos após Pedro informar o repositório (ver [[arquitetura#repo]]). Plataforma e migração seguem em aberto.
 
 - [2026-11-07 ~superseded 2026-11-07] (i) ~~**Nome de trabalho: The Watchmaker's Echo.**~~ → rejeitado por Pedro: o nome já existe. Ver candidatos novos no histórico da sessão de 2026-11-07. Texto original, para registro: título localizado opcional para pt-BR: "O Eco do Relojoeiro".
   **Por quê:** cobre o relojoeiro (Elias, Inácio) e o eco do 03:33; palavras latinas fáceis de buscar e de soletrar. Recomendação do OpenCode (sessão ses_e47fee9e1ffeZeuIw2fPKpKqDl), adotada por nós.

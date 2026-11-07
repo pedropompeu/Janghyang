@@ -106,7 +106,16 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
 
 - [2026-09-12] (e) `handoff/` contém o kit/template original para referência ou réplica em outros repositórios.
 - [2026-09-12] (e) `handoff.md` na raiz detalha a fundamentação teórica e lições aprendidas do sistema.
-- [2026-10-20] (e) ← `faz-de-conta/` O projeto está fora de qualquer repositório Git; não houve commit nem push.
+- [2026-10-20 ~superseded 2026-11-07] (e) ← `faz-de-conta/` O projeto está fora de qualquer repositório Git; não houve commit nem push. → Ver [[arquitetura#repo]].
+
+## Repositório Git {#repo}
+
+- [2026-11-07] (d) Pedro criou o repositório `https://github.com/pedropompeu/Janghyang` e pediu a integração.
+- [2026-11-07] (e) ← `git log` Repositório inicializado na raiz `~/Dev/Jogo` (branch `main`), remoto `origin` apontando para o endereço acima. Commit inicial `610b252` com o protótipo inteiro (`faz-de-conta/`, `context/`, `docs/`, `fontes/`, `.superpowers/`), sem cache do Godot.
+- [2026-11-07] (e) ← `.gitignore` Ignora `.godot/` (cache regenerado ao abrir o projeto) e `*.tmp`. Os arquivos `.import` são versionados, como o Godot recomenda.
+- [2026-11-07] (i) Commit inicial sem linha de co-autoria, conforme a regra do projeto.
+- [2026-11-07] (d) **A pasta do jogo passou de `faz-de-conta/` para `Janghyang/`** (`git mv`, ainda sem commit). `project.godot` e os textos de ajuda usam o nome Janghyang. Testes após a renomeação: selftest 241/0, unit 1059/0.
+- [2026-11-07] (e) ← `Janghyang/` Caminhos citados em entradas datadas anteriores (`faz-de-conta/...`) são histórico e não foram reescritos. Os nomes dos arquivos em `docs/superpowers/` também continuam, porque são nomes de arquivo já existentes.
 - [2026-10-20] (e) ← `faz-de-conta/blockout-playroom.png`, `blockout-corridor.png`, `blockout-atelier.png`, `blockout-fold.png` e `blockout-top.png` foram gerados pelo próprio projeto em 2026-10-20.
 - [2026-10-27] (e) ← `faz-de-conta/blockout-atelier.png` Regerada em 2026-10-27: agora enquadra o tampo sob a redoma.
 - [2026-10-20] (e) ← `faz-de-conta/scripts/selftest.gd` Os achados de circulação do blockout estão em [[achados#a-002]] e [[achados#a-003]]; a limitação da cabana em [[achados#a-001]].

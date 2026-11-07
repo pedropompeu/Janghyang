@@ -1,5 +1,5 @@
 extends Node3D
-## FAZ DE CONTA — slice blockout.
+## Janghyang — slice blockout.
 ## Builds the house from primitives so the plan, the folds and the loop can be
 ## tested before art. Everything is visual: no audio, no fail state.
 
@@ -1559,7 +1559,7 @@ func _build_ui() -> void:
 	root.add_child(prompt_label)
 
 	help_label = Label.new()
-	help_label.text = "FAZ DE CONTA — blockout\nWASD mover · mouse olhar · E interagir · Q catalogar · Tab caderno · M plano · C agachar · Shift correr · Espaço pular · V (segurar) fazer de conta · B bater (vareta) · F lanterna · R reiniciar · Esc opções\nDobras: F1 parede oeste · F2/F4 painéis do corredor · F3 porta deitada\nA porta da rua está aberta. Sair é uma escolha."
+	help_label.text = "Janghyang — blockout\nWASD mover · mouse olhar · E interagir · Q catalogar · Tab caderno · M plano · C agachar · Shift correr · Espaço pular · V (segurar) fazer de conta · B bater (vareta) · F lanterna · R reiniciar · Esc opções\nDobras: F1 parede oeste · F2/F4 painéis do corredor · F3 porta deitada\nA porta da rua está aberta. Sair é uma escolha."
 	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	help_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	help_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
