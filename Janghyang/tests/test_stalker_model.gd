@@ -83,3 +83,47 @@ func test_send_away_comes_back_later_far(t) -> void:
 	t.eq(_run(s, 5.0, 4), &"", "not back yet")
 	t.eq(_run(s, 2.0, 4), &"returned", "back after the given time")
 	t.eq(s.at, 0, "far from him")
+
+## U30 (Review Focus 3): on a connected graph every lurk point walks back to
+## every goal, one hop at a time, within the number of points.
+## A 3x3 grid, 1 m apart, each point linked to its four neighbours.
+func _grid() -> Stalker:
+	var pts: Array[Vector3] = []
+	var lnk: Array = []
+	for i in 9:
+		pts.append(Vector3(i % 3, 0.0, int(i / 3.0)))
+	for i in 9:
+		var x: int = i % 3
+		var z: int = int(i / 3.0)
+		var l: Array = []
+		if x > 0: l.append(i - 1)
+		if x < 2: l.append(i + 1)
+		if z > 0: l.append(i - 3)
+		if z < 2: l.append(i + 3)
+		lnk.append(l)
+	return Stalker.new(pts, lnk)
+
+func _walks_to(s: Stalker, from: int, goal: int) -> bool:
+	var p := from
+	for step in s.points.size():
+		if p == goal:
+			return true
+		var nxt: int = s.next_toward(p, goal)
+		if nxt == p:
+			return false
+		p = nxt
+	return p == goal
+
+func test_every_lurk_point_walks_back_to_every_goal(t) -> void:
+	var s := _grid()
+	var stuck := 0
+	for from in s.points.size():
+		for goal in s.points.size():
+			if not _walks_to(s, from, goal):
+				stuck += 1
+	t.eq(stuck, 0, "no lurk point is stuck on the grid")
+
+func test_cut_off_point_stays_put(t) -> void:
+	var pts: Array[Vector3] = [Vector3(0.0, 0.0, 0.0), Vector3(9.0, 0.0, 0.0)]
+	var s := Stalker.new(pts, [[], []])
+	t.eq(s.next_toward(0, 1), 0, "no way back: it stays where it is, never wanders")

@@ -274,6 +274,16 @@ func _run() -> void:
 			var g: Dictionary = gastos.graph(lvl)
 			_record(g.points.size() >= 4, "%s has lurk points" % lvl, str(g.points.size()))
 			_record(g.links.all(func(l): return not l.is_empty()), "every lurk point of %s leads somewhere" % lvl, "")
+			# U30 (Review Focus 3): one piece, so from its first point every lurk point is reachable (a way back).
+			var reached := {0: true}
+			var frontier := [0]
+			while not frontier.is_empty():
+				var cur_pt: int = frontier.pop_front()
+				for nxt_pt in g.links[cur_pt]:
+					if not reached.has(nxt_pt):
+						reached[nxt_pt] = true
+						frontier.append(nxt_pt)
+			_record(not g.points.is_empty() and reached.size() == g.points.size(), "every lurk point of %s walks back to the rest" % lvl, "%d of %d" % [reached.size(), g.points.size()])
 		_record(gastos.graph(&"casa").points.is_empty(), "the house ground floor is a refuge", "")
 	var coroa := main.find_child("Piece_coroa", true, false)
 	coroa.interact()
