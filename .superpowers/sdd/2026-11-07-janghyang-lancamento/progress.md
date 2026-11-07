@@ -31,3 +31,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U15: complete | gates: RED = `register_loop` inexistente; GREEN unit 1062/0 (+2 checks); selftest 243/0; headful `--shot-clock` com 0 vazamentos (linha de base 5), código 0; lint sem erro novo | commit: fix: stop looping audio before exit so no playback leaks (A-007)
 [2026-11-07] Hashes finais das unidades (correção do registro "commit: pendente"): U10 1a730be, U11 7f8a234, U12 8968f2b, U13 1b4ef31, U14 abcc0f1, U16 75013c5, U15 (ver git log).
 [2026-11-07] Nota de processo: o gate headful regenera `blockout-clock.png` (versionado); restaurado com `git checkout` para não entrar no commit.
+[2026-11-07] U02: start | baseline selftest 243/0 unit 1062/0 lint(1 pré-existente)
+[2026-11-07] U02: Ruling: templates 4.7.2.stable instalados em ~/.local/share/godot/export_templates/4.7.2.stable/ a partir do .tpz oficial, SHA512 conferido com SHA512-SUMS.txt da release — custo se errado: reinstalar; fora do repositório.
+[2026-11-07] U02: complete | gates: diretório com windows_release_x86_64.exe e linux_release.x86_64 e version.txt (4.7.2.stable.official.ed1daf0bf); desbloqueia U60–U66 | commit: nenhum (ferramenta local)
