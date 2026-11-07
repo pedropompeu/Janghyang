@@ -108,3 +108,13 @@ func test_pieces_open_the_gate_at_once(t) -> void:
 	v.on_pieces_ready()
 	t.eq(v.elapsed, 0.0, "no time has passed")
 	t.ok(v.clock.can_stop, "the pieces open the gate at once")
+
+## U37 (spec 6.7 / relojoeiro line 134): leaving before the third fragment is
+## incompleto, and the exit itself leaves the rope as it was. The spring starts
+## at its cap, so it is set lower first: a wind would then show.
+func test_leaving_before_fragment_three_keeps_the_rope(t) -> void:
+	var v := _new()
+	v.clock.spring = 100.0
+	t.eq(v.on_exit(), &"incompleto", "leaving before the third fragment is incompleto")
+	t.eq(v.clock.spring, 100.0, "the exit does not change the spring")
+	t.eq(v.clock.winds, 0, "the exit does not wind the clock")
