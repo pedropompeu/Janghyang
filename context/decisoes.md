@@ -67,7 +67,7 @@ criado: 2026-09-12
   **Descartado:** dobra a −65° (folga de ~1,1 m); parede mais baixa.
 
 - [2026-10-28] (i) **Tempos do relógio e do gatilho do 03:33.**
-  **Por quê:** corda inicial de 180 s, cada volta rende 70% da anterior (mínimo 15 s, teto 600 s); gasto de 0,45/s, que dobra para 0,9/s no ato do duplo. O 03:33 vem quando o boneco e mais 5 itens de Elias estão catalogados, ou aos 1200 s (`MAX_PRE_HORA`); a corda é então limitada a 20 s (`HURRY_SPRING`) e ninguém passa de 1380 s (`HARD_LIMIT`). Depois do 03:33, a corda fica em até 30 s para a escolha; a trava (`STALL_SPRING` 5 s) impede que corda tardia evite a parada.
+  **Por quê:** corda inicial de 180 s, cada volta rende 70% da anterior (mínimo 15 s, teto 600 s); gasto de 0,45/s, que dobra para 0,9/s no ato do duplo. O 03:33 vem quando o boneco e mais 5 itens de Elias estão catalogados, ou aos 1200 s (`MAX_PRE_HORA`) ~superseded 2026-11-07: o gate mudou, ver [2026-10-29] (as quatro peças juntas, `visit.on_pieces_ready`) e o spec de expansão §5 (limite de 60 min, `MAX_PRE_HORA = 3600.0`, `visit_state.gd:9`); a corda é então limitada a 20 s (`HURRY_SPRING`) e ninguém passa de 1380 s (`HARD_LIMIT`) ~superseded 2026-11-07: hoje 3780 s (`visit_state.gd:10`). Depois do 03:33, a corda fica em até 30 s para a escolha; a trava (`STALL_SPRING` 5 s) impede que corda tardia evite a parada.
   **Fecha:** o ritmo de uma visita de ~15–23 min.
   **Descartado:** relógio em tempo real; gatilho só por catálogo (um jogador que nunca cataloga o boneco ficaria preso).
 

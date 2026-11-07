@@ -140,6 +140,16 @@ relacionado:
 
 ## Fechados
 
+### [A-019] A decisão de 2026-10-28 dava o 03:33 aos 1200 s e com 5 itens; o código e o spec dizem outra coisa {#a-019}
+
+- [2026-11-07] (e) ← `context/decisoes.md:70` contra `Janghyang/scripts/visit_state.gd:9-10` (`MAX_PRE_HORA = 3600.0`, `HARD_LIMIT = 3780.0`) e spec de expansão §5 ("03:33 só começa na fase V", limite de 60 min).
+- **Severidade:** baixo — o jogo está certo; quem lê a decisão antiga (ou um teste escrito a partir dela) cai num gate que não existe mais.
+- **Onde:** `context/decisoes.md:70` (sem `~superseded` no fato antigo).
+- **Reprodução:** ler `decisoes.md:70` e comparar com `visit_state.gd:9-10`.
+- **Por que importa:** o registro decisório contradiz o código, e a memória do projeto é a referência para decidir o que muda.
+- **Fix recomendado:** marcar o trecho antigo com `~superseded` apontando para 2026-10-29 e para o spec de expansão §5. Custo: minutos.
+- **Estado:** corrigido na U16 do plano de lançamento. A cobertura já existe em `tests/test_visit_state.gd` (`test_pieces_gate`, `test_catalog_alone_no_longer_opens_the_gate`, `test_time_limit_is_an_hour`); nenhum teste novo foi necessário. (e)
+
 ### [A-018] O selftest lia o andar de Elias antes do `_process` do main rodar {#a-018}
 
 - [2026-10-29] (e) ← `faz-de-conta/scripts/selftest.gd` "back in the house, no Gasto" falhava em duas de três rodadas: o sinal `process_frame` sai antes do `_process` dos nós, então um único `await process_frame` depois de mover Elias às vezes chegava antes do `_track_place`.
