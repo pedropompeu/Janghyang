@@ -124,6 +124,8 @@ relacionado:
 - **Por que importa:** som sem corpo no slice que promete "nada inventado".
 - **Fix recomendado:** escrever a entrada sempre, tocar o lápis só com o duplo sentado.
 - **Estado:** aberto (minor adiado na revisão final).
+- [2026-11-07] (e) ← `Janghyang/scripts/hour_event.gd` (`_write_next`, `_double_sitting`), `Janghyang/scripts/sfx_bank.gd` (`pencil_count`). RED: com o duplo ainda fora do banco, `_write_next()` tocou o lápis (`FAIL ... — 1`). GREEN: o lápis só toca com `doll.is_double()`; a entrada é escrita sempre. Selftest `243 checks, 0 failures` (os 2 checks novos passam).
+- [2026-11-07 ~superseded 2026-11-07] ~~**Estado:** aberto (minor adiado na revisão final).~~ → **Estado:** corrigido na U14 do plano de lançamento. (e)
 
 ### [A-017] O tour reiniciou a cena duas vezes numa rodada, sem causa achada {#a-017}
 

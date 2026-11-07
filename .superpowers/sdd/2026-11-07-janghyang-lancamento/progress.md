@@ -18,3 +18,7 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U13: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
 [2026-11-07] U13: Ruling: API nova `Echo.load_window(recorder, seg)` + `sample_at(t)` de instância (no lugar de `static sample_at(recorder, seg, t)`); `index` relativo à janela — custo se errado: chamadores de teste atualizados (test_echo.gd), hour_event.gd inalterado.
 [2026-11-07] U13: complete | gates: RED com API antiga = `got 15.200000, expected 5.200000`; GREEN: unit 1060/0 (+1), selftest 241/0; lint sem erro novo | commit: pendente | evidência: /tmp/claude-1001/unit-u13.txt
+[2026-11-07] U14: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
+[2026-11-07] U14: Ruling: a entrada do caderno é sempre escrita; o lápis só toca com `doll.is_double()`; flush de `end()` segue a mesma regra (escreve sem som se o duplo não sentou) — custo se errado: uma linha para voltar ao comportamento anterior.
+[2026-11-07] U14: Ruling: contador `SfxBank.pencil_count` (só leitura para o selftest) em vez de espiar o áudio — custo se errado: nenhum no jogo.
+[2026-11-07] U14: complete | gates: RED selftest `FAIL the pencil stays quiet ... — 1` (243 checks, 1 failure); GREEN selftest 243/0; unit 1060/0; lint sem erro novo | baseline nova: selftest 243/0, unit 1060/0 | commit: pendente | evidência: /tmp/claude-1001/self-u14-red.txt e self-u14.txt

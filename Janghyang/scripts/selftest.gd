@@ -408,6 +408,10 @@ func _run() -> void:
 	_feed_loop()
 	var duplo_before: int = main.catalog.entries.filter(func(e): return e.author == &"duplo").size()
 	main.hour_event.begin()
+	# A-015: a double that is not at the bench yet must not make the pencil sound.
+	var pencils_before: int = main.sfx.pencil_count
+	main.hour_event._write_next()
+	_record(main.sfx.pencil_count == pencils_before, "the pencil stays quiet while the double is not at the bench", str(main.sfx.pencil_count - pencils_before))
 	await get_tree().create_timer(0.5).timeout
 	_record(main.hour_event.echoes.size() > 0, "echoes appear at 03:33", "")
 	_record(main.get_node("Echoes").find_children("*", "CollisionObject3D", true, false).is_empty(), "echoes have no collision", "")
@@ -417,6 +421,7 @@ func _run() -> void:
 	_check_segment(Vector3(1.8, 0.85, 8.3), Vector3(1.7, 0.85, 9.4), "spawn -> front door during 03:33")
 	_check_segment(Vector3(1.7, 0.85, 9.4), Vector3(2.0, 0.85, 12.0), "front door -> tampo edge during 03:33")
 	main.hour_event.end()
+	_record(main.sfx.pencil_count > pencils_before, "the pencil sounds once the double sits at the bench", str(main.sfx.pencil_count - pencils_before))
 	_record(main.hour_event.echoes.all(func(e): return e.is_frozen()), "winding freezes the echoes", "")
 	var duplo: Array = main.catalog.entries.filter(func(e): return e.author == &"duplo")
 	_record(duplo.size() - duplo_before == 3, "the double wrote three entries at 03:33", str(duplo.size() - duplo_before))

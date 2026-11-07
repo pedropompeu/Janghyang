@@ -211,8 +211,12 @@ func play_at(kind: StringName, pos: Vector3, bus: StringName = &"Casa", volume_d
 	p.global_position = pos
 	p.play()
 
+## Patterns started so far; the selftest reads it to tell whether the pencil sounded.
+var pencil_count := 0
+
 ## Five strokes of a pencil. The double's writing (Task 12) uses the same rhythm.
 func play_pencil_pattern(pos: Vector3) -> void:
+	pencil_count += 1
 	for delay in PENCIL_PATTERN:
 		if delay <= 0.0:
 			play_at(&"pencil", pos)

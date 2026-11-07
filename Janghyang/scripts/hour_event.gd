@@ -112,10 +112,17 @@ func _try_double() -> void:
 	doll.become_double(DOUBLE_SEAT)
 	_double_pending = false
 
+## The entry is always written; the pencil sounds only when the double is at
+## the bench (A-015). The flush in end() follows the same rule.
 func _write_next() -> void:
 	var text: String = _to_write.pop_front()
 	main.catalog.add_double_entries([text] as Array[String])
-	main.sfx.play_pencil_pattern(DOUBLE_SEAT)
+	if _double_sitting():
+		main.sfx.play_pencil_pattern(DOUBLE_SEAT)
+
+func _double_sitting() -> bool:
+	var doll = main.get_node_or_null("Doll")
+	return doll != null and doll.is_double()
 
 func _show_crack_things() -> void:
 	if crack_things.is_empty():

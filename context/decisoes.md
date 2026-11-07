@@ -221,3 +221,8 @@ criado: 2026-09-12
   **Por quê:** A-013. O gravador descarta as amostras mais antigas ao passar de `MAX_SAMPLES`, e os índices guardados apontavam para o lugar errado.
   **Fecha:** ecos em sessões longas reproduzem o trecho escolhido no 03:33. `index` do eco passa a ser relativo à janela (só é usado para detectar troca de ação).
   **Descartado:** guardar um deslocamento de descarte no gravador (mais estado, mesmo risco de drift).
+
+- [2026-11-07] (i) **O lápis do duplo só soa com o duplo sentado no banco; a entrada é sempre escrita.** `_write_next` toca o lápis só se `doll.is_double()`; o flush de `end()` segue a mesma regra, então pode escrever sem som.
+  **Por quê:** A-015. O som sem corpo contradizia "nada inventado" (spec de expansão).
+  **Fecha:** som do lápis durante o 03:33.
+  **Descartado:** tocar o lápis sempre (defeito); suprimir também a escrita enquanto o duplo não senta (perderia entradas do caderno).
