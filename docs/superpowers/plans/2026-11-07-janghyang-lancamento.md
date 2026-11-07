@@ -300,9 +300,10 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U36 — Rota do tampo e da Relojoaria
 **Arquivos:** `Janghyang/scripts/selftest.gd`; leitura de `Janghyang/scripts/areas/leste.gd` (vidro da redoma, loja `loja_varela`).
 
-- [ ] **Teste (RED):** tampo → quebrar o vidro (`quebrar_redoma`) → bancada → `room_at == &"loja_varela"`.
-- **Gate:** selftest verde.
-- **Commit:** `test: reach the Varela shop across the bench in the selftest`.
+- [x] **Teste (RED):** tampo → quebrar o vidro (`quebrar_redoma`) → bancada → `room_at == &"loja_varela"`. Checks: `three knocks break the dome glass`, `the tampo edge walks over the broken dome glass to the bench`, `the steel ruler carries Elias across the crack to the north bench`, `the door opening takes Elias into the Varela shop`, `the far end of the route is the Varela shop`. RED por mutante do vidro (999 pancadas): 2 FAIL.
+- [x] **Desvio (i) de rota:** os dois bloqueios da primeira versão eram geometria de jogo, não defeito. A caixa de parafusos (x 15.6–17.4, z −0.8–5.0) fecha a bancada a oeste, e a parede oeste da loja (x = 20) fecha a loja. A rota passa pela régua em x 24.5 (única ponte sobre a fenda), contorna a ponta oeste da haste de aço (x 24.2–27.8, z 9.0) por x 23.4, atravessa a porta (folha girada 75°; usar x 25.2) e para em z −4.0, antes do balcão de fundo (face em z −4.6). O `room_at` agora vem depois de um segmento com colisão.
+- [x] **Gate:** selftest 273/0 (+10 sobre 263; o bloco do tampo tem 10 checks), código 0; unit 1075/0 sem mudança; lint nada a reportar.
+- **Commit:** `test: reach the Varela shop across the bench in the selftest` (código `34f54de`).
 
 #### U37 — Regressão dos finais e da saída antecipada
 **Arquivos:** `Janghyang/scripts/selftest.gd` (já cobre: `reaching the tampo edge ends the visit` linha 450; `leaving during 03:33 ends the hour` linha 454; `new figure stays in the maquete` linha 468).
