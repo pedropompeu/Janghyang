@@ -261,6 +261,43 @@ func _run() -> void:
 	main.knock_sounded.disconnect(on_sound)
 	main.player.global_position = saved_b
 
+	# U34 (Review Focus 4): W climbs only on a ladder; the shaft leads to the attic and the tower ladder to the mechanism.
+	print("SELFTEST: ladders")
+	var saved_l: Vector3 = main.player.global_position
+	var saved_rot: float = main.player.rotation.y
+	main.player.set_physics_process(true)
+	main.player.rotation.y = 0.0
+	main.player.global_position = Vector3(7.0, 0.0, -0.68)
+	await _frames(3)
+	_key_event(KEY_W, true)
+	await _frames(30)
+	_key_event(KEY_W, false)
+	_record(main.player.global_position.y < 0.05 and main.player.ladders == 0, "W off the ladder walks, Elias stays on the floor", str(main.player.global_position))
+
+	main.player.global_position = Vector3(10.12, 0.0, -0.68)
+	await _frames(3)
+	_record(main.player.ladders > 0, "the shaft counts Elias as on the ladder", str(main.player.ladders))
+	_key_event(KEY_W, true)
+	var shaft_top: float = await _climb_until(2.9)
+	_key_event(KEY_W, false)
+	_record(shaft_top >= 2.9, "W climbs the shaft to the attic floor", "top y %.2f" % shaft_top)
+	_record(main.atlas.room_at(main.player.global_position) == &"sotao", "the top of the shaft is the attic", str(main.atlas.room_at(main.player.global_position)))
+
+	main.player.rotation.y = PI * 0.5
+	main.player.global_position = Vector3(6.0, 2.95, 5.5)
+	await _frames(3)
+	_record(main.player.ladders > 0, "the tower ladder counts Elias as on the ladder", str(main.player.ladders))
+	_key_event(KEY_W, true)
+	var tower_top: float = await _climb_until(5.5)
+	_key_event(KEY_W, false)
+	_record(tower_top >= 5.4, "W climbs the tower ladder", "top y %.2f" % tower_top)
+	_record(tower_top >= 5.4 and main.atlas.room_at(main.player.global_position) == &"mecanismo", "at the top of the tower ladder Elias is in the mechanism", "y %.2f, %s" % [tower_top, main.atlas.room_at(main.player.global_position)])
+
+	main.player.global_position = saved_l
+	main.player.rotation.y = saved_rot
+	await _frames(3)
+	main.player.set_physics_process(false)
+
 	print("SELFTEST: story")
 	var quest = main.get("quest")
 	var gastos = main.get("gastos")
@@ -545,6 +582,28 @@ func _expect_at(node_name: String, expected: bool, label: String) -> void:
 		return
 	var actual: bool = node.is_at_b()
 	_record(actual == expected, label, "expected at_b=%s, got %s" % [str(expected), str(actual)])
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().physics_frame
+
+## A key press or release through the Input singleton, as the keyboard sends it.
+func _key_event(code: Key, down: bool) -> void:
+	var ev := InputEventKey.new()
+	ev.physical_keycode = code
+	ev.keycode = code
+	ev.pressed = down
+	Input.parse_input_event(ev)
+
+## Waits (at most 4 s) while W is held; returns the highest y Elias reached.
+func _climb_until(height: float) -> float:
+	var top := 0.0
+	for i in 240:
+		await get_tree().physics_frame
+		top = maxf(top, main.player.global_position.y)
+		if top >= height:
+			break
+	return top
 
 func _expect_clear(pos: Vector3, label: String) -> void:
 	_expect_clear_shape(pos, query_shape, label)
