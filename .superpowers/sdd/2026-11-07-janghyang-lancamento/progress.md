@@ -44,4 +44,14 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U20: start (registro tardio: a unidade começou antes deste ponto) | baseline unit 1062/0 selftest 243/0 lint(1 pré-existente)
 [2026-11-07] U20: Ruling: teste em `tests/test_doll.gd` (novo), não em `test_catalog.gd` — o comportamento está em `doll.gd`; o catálogo só recebe o sinal — custo se errado: renomear o arquivo.
 [2026-11-07] U20: Ruling: correção por `toggled.emit(false)` em `become_double` (sinal que o `main` já ouve para `doll_sat`), sem flag direta — custo se errado: uma linha a remover.
-[2026-11-07] U20: complete | gates: RED unitário 1 falha (`becoming the double reports it seated`); RED selftest `the double counts ... (A-014) — false` (244 checks, 1 falha); GREEN unitário 1064/0; selftest 244/0; lint pendente antes do commit de docs | commit: 67ccc48 (código); docs no commit seguinte
+[2026-11-07] U20: complete | gates: RED unitário 1 falha (`becoming the double reports it seated`); RED selftest `the double counts ... (A-014) — false` (244 checks, 1 falha); GREEN unitário 1064/0; selftest 244/0; lint pendente antes do commit de docs | commit: 67ccc48 (código); docs f6bff72
+[2026-11-07] U30: start | baseline unit 1064/0 selftest 244/0 lint nada a reportar
+[2026-11-07] U30: Ruling: pino unitário em grade 3×3 (`every lurk point walks back to every goal`) e caso sem caminho (`cut-off point stays put`), em `test_stalker_model.gd`; o grafo real já é só a maior componente (`_largest_part`), então a conectividade do jogo vem por construção — custo se errado: nenhum.
+[2026-11-07] U30: Ruling: check de conectividade por nível no selftest (`story`, BFS sobre `gastos.graph(lvl)`) — pina o invariante; não muda hoje. Mutação do grafo real não feita: o filtro é a fonte da garantia e o custo de mutar `_largest_part` não compensa agora.
+[2026-11-07] U30: complete | gates: unit 1066/0 (+2); selftest 249/0 (+5, um por nível); mutante do `next_toward` na cópia (escolhe o 1º vizinho): FAIL `no lurk point is stuck on the grid (got 60, expected 0)`; lint nada a reportar | commit: e430d7b
+[2026-11-07] U31: start | baseline unit 1066/0 selftest 249/0 lint nada a reportar
+[2026-11-07] U31: Ruling: pino de pancadas extras em `test_breakable.gd` (passa de primeira: o guarda de `hit()` já existe); prova RED por mutante do guarda na cópia (4 FAIL) — custo se errado: nenhum.
+[2026-11-07] U31: complete | gates: unit 1070/0 (+4); mutante `if false:` no guarda: 4 FAIL | commit: af3a440
+[2026-11-07] U32: start | baseline unit 1070/0 selftest 249/0
+[2026-11-07] U32: Ruling: dois testes em `test_visit_state.gd`: 3599 s sem portão e 3600 s com portão; peças abrem na hora — custo se errado: nenhum.
+[2026-11-07] U32: complete | gates: unit 1075/0 (+5); mutante que ignora as peças em `_check_gate`: 3 FAIL | commit: 16e2ec2
