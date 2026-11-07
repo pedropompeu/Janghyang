@@ -273,3 +273,5 @@ criado: 2026-09-12
 - [2026-11-07] (i) **D8: o default de 2026-10-20 segue como teste de design; a revisão vencida em 2026-11-03 fica para 2026-11-21.** Por quê: o teste "divertido sem objetivo?" continua valendo com o blockout jogável, e não houve revisão com o Pedro. Fecha: a pendência de lint (`modelo-arquitetural-dinamico-3d.md`, linha (i) de 2026-11-07). A linha antiga recebe `~superseded`, sem apagar. Descartado: remover o default (apaga o teste); deixar a data vencida (lint vermelho).
 
 - [2026-11-07] (e) **D7 segue aberta.** A aprovação visual das capturas de luz (U40, U41) é decisão de olho do Pedro e não pode ser delegada ao modelo. Bloqueia U40 e U41; o resto da fase 4 não depende dela.
+
+- [2026-11-07] (d) **D2 aprovada por Pedro: escopo congelado.** Por quê: Pedro respondeu "aprovado tudo" à proposta do U38. Fecha: a partir de 2026-11-07, sem mecânica, área ou Gasto novo até o lançamento; só correção, texto e polimento. Confirma a entrada (i) de D2 acima. Descartado: manter o escopo aberto até o lançamento.
