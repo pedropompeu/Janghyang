@@ -1,0 +1,3937 @@
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/README.md faz-de-conta/README.md
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/README.md	2026-10-27 19:52:06.256472209 -0300
++++ faz-de-conta/README.md	2026-10-28 21:09:14.038219198 -0300
+@@ -1,144 +1,110 @@
+-# FAZ DE CONTA — blockout Godot 4.7
++# FAZ DE CONTA — slice Godot 4.7
+ 
+-Blockout jogável do slice de **FAZ DE CONTA**: um horror doméstico contemplativo
+-dentro de uma maquete arquitetônica viva. A casa não quer matar o jogador; quer
+-que ele fique. A porta da rua está aberta desde o primeiro minuto.
++## O slice em 5 linhas
+ 
+-Este projeto é ** scaffolding de teste**, não a arte final. A geometria é feita de
+-primitivas, as labels e o HUD são andaimes de leitura e não há áudio.
++1. Elias, catalogador, entra numa maquete de casa sob uma redoma, em cima da bancada de um relojoeiro.
++2. Ele cataloga o que encontra (`Q`) e dá corda ao relógio da entrada; a casa imita, longe dele, os gestos que ele faz.
++3. Às 03:33 o relógio para, a casa devolve os trajetos dele como ecos, três coisas saem das frestas e um duplo escreve no caderno dele.
++4. Depois do 03:33 aparece a verdade sobre Inácio e, pela porta da rua, o corpo gigante de Elias curvado sobre a bancada.
++5. Ele sai pela beira do tampo; conforme deu corda ou deixou parar, algo dele fica na maquete — e a última entrada do caderno diz o quê.
++
++Não há combate, dano, cronômetro visível, HUD de objetivo nem game over. A porta
++da rua está sempre aberta; sair por ela **não** encerra o jogo. Só a beira do
++tampo encerra.
+ 
+ ## Requisitos
+ 
+-- Godot **4.7.2.stable** (ou 4.7.x compatível).
++- Godot **4.7.2.stable** (ou 4.7.x compatível), renderer GL Compatibility.
+ - Rodar a partir da pasta `faz-de-conta/`.
+ 
+ ## Rodar
+ 
+ ```bash
+ cd faz-de-conta
+-godot --path .
++godot --path .                 # jogar
++godot --path . -- --labels     # jogar com as labels de leitura do blockout
+ ```
+ 
+-Ou abra `project.godot` no editor do Godot. A cena principal é `main.tscn`, que
+-instancia `scripts/main.gd`.
+-
+ ## Controles
+ 
+ | Tecla | Ação |
+ |---|---|
+ | `W A S D` | mover |
+ | mouse | olhar |
+-| `E` | interagir com dobra, porta, bola, caixa de música e boneco |
++| `E` | interagir: dobra, porta, bola, caixa de música, boneco, relógio (dar corda) |
++| `Q` | catalogar o que está na mira |
++| `Tab` | abrir/fechar o caderno |
++| `C` | agachar/levantar |
++| `B` | bater na superfície à frente |
+ | `F` | ligar/desligar a lanterna |
+-| `R` | reiniciar a cena |
+-| `ESC` | liberar o mouse |
+-| clique | recapturar o mouse |
+-
+-Não há combate, dano, cronômetro nem game over. Sair pela porta da rua encerra o
+-slice; a casa não tranca a porta.
+-
+-## O que existe no blockout
+-
+-- **Primeira pessoa** em escala de caminhada, olho a 1,62 m.
+-- **Quarto de brincar** com mesa, blocos, bola, prateleira, desenho, casinha de
+-  brinquedo e a parede oeste dobrável **F1**.
+-- **Corredor** com a porta deitada **F3**, os painéis **F2** e **F4** e o laço
+-  pelos dois lados do quarto.
+-- **Quarto de dormir** com cama, boneca, espelho, guarda-roupa e as portas da
+-  frente e dos fundos.
+-- **Sala das figuras** com mesa, vela e três cadeiras ocupadas.
+-- **Entrada**, **passagem** e **ateliê** com mesa, abajur, cadeira, janela de chuva
+-  e a saída.
+-- **F1–F4** com colisão que acompanha a dobra; **F3** começa deitada e libera a
+-  passagem do quarto para o corredor.
+-- Porta da rua e porta do quarto de brincar abertas; portas do quarto e das
+-  figuras fechadas; o jogador as abre.
+-- O ateliê envolve o oeste da casa com um strip de apoio; é o que aparece quando
+-  F1 dobra para dentro. O jogador não entra nesse strip.
+-- Sem áudio, sem comportamento adaptativo da casa, sem arte final.
+-
+-## Telas de revisão
++| `R` | reiniciar a cena (funciona também depois do final) |
++| `ESC` | liberar o mouse (clique recaptura) |
++| `F9` | **só em build de debug:** deixa o relógio acabar agora, para chegar ao 03:33 |
+ 
+-Os PNGs são gerados em resolução 1280×720 e salvos na raiz do projeto. A captura
+-desliga física/input do jogador e encerra o Godot depois de salvar.
++## Verificação automática
+ 
+ ```bash
+-DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-playroom
+-DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-corridor
+-DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-atelier
+-DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-fold
+-DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
++cd faz-de-conta
++timeout 60  godot --headless --path . -s res://tests/run_unit.gd   # unit: modelos puros
++timeout 150 godot --headless --path . -- --selftest               # cena: colisão, laço, 03:33, final
++cd .. && python lint.py                                             # integridade de context/
+ ```
+ 
+-Em um desktop comum, o `DISPLAY=:0` pode ser omitido.
++- O **unit** roda todo `test_*` de `tests/test_*.gd` sobre os modelos `RefCounted`
++  (relógio, visita, catálogo, gravador, espelho, ecos, frestas, duplo, final).
++- O **selftest** monta a cena real e confere estados iniciais, portas, o laço com
++  uma cápsula do tamanho do jogador, as dobras, a cabana, o catálogo, o 03:33
++  (ecos, coisas das frestas, duplo), as provas sobre Inácio, a saída e o que fica
++  na maquete. Os dois harnesses contam erro de script como falha.
++- Nenhum dos dois substitui o playtest: não avaliam ritmo, medo, som nem leitura
++  da luz.
+ 
+-| Arquivo | O que mostra |
+-|---|---|
+-| `blockout-playroom.png` | quarto de brincar com F1 em pé, mesa, prateleira e casinha |
+-| `blockout-corridor.png` | corredor, F3 deitada, F2/F4 e portas do quarto fechadas |
+-| `blockout-atelier.png` | ateliê, abajur, janela de chuva e porta da rua ao fundo |
+-| `blockout-fold.png` | F1 dobrada para dentro, revelando o strip oeste |
+-| `blockout-top.png` | planta 3D do blockout, com tetos ocultos |
+-
+-## Verificação automática
++## Telas de revisão
+ 
+ ```bash
+-godot --headless --path . -- --selftest
++DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-<modo>
+ ```
+ 
+-O autoteste confere estados iniciais, colisão de portas fechadas, abertura das
+-três portas, o laço completo com uma cápsula do tamanho do jogador, as quatro
+-dobras e o estado final. Sai com código 0 se tudo passar; imprime `SELFTEST
+-RESULT: 53 checks, 0 failures` na versão atual.
+-
+-Ele **não** substitui um playtest humano: não avalia conforto de câmera, ritmo,
+-medo, som, nem o gesto de sentar na cabana.
++Modos: `playroom`, `atelier`, `corridor`, `fold`, `notebook`, `mirror`, `clock`,
++`top`, `hour`, `double`, `giant`, `ending`. Cada um salva `blockout-<modo>.png`
++na raiz do projeto e fecha o Godot.
+ 
+ ## Caminho sugerido para o playtest
+ 
+-1. Comece no ateliê, de frente para a porta da rua.
+-2. Entre na entrada, visite o quarto de brincar e tente a cabana de F1.
+-3. Vá ao corredor, levante/abaixe F3, dobre F2/F4.
+-4. Abra a porta da frente do quarto, atravesse, abra a dos fundos e volte ao
+-   corredor.
+-5. Entre na sala das figuras, volte pela passagem e saia pela porta da rua.
+-6. Repita o laço pelo menos duas vezes e observe o que a casa “guarda”.
+-
+-## Limitações conhecidas
+-
+-- **Sem áudio.** O roteiro de som existe no documento de design, mas nenhum som
+-  foi produzido ou integrado.
+-- **Sem comportamento da casa.** O blockout não aprende gestos, não devolve
+-  dobras, não move o boneco e não tem estados de horror.
+-- **A cabana do F1 não é entrável.** A parede de 2,7 m dobrada a 65° deixa uma
+-  folga de ~1,1 m no bordo livre; a cápsula do jogador tem 1,7 m. O blockout
+-  mostra a dobra e o abrigo, mas não permite sentar. Ver
+-  `../context/achados.md`.
+-- **Porta dos fundos.** Ela abre para o corredor para não bloquear o caminho
+-  oeste do quarto; o corredor fica mais estreito quando ela está aberta. É uma
+-  escolha de blockout a validar em playtest.
+-- **O strip oeste do ateliê é cenário.** Ele existe para F1 não abrir para o
+-  vazio; ainda não é uma área jogável.
+-- **Arte e UI são andaimes.** Nada aqui é a direção visual final.
+-- **Sem save/export.** R reinicia a cena; não há preset de exportação.
++1. Comece na entrada; dê corda ao relógio e catalogue o que achar.
++2. Visite o quarto de brincar, dobre F1 e agache na cabana (`C`).
++3. Faça o laço pelo corredor e pelo quarto; dobre F2/F4, role a bola, bata (`B`).
++   Olhe o espelho do quarto.
++4. Espere o 03:33 (ou `F9` em debug). Reconheça seus trajetos nos ecos.
++5. Depois, leia o caderno (`Tab`), ache a página da cabana e olhe pela porta da rua.
++6. Saia pela beira do tampo de três jeitos: cedo; sem dar corda depois do 03:33;
++   dando corda depois do 03:33.
+ 
+ ## Estrutura
+ 
+ ```
+ faz-de-conta/
+-├── project.godot
+-├── main.tscn
++├── project.godot, main.tscn
+ ├── scripts/
+-│   ├── main.gd          # constrói casa, móveis, dobras, portas, luz e UI
+-│   ├── foldable.gd      # painel/porta com rotação e colisão
+-│   ├── player.gd        # primeira pessoa, interação e lanterna
+-│   ├── ball.gd          # bola interativa
+-│   ├── music_box.gd     # caixa de música interativa
+-│   ├── doll.gd          # boneca
+-│   ├── figure.gd        # figuras da sala
+-│   └── selftest.gd      # verificação headless
+-└── blockout-*.png       # telas de revisão
++│   ├── main.gd                # constrói casa, tampo, oficina, móveis, UI; liga tudo
++│   ├── player.gd              # primeira pessoa, verbos, agachar, lanterna
++│   ├── foldable.gd            # dobras e portas
++│   ├── ball.gd, music_box.gd, doll.gd, figure.gd, entry_clock.gd
++│   ├── wind_clock_model.gd    # (lógica) corda e 03:33
++│   ├── visit_state.gd         # (lógica) atos da visita e desfecho
++│   ├── catalog_data.gd, catalog.gd, catalog_target.gd, notebook_ui.gd
++│   ├── sfx_bank.gd            # som sintetizado, sem assets
++│   ├── echo_recorder.gd, echo.gd, mannequin.gd
++│   ├── mirror_brain.gd, house_mirror.gd, mirror_reflection.gd
++│   ├── hour_event.gd, crack_placement.gd, crack_thing.gd, double_writer.gd
++│   ├── ending_model.gd, ending.gd
++│   └── selftest.gd
++├── tests/                     # run_unit.gd + test_*.gd
++└── blockout-*.png
+ ```
+ 
+-O documento de design, o roteiro de som e o comportamento proposto da casa estão
+-em `../context/discussoes/modelo-arquitetural-dinamico-3d.md`.
++Scripts de lógica são `RefCounted` puros, sem `class_name`, carregados por
++`preload` e testados no unit; os nós da cena só leem e escrevem neles.
++
++O design está em `../docs/superpowers/specs/2026-10-27-faz-de-conta-relojoeiro-design.md`
++e o plano em `../docs/superpowers/plans/2026-10-27-faz-de-conta-relojoeiro.md`.
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ball.gd faz-de-conta/scripts/ball.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ball.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/ball.gd	2026-10-28 20:50:26.936858324 -0300
+@@ -1,7 +1,13 @@
+ extends RigidBody3D
+ ## Wooden ball: the first invitation. Visual only, no audio.
+ 
++const TRAIL_EVERY := 1.0
++const ROLL_BACK_SECONDS := 10
++
+ var _cooldown := 0.0
++## Where the ball was, once a second, newest last.
++var _trail: Array[Vector3] = []
++var _trail_acc := 0.0
+ 
+ func _ready() -> void:
+ 	continuous_cd = true
+@@ -12,6 +18,14 @@
+ func _process(delta: float) -> void:
+ 	_cooldown = maxf(0.0, _cooldown - delta)
+ 
++func _physics_process(delta: float) -> void:
++	_trail_acc += delta
++	if _trail_acc >= TRAIL_EVERY:
++		_trail_acc -= TRAIL_EVERY
++		_trail.append(global_position)
++		if _trail.size() > ROLL_BACK_SECONDS + 1:
++			_trail.pop_front()
++
+ func get_prompt() -> String:
+ 	return "rolar a bola"
+ 
+@@ -22,3 +36,24 @@
+ 	sleeping = false
+ 	apply_central_impulse(Vector3(randf_range(-0.5, 0.5), 0.35, randf_range(-1.3, 1.3)))
+ 	apply_torque_impulse(Vector3(randf_range(-0.2, 0.2), 0.0, randf_range(-0.4, 0.4)))
++
++## The house rolls the ball back: a nudge along the floor.
++func push(dir: Vector3) -> void:
++	var flat := Vector3(dir.x, 0.0, dir.z).normalized()
++	if flat == Vector3.ZERO:
++		return
++	sleeping = false
++	apply_central_impulse(flat * 1.1 + Vector3(0.0, 0.15, 0.0))
++
++## 03:33: the ball rolls back toward where it was ten seconds ago.
++func roll_back() -> void:
++	if _trail.is_empty():
++		return
++	var back := _trail[0] - global_position
++	back.y = 0.0
++	var d := back.length()
++	if d < 0.1:
++		return
++	sleeping = false
++	# Enough to cover the distance against the damping, no more.
++	apply_central_impulse(back / d * clampf(mass * d * linear_damp, 0.1, 1.5))
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog_data.gd faz-de-conta/scripts/catalog_data.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog_data.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/catalog_data.gd	2026-10-28 20:18:32.554158865 -0300
+@@ -0,0 +1,33 @@
++extends RefCounted
++## Fixed copy for the catalogue: Elias's lines and Inácio's diary pages.
++## Text is player-facing (pt-BR); ids stay in English-free snake_case.
++
++const FIRST_NUMBER := 215
++
++const OPENING := {"number": 214, "text": "maquete de casa sob redoma, relógio no telhado, parado. Dei corda para testar o mecanismo."}
++
++const ITEMS := {
++	&"relogio_entrada": {"text": "relógio de caixa, ébano tingido, pêndulo de latão. O mostrador só tem marcas entre 03:00 e 03:33.", "page": &"p1", "gate": &""},
++	&"bola": {"text": "bola de madeira, faia, gasta de um lado só.", "page": &"", "gate": &""},
++	&"caixa_musica": {"text": "caixa de música, manivela de latão. A melodia sempre para na mesma nota.", "page": &"p2", "gate": &""},
++	&"desenho": {"text": "desenho a lápis de cera: esta casa, um menino, um relógio maior que a casa. Assinado \"Inácio, 7 anos\".", "page": &"", "gate": &""},
++	&"casinha": {"text": "casinha de brinquedo dentro da casa de brinquedo. Também tem relógio no telhado.", "page": &"", "gate": &""},
++	&"cabana": {"text": "cabana de parede dobrada, almofada, cobertor. Cheiro de cobre.", "page": &"", "gate": &"f1_folded"},
++	&"cama": {"text": "cama de criança, colcha bordada. No travesseiro, a marca de uma cabeça adulta.", "page": &"", "gate": &""},
++	&"espelho": {"text": "espelho oval, moldura de latão. O reflexo demora.", "page": &"", "gate": &""},
++	&"boneco": {"text": "boneco de pano, casaco cinza-azulado igual ao meu. A costura é nova.", "page": &"", "gate": &"doll_sat"},
++	&"vela": {"text": "vela de cera, acesa. Não diminui.", "page": &"", "gate": &""},
++	&"casaco": {"text": "casaco de lã pendurado na entrada. Do meu tamanho, na escala da casa.", "page": &"", "gate": &""},
++	&"figura_inacio_a": {"text": "figura sentada, cabelo branco, relógio de bolso parado às 03:33.", "page": &"p4", "gate": &""},
++	&"figura_inacio_b": {"text": "figura sentada, mais gasta que a do lado. O mesmo relógio de bolso.", "page": &"", "gate": &""},
++	&"figura_catalogador": {"text": "figura sentada, sem relógio de bolso. No colo, um caderno igual ao meu.", "page": &"p5", "gate": &""},
++	&"pagina_cabana": {"text": "página solta debaixo da almofada da cabana. Letra de Inácio.", "page": &"p3", "gate": &"after_hora"},
++}
++
++const PAGES := {
++	&"p1": "O médico diz meses. A falha diz mais: 03:33, numa madrugada de março.\nLeio a mesma hora em todos os pêndulos.\nVou fazer um relógio que nunca chegue lá.",
++	&"p2": "Refiz de memória a casa da rua do Porto.\nA cabana, a bola, a caixa a que minha mãe dava corda.\nLá dentro eu ainda não tenho idade para morrer.",
++	&"p3": "Entrei. Deu certo, mais ou menos.\nÀs 03:33 eu morro de novo, dou corda e recomeço.\nPerdi a conta. A casa ficou cheia de mim.\nA casa sou eu.",
++	&"p4": "As mais antigas já nem se mexem.\nGastei tanto essas versões que viraram bonecos.\nAinda sussurram quando o relógio para.",
++	&"p5": "Dentro do caderno, a carta que me contratou. Letra de Inácio.\nDatada de seis anos depois do enterro.\nNa última linha do caderno: \"Item 231 — catalogador.\"",
++}
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog.gd faz-de-conta/scripts/catalog.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/catalog.gd	2026-10-28 20:18:42.097904336 -0300
+@@ -0,0 +1,56 @@
++extends RefCounted
++## Elias's catalogue as pure state: numbered entries, revealed diary pages and
++## the play flags that open gated items. Entry 214 is already written.
++
++const Data = preload("res://scripts/catalog_data.gd")
++
++var entries: Array[Dictionary] = []
++var pages: Array[StringName] = []
++var flags: Dictionary = {}
++
++func _init() -> void:
++	entries.append({"number": Data.OPENING.number, "text": Data.OPENING.text, "author": &"elias", "item": &"maquete"})
++
++func set_flag(name: StringName, value: bool) -> void:
++	flags[name] = value
++
++func can_catalog(item: StringName) -> bool:
++	if not Data.ITEMS.has(item) or has(item):
++		return false
++	var gate: StringName = Data.ITEMS[item].gate
++	return gate == &"" or flags.get(gate, false)
++
++## Writes the entry for item and reveals its page. Returns {} when refused.
++func catalog(item: StringName) -> Dictionary:
++	if not can_catalog(item):
++		return {}
++	var data: Dictionary = Data.ITEMS[item]
++	var entry := {"number": next_number(), "text": data.text, "author": &"elias", "item": item}
++	entries.append(entry)
++	if data.page != &"" and not pages.has(data.page):
++		pages.append(data.page)
++	return entry
++
++func has(item: StringName) -> bool:
++	for e in entries:
++		if e.item == item:
++			return true
++	return false
++
++## Items Elias catalogued himself: not the opening 214, not the double's lines.
++func count_elias_items() -> int:
++	var n := 0
++	for e in entries:
++		if e.author == &"elias" and e.item != &"maquete":
++			n += 1
++	return n
++
++func next_number() -> int:
++	return maxi(Data.FIRST_NUMBER, entries[-1].number + 1)
++
++func add_double_entries(texts: Array[String]) -> void:
++	for text in texts:
++		entries.append({"number": next_number(), "text": text, "author": &"duplo", "item": &""})
++
++static func format(entry: Dictionary) -> String:
++	return "Item %d — %s" % [entry.number, entry.text]
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog_target.gd faz-de-conta/scripts/catalog_target.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/catalog_target.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/catalog_target.gd	2026-10-28 20:21:01.798337597 -0300
+@@ -0,0 +1,12 @@
++extends Area3D
++## A catalogue spot laid over a piece. Lives on layer 2 so it never blocks the
++## walking loop nor the E ray; only the player's CatalogRay sees it.
++
++@export var item_id: StringName
++
++func _init() -> void:
++	collision_layer = 2
++	collision_mask = 0
++	monitoring = false
++	monitorable = true
++	add_to_group("catalog_target")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/crack_placement.gd faz-de-conta/scripts/crack_placement.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/crack_placement.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/crack_placement.gd	2026-10-28 20:52:27.252983092 -0300
+@@ -0,0 +1,28 @@
++extends RefCounted
++## Where a thing from the cracks may be: out of sight, far from the player,
++## away from the front door, and never where it already was.
++
++const MIN_PLAYER_DIST := 4.0
++const MIN_DOOR_DIST := 2.5
++const FRONT_DOOR := Vector3(1.82, 0.0, 9.1)
++
++## Index of the valid anchor farthest from the player, or -1 to hide.
++static func pick(anchors: Array[Vector3], player_pos: Vector3, current: int, seen: Callable) -> int:
++	var best := -1
++	var best_d := -1.0
++	for i in anchors.size():
++		if i == current:
++			continue
++		var a := anchors[i]
++		var d := _flat(a, player_pos)
++		if d < MIN_PLAYER_DIST or _flat(a, FRONT_DOOR) < MIN_DOOR_DIST:
++			continue
++		if seen.call(a):
++			continue
++		if d > best_d:
++			best = i
++			best_d = d
++	return best
++
++static func _flat(a: Vector3, b: Vector3) -> float:
++	return Vector2(a.x - b.x, a.z - b.z).length()
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/crack_thing.gd faz-de-conta/scripts/crack_thing.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/crack_thing.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/crack_thing.gd	2026-10-28 20:52:42.300515839 -0300
+@@ -0,0 +1,89 @@
++extends Node3D
++## A thing from the cracks, only during 03:33: porcelain teeth and rusted
++## clock hands in a corner of the floor. Meshes only. It never moves while
++## seen; it moves once you look away, or if you come close without looking.
++
++const Placement = preload("res://scripts/crack_placement.gd")
++const SEEN_OFFSET := Vector3(0.0, 0.15, 0.0)
++
++## Set by the creator before add_child.
++var main: Node
++var anchors: Array[Vector3] = []
++## Other crack things, so two never share a corner.
++var others: Array = []
++
++var index := -1
++var _active := false
++var _was_seen := false
++
++func _ready() -> void:
++	visible = false
++	var porcelain := _mat(Color("#f2efe6"), 0.35)
++	var rust := _mat(Color("#6b3a22"), 0.95)
++	for k in 7:
++		var a := lerpf(-0.9, 0.9, k / 6.0)
++		var tooth := _box(Vector3(0.035, 0.05 + 0.02 * (k % 2), 0.03), Vector3(sin(a) * 0.12, 0.03, -cos(a) * 0.12 + 0.06), porcelain)
++		tooth.rotation.y = -a
++	for k in 3:
++		var hand := _box(Vector3(0.012, 0.012, 0.22 - 0.04 * k), Vector3(0.0, 0.012, 0.05), rust)
++		hand.rotation = Vector3(deg_to_rad(-12.0 - 9.0 * k), deg_to_rad(-40.0 + 45.0 * k), 0.0)
++		hand.position += Vector3(-0.04 + 0.04 * k, 0.0, 0.0)
++
++func activate() -> void:
++	_active = true
++	_was_seen = false
++	relocate()
++
++func deactivate() -> void:
++	_active = false
++	visible = false
++
++func is_active() -> bool:
++	return _active
++
++func relocate() -> void:
++	index = Placement.pick(anchors, main.player.global_position, index, _blocked)
++	visible = index >= 0
++	if index >= 0:
++		global_position = anchors[index]
++		# Face into the room, away from the corner.
++		look_at(Vector3(7.5, global_position.y, 4.5), Vector3.UP, true)
++
++func _process(_delta: float) -> void:
++	if not _active:
++		return
++	if not visible:
++		relocate()
++		return
++	if main.is_seen(global_position + SEEN_OFFSET):
++		_was_seen = true
++		return
++	var q: Vector3 = main.player.global_position
++	var near := Vector2(global_position.x - q.x, global_position.z - q.z).length() < Placement.MIN_PLAYER_DIST
++	if _was_seen or near:
++		_was_seen = false
++		relocate()
++
++func _blocked(p: Vector3) -> bool:
++	if main.is_seen(p + SEEN_OFFSET):
++		return true
++	for o in others:
++		if o != self and o.visible and o.index >= 0 and o.anchors[o.index] == p:
++			return true
++	return false
++
++func _mat(c: Color, rough: float) -> StandardMaterial3D:
++	var m := StandardMaterial3D.new()
++	m.albedo_color = c
++	m.roughness = rough
++	return m
++
++func _box(size: Vector3, pos: Vector3, m: Material) -> MeshInstance3D:
++	var mi := MeshInstance3D.new()
++	var mesh := BoxMesh.new()
++	mesh.size = size
++	mi.mesh = mesh
++	mi.material_override = m
++	mi.position = pos
++	add_child(mi)
++	return mi
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/doll.gd faz-de-conta/scripts/doll.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/doll.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/doll.gd	2026-10-28 21:06:36.942045189 -0300
+@@ -1,29 +1,101 @@
+ extends StaticBody3D
+ ## The copy: lying on the bed, then sitting up. The player's touch is the trigger.
+ 
++signal toggled(lying: bool)
++
+ var sit_rotation := Vector3(-1.3, 0.0, 0.0)
+ var sit_offset := Vector3(0.0, 0.25, 0.08)
+ 
++## Small turns the doll takes between looks (set by the house, never in view).
++const POSE_VARIANTS := [Vector3.ZERO, Vector3(0.0, 0.0, 0.45), Vector3(0.25, 0.0, -0.35)]
++
++var _variant := Vector3.ZERO
+ var _rest_pos: Vector3
+ var _rest_rot: Vector3
+ var _lying := true
+ var _busy := false
++var _double := false
++var _pencil: Node3D
++var _pencil_tween: Tween
+ 
+ func _ready() -> void:
+ 	_rest_pos = position
+ 	_rest_rot = rotation
+ 
+ func get_prompt() -> String:
++	if _double:
++		return ""
+ 	return "sentar o boneco" if _lying else "deitar o boneco"
+ 
+ func interact() -> void:
+-	if _busy:
++	if _busy or _double:
+ 		return
+ 	_busy = true
+ 	_lying = not _lying
+ 	var target_pos := _rest_pos if _lying else _rest_pos + sit_offset
+-	var target_rot := _rest_rot if _lying else _rest_rot + sit_rotation
++	var target_rot := _base_rotation() + _variant
+ 	var tw := create_tween().set_parallel(true)
+ 	tw.tween_property(self, "position", target_pos, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+ 	tw.tween_property(self, "rotation", target_rot, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+-	tw.finished.connect(func() -> void: _busy = false)
++	tw.finished.connect(func() -> void:
++		_busy = false
++		toggled.emit(_lying))
++
++func is_lying() -> bool:
++	return _lying
++
++func set_pose_variant(i: int) -> void:
++	if _double:
++		return
++	_variant = POSE_VARIANTS[posmod(i, POSE_VARIANTS.size())]
++	if not _busy:
++		rotation = _base_rotation() + _variant
++
++func _base_rotation() -> Vector3:
++	return _rest_rot if _lying else _rest_rot + sit_rotation
++
++func is_double() -> bool:
++	return _double
++
++## 03:33: the doll is now the double, sitting on the entry bench facing north,
++## a notebook on its knees and a pencil that keeps writing. Only ever called
++## while neither the doll nor the bench is in view.
++func become_double(seat: Vector3) -> void:
++	if _double:
++		return
++	_double = true
++	_lying = false
++	_busy = false
++	position = seat
++	rotation = Vector3(deg_to_rad(-8.0), 0.0, 0.0)
++	var paper := StandardMaterial3D.new()
++	paper.albedo_color = Color("#e9e1cc")
++	paper.roughness = 0.95
++	var book := MeshInstance3D.new()
++	var book_mesh := BoxMesh.new()
++	book_mesh.size = Vector3(0.2, 0.02, 0.26)
++	book.mesh = book_mesh
++	book.material_override = paper
++	book.position = Vector3(0.0, 0.08, -0.2)
++	book.rotation.x = deg_to_rad(-15.0)
++	add_child(book)
++	var graphite := StandardMaterial3D.new()
++	graphite.albedo_color = Color("#3a3a3a")
++	_pencil = Node3D.new()
++	_pencil.position = Vector3(0.12, 0.12, -0.22)
++	add_child(_pencil)
++	var lead := MeshInstance3D.new()
++	var lead_mesh := BoxMesh.new()
++	lead_mesh.size = Vector3(0.012, 0.012, 0.14)
++	lead.mesh = lead_mesh
++	lead.material_override = graphite
++	lead.rotation.x = deg_to_rad(35.0)
++	_pencil.add_child(lead)
++	_pencil_tween = create_tween().set_loops()
++	_pencil_tween.tween_property(_pencil, "position:x", 0.04, 0.35).set_trans(Tween.TRANS_SINE)
++	_pencil_tween.tween_property(_pencil, "position:x", 0.12, 0.35).set_trans(Tween.TRANS_SINE)
++
++## The double stops mid-line (the clock was let stop).
++func stop_writing() -> void:
++	if _pencil_tween != null and _pencil_tween.is_valid():
++		_pencil_tween.kill()
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/double_writer.gd faz-de-conta/scripts/double_writer.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/double_writer.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/double_writer.gd	2026-10-28 20:54:21.621515007 -0300
+@@ -0,0 +1,37 @@
++extends RefCounted
++## What the double writes about the player at 03:33. It only ever describes
++## what the visit's numbers show; the item number comes from the catalog.
++
++const FIRST := "catalogador. A mão direita gasta de um lado só."
++const LAST := "catalogador. Entrou pela porta da rua. Ainda não saiu."
++const CROUCHED := "catalogador. Passa muito tempo agachado, como criança."
++const STILL := "catalogador. Fica parado olhando, por muito tempo."
++const DEFAULT := "catalogador. Anda pela casa como quem já conhece."
++## Checked in this order; on a tie the earlier verb wins.
++const BY_ACTION := [
++	[&"dobrar", "catalogador. Dobra as paredes para ver o que há atrás."],
++	[&"bater", "catalogador. Bate nas paredes e espera resposta."],
++	[&"rolar", "catalogador. Brinca com a bola quando acha que ninguém vê."],
++]
++const CROUCHED_S := 60.0
++const STILL_S := 120.0
++
++static func entries(stats: Dictionary) -> Array[String]:
++	return [FIRST, _dominant(stats), LAST]
++
++static func _dominant(stats: Dictionary) -> String:
++	if float(stats.get("crouched_s", 0.0)) >= CROUCHED_S:
++		return CROUCHED
++	var actions: Dictionary = stats.get("actions", {})
++	var best := ""
++	var best_n := 0
++	for pair in BY_ACTION:
++		var n := int(actions.get(pair[0], 0))
++		if n > best_n:
++			best = pair[1]
++			best_n = n
++	if best != "":
++		return best
++	if float(stats.get("still_s", 0.0)) >= STILL_S:
++		return STILL
++	return DEFAULT
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/echo.gd faz-de-conta/scripts/echo.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/echo.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/echo.gd	2026-10-28 20:49:27.642871531 -0300
+@@ -0,0 +1,86 @@
++extends Node3D
++## One echo of Elias at 03:33: an 8 s window of what the player did, replayed
++## in a loop. It only ever walks a recorded path; it has no collision and
++## takes no input. Winding the clock freezes it where it stands.
++
++const Mannequin = preload("res://scripts/mannequin.gd")
++const SAMPLE_HZ := 10.0
++const VOLUME_DB := -12.0
++const STEP_EVERY := 0.6
++
++## Set by the creator before setup: the shared SfxBank (may be null).
++var sfx
++var style: Dictionary
++
++var _recorder
++var _seg := Vector2i.ZERO
++var _t := 0.0
++var _frozen := false
++var _body: Node3D
++var _last_index := -1
++var _walked := 0.0
++
++## Interpolated position and angles at time t inside the segment, looping
++## every (seg.y - seg.x) / SAMPLE_HZ seconds. crouched and action come from
++## the earlier sample.
++static func sample_at(recorder, seg: Vector2i, t: float) -> Dictionary:
++	var count := seg.y - seg.x
++	if count <= 0:
++		return {}
++	var f := fposmod(t * SAMPLE_HZ, float(count))
++	var i := int(floor(f))
++	var w := f - i
++	var a: Dictionary = recorder.get_sample(seg.x + i)
++	# The last sample of the window holds still until the loop restarts.
++	var b: Dictionary = recorder.get_sample(seg.x + mini(i + 1, count - 1))
++	return {
++		"pos": a.pos.lerp(b.pos, w),
++		"yaw": lerp_angle(a.yaw, b.yaw, w),
++		"pitch": lerpf(a.pitch, b.pitch, w),
++		"crouched": a.crouched,
++		"action": a.action,
++		"index": seg.x + i,
++	}
++
++func setup(recorder, seg: Vector2i, phase: float) -> void:
++	_recorder = recorder
++	_seg = seg
++	_t = phase
++	_body = Mannequin.new()
++	_body.build(style)
++	add_child(_body)
++	_apply(sample_at(_recorder, _seg, _t))
++
++func freeze() -> void:
++	_frozen = true
++
++func resume() -> void:
++	_frozen = false
++
++func is_frozen() -> bool:
++	return _frozen
++
++func _process(delta: float) -> void:
++	if _frozen or _recorder == null:
++		return
++	_t += delta
++	var before := global_position
++	var s := sample_at(_recorder, _seg, _t)
++	_apply(s)
++	if sfx == null:
++		return
++	_walked += Vector2(global_position.x - before.x, global_position.z - before.z).length()
++	if _walked >= STEP_EVERY:
++		_walked = 0.0
++		sfx.play_at(&"step", global_position, &"Casa", VOLUME_DB)
++	if s.index != _last_index:
++		_last_index = s.index
++		if s.action != &"":
++			sfx.play_at(&"click", global_position + Vector3(0.0, 1.0, 0.0), &"Casa", VOLUME_DB)
++
++func _apply(s: Dictionary) -> void:
++	if s.is_empty():
++		return
++	global_position = s.pos
++	_body.set_look(s.yaw, s.pitch)
++	_body.set_pose(&"agachado" if s.crouched else &"em_pe")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/echo_recorder.gd faz-de-conta/scripts/echo_recorder.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/echo_recorder.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/echo_recorder.gd	2026-10-28 20:36:15.251043734 -0300
+@@ -0,0 +1,96 @@
++extends RefCounted
++## The house records everything: the player's body at 10 Hz and what the hands
++## did. Later the echoes replay the most telling windows of the visit.
++
++const SAMPLE_HZ := 10.0
++const MAX_SAMPLES := 18000
++const SEGMENT_LEN := 8.0
++const MAX_ECHOES := 6
++const STILL_SPEED := 0.15
++
++var _samples: Array[Dictionary] = []
++var _acc := 0.0
++var _pending := &""
++var _crouched_s := 0.0
++var _still_s := 0.0
++var _meters := 0.0
++var _actions := {}
++var _last_pos = null
++
++func update(dt: float, pos: Vector3, yaw: float, pitch: float, crouched: bool) -> void:
++	_acc += dt
++	var step := 1.0 / SAMPLE_HZ
++	while _acc >= step - 0.000001:
++		_acc -= step
++		_push(pos, yaw, pitch, crouched)
++
++## The next sample carries this verb.
++func mark_action(verb: StringName) -> void:
++	_pending = verb
++	_actions[verb] = int(_actions.get(verb, 0)) + 1
++
++func sample_count() -> int:
++	return _samples.size()
++
++func get_sample(i: int) -> Dictionary:
++	return _samples[i]
++
++## Where the player was `seconds` ago, or {} if the house has not seen that far.
++func delayed(seconds: float) -> Dictionary:
++	var i := _samples.size() - 1 - int(round(seconds * SAMPLE_HZ))
++	if i < 0:
++		return {}
++	return _samples[i]
++
++## The most telling 8 s windows, at most MAX_ECHOES, ordered by start.
++## Windows are aligned from the oldest retained sample and never overlap.
++func select_segments() -> Array[Vector2i]:
++	var out: Array[Vector2i] = []
++	var len := int(SEGMENT_LEN * SAMPLE_HZ)
++	if _samples.size() < len:
++		return out
++	var scored: Array = []
++	var start := 0
++	while start + len <= _samples.size():
++		scored.append([_score(start, start + len), start])
++		start += len
++	scored.sort_custom(func(a, b) -> bool:
++		return a[0] > b[0] or (a[0] == b[0] and a[1] < b[1]))
++	for i in mini(MAX_ECHOES, scored.size()):
++		out.append(Vector2i(scored[i][1], scored[i][1] + len))
++	out.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x)
++	return out
++
++## Totals for the whole visit, not only the retained samples.
++func stats() -> Dictionary:
++	return {"crouched_s": _crouched_s, "still_s": _still_s, "meters": _meters, "actions": _actions.duplicate()}
++
++func _push(pos: Vector3, yaw: float, pitch: float, crouched: bool) -> void:
++	var moved := 0.0 if _last_pos == null else pos.distance_to(_last_pos)
++	_last_pos = pos
++	_meters += moved
++	if crouched:
++		_crouched_s += 1.0 / SAMPLE_HZ
++	if moved * SAMPLE_HZ < STILL_SPEED:
++		_still_s += 1.0 / SAMPLE_HZ
++	_samples.append({"pos": pos, "yaw": yaw, "pitch": pitch, "crouched": crouched, "action": _pending})
++	_pending = &""
++	if _samples.size() > MAX_SAMPLES:
++		_samples.pop_front()
++
++func _score(from: int, to: int) -> float:
++	var actions := 0
++	var still := 0
++	var crouched := 0
++	var meters := 0.0
++	for i in range(from, to):
++		var s: Dictionary = _samples[i]
++		if s.action != &"":
++			actions += 1
++		if s.crouched:
++			crouched += 1
++		var moved: float = 0.0 if i == from else s.pos.distance_to(_samples[i - 1].pos)
++		meters += moved
++		if moved * SAMPLE_HZ < STILL_SPEED:
++			still += 1
++	return 3.0 * actions + still / SAMPLE_HZ + 2.0 * crouched / SAMPLE_HZ + 0.5 * meters
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ending.gd faz-de-conta/scripts/ending.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ending.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/ending.gd	2026-10-28 21:07:59.488026848 -0300
+@@ -0,0 +1,118 @@
++extends Node
++## Leaving the maquete: the player stops, the screen goes black, the clock is
++## left as the outcome says, and the view becomes the giant's eyes over the
++## bench. Three seconds later, one last entry on paper. Nothing else.
++
++const EndingModel = preload("res://scripts/ending_model.gd")
++const Mannequin = preload("res://scripts/mannequin.gd")
++
++const FADE := 1.0
++const ENTRY_DELAY := 3.0
++const CAMERA_POS := Vector3(1.8, 14.0, 22.0)
++const CAMERA_TARGET := Vector3(1.8, 0.5, 8.3)
++const CAMERA_FOV := 24.0
++## The new figure turns a page this often, when the clock was wound.
++const PAGE_EVERY := 4.0
++const PAGE_ARM := 25.0
++
++signal finished(outcome: StringName)
++
++## Set by main before add_child.
++var main: Node
++var final_camera: Camera3D
++
++var _done := false
++var _black: ColorRect
++var _figure: Node3D
++var _page_t := 0.0
++
++func _ready() -> void:
++	set_process(false)
++	final_camera = Camera3D.new()
++	final_camera.name = "FinalCamera"
++	final_camera.fov = CAMERA_FOV
++	final_camera.far = 80.0
++	final_camera.transform = Transform3D(Basis.IDENTITY, CAMERA_POS).looking_at(CAMERA_TARGET, Vector3.UP)
++	main.add_child.call_deferred(final_camera)
++	var layer := CanvasLayer.new()
++	layer.layer = 4
++	add_child(layer)
++	_black = ColorRect.new()
++	_black.color = Color.BLACK
++	_black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
++	_black.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	_black.modulate.a = 0.0
++	_black.visible = false
++	layer.add_child(_black)
++
++func finish(outcome: StringName) -> void:
++	if _done or outcome == &"":
++		return
++	_done = true
++	main.player.input_locked = true
++	main.player.velocity = Vector3.ZERO
++	_black.visible = true
++	var tw := create_tween()
++	tw.tween_property(_black, "modulate:a", 1.0, FADE)
++	tw.tween_callback(_behind_black.bind(outcome))
++	tw.tween_property(_black, "modulate:a", 0.0, FADE)
++	tw.tween_callback(func() -> void: _black.visible = false)
++	get_tree().create_timer(FADE + ENTRY_DELAY).timeout.connect(func() -> void:
++		main.notebook.show_final(EndingModel.final_entry(outcome)))
++	finished.emit(outcome)
++
++func _behind_black(outcome: StringName) -> void:
++	if not EndingModel.clock_running(outcome):
++		main.clock_model.force_stop()
++		if main.sfx != null:
++			main.sfx.set_casa_muted(true)
++	var giant := main.get_node_or_null("GiantElias")
++	if giant != null:
++		giant.visible = false
++	_apply_echoes(EndingModel.echoes_mode(outcome))
++	_figure = _new_figure()
++	set_process(EndingModel.figure_alive(outcome))
++	final_camera.make_current()
++
++## Something of Elias stays: a figure sitting where he arrived, notebook on
++## the lap, facing the open front door (and the camera beyond it).
++func _new_figure() -> Node3D:
++	var fig := Mannequin.new()
++	fig.name = "NewFigure"
++	fig.build(main.ELIAS_STYLE)
++	fig.set_pose(&"no_chao")
++	fig.add_notebook()
++	fig.position = Vector3(main.SPAWN.x, 0.0, main.SPAWN.z)
++	fig.rotation.y = PI
++	main.add_child(fig)
++	return fig
++
++func _apply_echoes(mode: StringName) -> void:
++	var echoes: Array = main.hour_event.echoes if main.hour_event != null else []
++	match mode:
++		&"loop":
++			for e in echoes:
++				if is_instance_valid(e):
++					e.resume()
++		&"frozen":
++			for e in echoes:
++				if is_instance_valid(e):
++					e.freeze()
++			var doll := main.get_node_or_null("Doll")
++			if doll != null and doll.has_method("stop_writing"):
++				doll.stop_writing()
++
++func _process(delta: float) -> void:
++	if _figure == null:
++		return
++	_page_t += delta
++	if _page_t < PAGE_EVERY:
++		return
++	_page_t = 0.0
++	var arm: Node3D = _figure.arm(1.0)
++	if arm != null:
++		var tw := create_tween()
++		tw.tween_property(arm, "rotation:x", deg_to_rad(-PAGE_ARM), 0.4).set_trans(Tween.TRANS_SINE)
++		tw.tween_property(arm, "rotation:x", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
++	if main.sfx != null:
++		main.sfx.play_pencil_pattern(_figure.global_position)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ending_model.gd faz-de-conta/scripts/ending_model.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/ending_model.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/ending_model.gd	2026-10-28 21:03:23.782855281 -0300
+@@ -0,0 +1,26 @@
++extends RefCounted
++## What the house is like after Elias walks off the tampo, by outcome.
++## Pure logic; ending.gd applies it to the scene.
++
++const FINAL := {
++	&"corda": "Item 214 — maquete de casa. Dei corda. Dentro, uma figura nova. Ele não está mais sozinho.",
++	&"parar": "Item 214 — maquete de casa. Deixei parar às 03:33. As figuras pararam de olhar para mim. A minha não.",
++	&"incompleto": "Item 214 — maquete de casa. Funciona. Não sei por que há uma figura a mais.",
++}
++
++static func final_entry(outcome: StringName) -> String:
++	return String(FINAL.get(outcome, FINAL[&"incompleto"]))
++
++static func clock_running(outcome: StringName) -> bool:
++	return outcome != &"parar"
++
++static func echoes_mode(outcome: StringName) -> StringName:
++	match outcome:
++		&"corda":
++			return &"loop"
++		&"parar":
++			return &"frozen"
++	return &"as_is"
++
++static func figure_alive(outcome: StringName) -> bool:
++	return outcome == &"corda"
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/entry_clock.gd faz-de-conta/scripts/entry_clock.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/entry_clock.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/entry_clock.gd	2026-10-28 20:32:34.087349569 -0300
+@@ -0,0 +1,44 @@
++extends StaticBody3D
++## The tall clock by the front door. Winding it is the only thing it asks;
++## the hands and the pendulum only read the WindClockModel.
++
++signal wound(amount: float)
++
++var model
++var _minute_pivot: Node3D
++var _pendulum_pivot: Node3D
++var _swing_time := 0.0
++## Set by main (sfx_bank.gd). The tick is heard all over the house.
++var sfx: Node
++var _tick_time := 0.0
++
++func setup(clock_model, minute_pivot: Node3D, pendulum_pivot: Node3D) -> void:
++	model = clock_model
++	_minute_pivot = minute_pivot
++	_pendulum_pivot = pendulum_pivot
++
++func get_prompt() -> String:
++	return "dar corda"
++
++func interact() -> void:
++	if model == null:
++		return
++	wound.emit(model.wind())
++
++func _process(delta: float) -> void:
++	if model == null:
++		return
++	if sfx != null and not model.is_stopped():
++		_tick_time += delta
++		if _tick_time >= model.audio_tick_period():
++			_tick_time = 0.0
++			sfx.play_at(&"tick", global_position + Vector3(0.0, 1.6, 0.0))
++	if _minute_pivot != null:
++		_minute_pivot.rotation.z = deg_to_rad(model.display_minutes() * 6.0)
++	if _pendulum_pivot != null:
++		if model.is_stopped():
++			_pendulum_pivot.rotation.z = lerpf(_pendulum_pivot.rotation.z, 0.0, 4.0 * delta)
++		else:
++			# Fixed 1.0 s beat: the pendulum never drifts, only the tick does.
++			_swing_time += delta
++			_pendulum_pivot.rotation.z = sin(_swing_time * PI) * 0.16
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/foldable.gd faz-de-conta/scripts/foldable.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/foldable.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/foldable.gd	2026-10-27 19:42:49.710570061 -0300
+@@ -12,6 +12,11 @@
+ @export var disable_collision_at_a := false
+ @export var disable_collision_at_b := false
+ 
++signal toggled(at_b: bool)
++
++## Optional guard: when valid and it returns false, interact() does nothing.
++var can_toggle: Callable
++
+ var _at_b := false
+ var _busy := false
+ 
+@@ -33,6 +38,8 @@
+ func interact() -> void:
+ 	if _busy:
+ 		return
++	if can_toggle.is_valid() and not can_toggle.call():
++		return
+ 	_busy = true
+ 	_at_b = not _at_b
+ 	_apply_collision()
+@@ -40,4 +47,6 @@
+ 	var tw := create_tween()
+ 	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+ 	tw.tween_property(self, "rotation", target, duration)
+-	tw.finished.connect(func() -> void: _busy = false)
++	tw.finished.connect(func() -> void:
++		_busy = false
++		toggled.emit(_at_b))
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/hour_event.gd faz-de-conta/scripts/hour_event.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/hour_event.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/hour_event.gd	2026-10-28 20:59:46.652464703 -0300
+@@ -0,0 +1,167 @@
++extends Node
++## 03:33. The house falls silent, Elias's echoes walk what the player did,
++## and time slips back a little: the ball, a fold, the dust rising. Winding
++## the clock ends it and the echoes stay where they stand.
++
++const Echo = preload("res://scripts/echo.gd")
++const CrackThing = preload("res://scripts/crack_thing.gd")
++const Writer = preload("res://scripts/double_writer.gd")
++## The entry bench, where the double sits facing north.
++const DOUBLE_SEAT := Vector3(0.7, 0.45, 8.5)
++const WRITE_AT := [6.0, 12.0, 18.0]
++const FAR := 3.0
++const MUTE_SECONDS := 2.0
++const PHASE_STEP := 0.37
++## Folds that can be undone, never F3 or a door. F1 keeps its own guard.
++const UNDO_FOLDS := ["F1", "F2", "F4"]
++const CRACK_COUNT := 3
++## Floor corners the things from the cracks can sit in.
++const CRACK_ANCHORS: Array[Vector3] = [
++	Vector3(0.3, 0, 0.3), Vector3(8.1, 0, 0.3), Vector3(8.1, 0, 6.7), Vector3(0.3, 0, 6.7),
++	Vector3(9.6, 0, 0.3), Vector3(15.1, 0, 0.3), Vector3(15.1, 0, 5.3), Vector3(13.0, 0, 8.9),
++	Vector3(10.7, 0, 8.9), Vector3(6.5, 0, 8.9),
++]
++
++signal began
++signal ended
++
++## Set by main before add_child.
++var main: Node
++var echoes: Array[Node3D] = []
++var crack_things: Array[Node3D] = []
++
++var _active := false
++var _hour_t := 0.0
++var _to_write: Array[String] = []
++var _double_pending := false
++
++func is_active() -> bool:
++	return _active
++
++func begin() -> void:
++	if _active:
++		return
++	_active = true
++	_hour_t = 0.0
++	_to_write = Writer.entries(main.recorder.stats())
++	_double_pending = true
++	main.sfx.set_casa_muted(true)
++	get_tree().create_timer(MUTE_SECONDS).timeout.connect(func() -> void:
++		main.sfx.set_casa_muted(false))
++	var root: Node3D = main.get_node("Echoes")
++	var segments: Array[Vector2i] = main.recorder.select_segments()
++	for i in segments.size():
++		var echo := Echo.new()
++		echo.sfx = main.sfx
++		echo.style = main.ELIAS_STYLE
++		root.add_child(echo)
++		echo.setup(main.recorder, segments[i], i * PHASE_STEP)
++		echoes.append(echo)
++	_turn_back_time()
++	_show_crack_things()
++	began.emit()
++
++func end() -> void:
++	if not _active:
++		return
++	_active = false
++	# Whatever the double did not write yet is in the notebook all the same.
++	while not _to_write.is_empty():
++		_write_next()
++	for echo in echoes:
++		echo.freeze()
++	for thing in crack_things:
++		thing.deactivate()
++	main.catalog.set_flag(&"after_hora", true)
++	main.reveal_cabana_page()
++	ended.emit()
++
++func _process(delta: float) -> void:
++	if _double_pending:
++		_try_double()
++	if not _active:
++		return
++	_hour_t += delta
++	var written := Writer.entries({}).size() - _to_write.size()
++	if written < WRITE_AT.size() and _hour_t >= WRITE_AT[written]:
++		_write_next()
++
++## The doll becomes the double only when neither it nor the bench is in view.
++## After 03:33 it keeps waiting for that, so it never moves in sight.
++func _try_double() -> void:
++	var doll: Node3D = main.get_node_or_null("Doll")
++	if doll == null:
++		_double_pending = false
++		return
++	if main.is_seen(doll.global_position + Vector3(0.0, 0.3, 0.0)) or main.is_seen(DOUBLE_SEAT + Vector3(0.0, 0.3, 0.0)):
++		return
++	doll.become_double(DOUBLE_SEAT)
++	_double_pending = false
++
++func _write_next() -> void:
++	var text: String = _to_write.pop_front()
++	main.catalog.add_double_entries([text] as Array[String])
++	main.sfx.play_pencil_pattern(DOUBLE_SEAT)
++
++func _show_crack_things() -> void:
++	if crack_things.is_empty():
++		for i in CRACK_COUNT:
++			var thing := CrackThing.new()
++			thing.name = "CrackThing%d" % (i + 1)
++			thing.main = main
++			thing.anchors = CRACK_ANCHORS
++			thing.others = crack_things
++			main.add_child(thing)
++			crack_things.append(thing)
++	for thing in crack_things:
++		thing.activate()
++
++func _turn_back_time() -> void:
++	var ball := main.get_node_or_null("Ball")
++	if ball != null:
++		ball.roll_back()
++	for n in UNDO_FOLDS:
++		var f: Node3D = main.get_node_or_null(n)
++		if f != null and f.is_at_b() and _flat_distance(f.global_position) >= FAR:
++			f.interact()
++			break
++	_dust_rising()
++
++## Grey dust drifting upward, a few metres ahead of the player.
++func _dust_rising() -> void:
++	var p := CPUParticles3D.new()
++	p.name = "DustRising"
++	var forward: Vector3 = -main.player.global_transform.basis.z
++	forward.y = 0.0
++	forward = forward.normalized() if forward.length() > 0.01 else Vector3.FORWARD
++	p.position = main.player.global_position + forward * (FAR + 0.5) + Vector3(0.0, 0.3, 0.0)
++	p.amount = 40
++	p.lifetime = 8.0
++	p.one_shot = true
++	p.explosiveness = 0.0
++	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
++	p.emission_box_extents = Vector3(0.8, 0.2, 0.8)
++	p.direction = Vector3.UP
++	p.spread = 25.0
++	p.initial_velocity_min = 0.02
++	p.initial_velocity_max = 0.08
++	p.gravity = Vector3(0.0, 0.05, 0.0)
++	p.scale_amount_min = 0.01
++	p.scale_amount_max = 0.025
++	var mesh := SphereMesh.new()
++	mesh.radius = 1.0
++	mesh.height = 2.0
++	mesh.radial_segments = 6
++	mesh.rings = 3
++	var mat := StandardMaterial3D.new()
++	mat.albedo_color = Color(0.62, 0.6, 0.57)
++	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
++	mesh.material = mat
++	p.mesh = mesh
++	main.add_child(p)
++	p.emitting = true
++	get_tree().create_timer(p.lifetime + 2.0).timeout.connect(p.queue_free)
++
++func _flat_distance(p: Vector3) -> float:
++	var q: Vector3 = main.player.global_position
++	return Vector2(p.x - q.x, p.z - q.z).length()
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/house_mirror.gd faz-de-conta/scripts/house_mirror.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/house_mirror.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/house_mirror.gd	2026-10-28 20:44:04.007549296 -0300
+@@ -0,0 +1,98 @@
++extends Node
++## Applies the MirrorBrain's answers to the house. It only ever repeats a
++## gesture the player made, far from the player, and the doll only moves
++## when nobody is looking.
++
++const FAR := 3.0
++const KNOCK_GAP := 0.4
++const KNOCK_LATE := 0.2
++const DOLL_UNSEEN := 5.0
++const DOLL_EXPIRE := 30.0
++## Wall surfaces inside the house the knocks can come from.
++const KNOCK_POINTS := [
++	Vector3(4.0, 1.3, 0.12), Vector3(9.4, 1.3, 0.12), Vector3(12.5, 1.3, 0.12),
++	Vector3(15.28, 1.3, 0.8), Vector3(13.0, 1.3, 5.48), Vector3(13.2, 1.3, 8.0),
++	Vector3(0.2, 1.3, 8.2), Vector3(6.0, 1.3, 7.6), Vector3(8.3, 1.3, 6.2),
++]
++
++## Set by main.
++var main: Node
++
++var _doll_pending := false
++var _doll_unseen := 0.0
++var _doll_age := 0.0
++var _doll_variant := 0
++
++## Returns whether the answer was applied now (or scheduled, for the doll).
++## An answer that cannot be applied is dropped all the same.
++func respond(r: Dictionary) -> bool:
++	match r.get("verb", &""):
++		&"dobrar":
++			return _fold_back()
++		&"bater":
++			return _knock_back(int(r.get("count", 1)))
++		&"rolar":
++			var ball := main.get_node_or_null("Ball")
++			if ball == null:
++				return false
++			var a := randf() * TAU
++			ball.push(Vector3(cos(a), 0.0, sin(a)))
++			return true
++		&"boneco":
++			_doll_pending = true
++			_doll_unseen = 0.0
++			_doll_age = 0.0
++			return true
++	return false
++
++func _process(delta: float) -> void:
++	if not _doll_pending:
++		return
++	_doll_age += delta
++	var doll: Node3D = main.get_node_or_null("Doll")
++	if doll == null or _doll_age >= DOLL_EXPIRE:
++		_doll_pending = false
++		return
++	if main.is_seen(doll.global_position + Vector3(0.0, 0.2, 0.0)):
++		_doll_unseen = 0.0
++		return
++	_doll_unseen += delta
++	if _doll_unseen >= DOLL_UNSEEN:
++		_doll_variant = (_doll_variant + 1) % 3
++		doll.set_pose_variant(_doll_variant)
++		_doll_pending = false
++
++## F2 or F4, whichever is farther from the player, and only if 3 m away.
++## Never F1, F3 or a door.
++func _fold_back() -> bool:
++	var best: Node3D = null
++	var best_d := FAR
++	for n in ["F2", "F4"]:
++		var f: Node3D = main.get_node_or_null(n)
++		if f == null:
++			continue
++		var d := _flat_distance(f.global_position)
++		if d >= best_d:
++			best = f
++			best_d = d
++	if best == null:
++		return false
++	best.interact()
++	return true
++
++func _knock_back(count: int) -> bool:
++	var options: Array = KNOCK_POINTS.filter(func(p: Vector3) -> bool: return _flat_distance(p) >= FAR)
++	if options.is_empty() or main.sfx == null:
++		return false
++	var point: Vector3 = options[randi() % options.size()]
++	for i in count:
++		var delay := i * KNOCK_GAP + (KNOCK_LATE if i == count - 1 and count > 1 else 0.0)
++		if delay <= 0.0:
++			main.sfx.play_at(&"knock", point)
++		else:
++			get_tree().create_timer(delay).timeout.connect(main.sfx.play_at.bind(&"knock", point))
++	return true
++
++func _flat_distance(p: Vector3) -> float:
++	var q: Vector3 = main.player.global_position
++	return Vector2(p.x - q.x, p.z - q.z).length()
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/main.gd faz-de-conta/scripts/main.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/main.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/main.gd	2026-10-28 21:07:19.125011390 -0300
+@@ -6,6 +6,36 @@
+ const WALL_H := 2.7
+ const WALL_T := 0.14
+ const DOOR_H := 2.1
++## Where Elias wakes: inside the model, at the entry, facing into the house.
++const SPAWN := Vector3(1.8, 0.2, 8.3)
++## Scale of the real workshop around the model.
++const GIANT := 12.0
++const CatalogData = preload("res://scripts/catalog_data.gd")
++const Catalog = preload("res://scripts/catalog.gd")
++const CatalogTarget = preload("res://scripts/catalog_target.gd")
++const VisitState = preload("res://scripts/visit_state.gd")
++const SfxBank = preload("res://scripts/sfx_bank.gd")
++const EchoRecorder = preload("res://scripts/echo_recorder.gd")
++const MirrorBrain = preload("res://scripts/mirror_brain.gd")
++const HouseMirror = preload("res://scripts/house_mirror.gd")
++const MirrorReflection = preload("res://scripts/mirror_reflection.gd")
++const HourEvent = preload("res://scripts/hour_event.gd")
++const Mannequin = preload("res://scripts/mannequin.gd")
++const Ending = preload("res://scripts/ending.gd")
++## Elias's real body, sitting at the workshop bench south of the dome.
++const GIANT_SEAT := Vector3(2.0, -10.0, 20.0)
++## Where his right hand rests: the dome's top, over the entry.
++const GIANT_HAND := Vector3(2.2, 3.65, 11.8)
++const ELIAS_STYLE := {"coat": Color("#4a5866"), "skin": Color("#d9b99b"), "hair": Color("#4a3a2c"), "trousers": Color("#2b2b30")}
++## Verbs the house can give back; opening doors and winding are not mirrored.
++const MIRRORED_VERBS := [&"dobrar", &"rolar", &"boneco", &"bater"]
++const BEDROOM_X := Vector2(10.5, 15.4)
++const BEDROOM_Z := Vector2(0.0, 5.6)
++
++signal exit_edge_reached
++signal cataloged(entry: Dictionary)
++signal hora_started
++signal hora_ended
+ 
+ var mat_floor_play: StandardMaterial3D
+ var mat_floor_corridor: StandardMaterial3D
+@@ -38,24 +68,66 @@
+ var mat_candle: StandardMaterial3D
+ var mat_red: StandardMaterial3D
+ var mat_dark: StandardMaterial3D
++var mat_glass: StandardMaterial3D
+ 
+ var player: CharacterBody3D
+ var prompt_label: Label
+ var help_label: Label
+ var crosshair: ColorRect
+ var _shot_mode := ""
++## The entrance clock (WindClockModel); main drives its tick.
++var clock_model
++## Elias's catalogue (catalog.gd).
++var catalog
++var notebook
++## The visit's acts (visit_state.gd); it ticks the clock.
++var visit
++## False in the selftest: the visit does not advance on its own.
++var autonomous := true
++## Synthesised prototype sound (sfx_bank.gd).
++var sfx
++## The house's recording of the player (echo_recorder.gd).
++var recorder
++## The house as a mirror: brain decides, house_mirror applies.
++var brain
++var house_mirror
++var hour_event
++var ending
++## True once Elias has walked off the tampo; ending_outcome says how.
++var ended := false
++var ending_outcome: StringName = &""
++var _move_cool := 0.0
+ 
+ func _ready() -> void:
++	clock_model = preload("res://scripts/wind_clock_model.gd").new()
++	catalog = Catalog.new()
++	visit = VisitState.new(clock_model, catalog)
++	recorder = EchoRecorder.new()
++	brain = MirrorBrain.new()
++	sfx = SfxBank.new()
++	sfx.name = "Sfx"
++	add_child(sfx)
+ 	_make_materials()
+ 	_make_environment()
+ 	_build_house()
+ 	_build_furniture()
+-	_build_atelier()
++	_build_tampo()
++	_build_oficina()
++	_build_giant_elias()
+ 	_build_player()
++	# F1 never folds onto a player sitting in the cabana.
++	get_node("F1").can_toggle = func() -> bool:
++		return not (player.position.x < 2.1 and player.position.z < 7.0)
++	_wire_catalog()
++	_wire_sound()
++	_wire_mirror()
++	_wire_hour()
++	_wire_ending()
+ 	_build_ui()
+-	_add_labels()
+ 
+ 	var args := OS.get_cmdline_user_args()
++	if args.has("--labels"):
++		_add_labels()
+ 	for arg in args:
+ 		if arg.begins_with("--shot"):
+ 			_shot_mode = arg.substr(6)
+@@ -71,19 +143,31 @@
+ 		test.main = self
+ 		add_child(test)
+ 
+-func _process(_delta: float) -> void:
++func _physics_process(delta: float) -> void:
++	if player == null or not visit.recording_enabled():
++		return
++	recorder.update(delta, player.global_position, player.rotation.y, player.camera.rotation.x, player.crouched)
++
++func _process(delta: float) -> void:
++	if autonomous and visit != null and player != null:
++		if visit.update(delta, in_bedroom(player.position)) == &"hora_started":
++			hora_started.emit()
++		_update_mirror(delta)
+ 	if player == null or prompt_label == null:
+ 		return
++	var lines: Array[String] = []
+ 	var ray := player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
+ 	if ray != null and ray.is_colliding():
+ 		var collider := ray.get_collider()
+ 		if collider != null and collider.has_method("get_prompt"):
+ 			var p: String = collider.get_prompt()
+ 			if p != "":
+-				prompt_label.text = "[E]  " + p
+-				prompt_label.visible = true
+-				return
+-	prompt_label.visible = false
++				lines.append("[E]  " + p)
++	var target: Area3D = player.catalog_target_in_view()
++	if target != null and catalog.can_catalog(target.item_id):
++		lines.append("[Q]  catalogar")
++	prompt_label.text = "\n".join(lines)
++	prompt_label.visible = not lines.is_empty()
+ 
+ # ---------------------------------------------------------------------------
+ # Materials and helpers
+@@ -96,6 +180,10 @@
+ 	m.metallic = metal
+ 	return m
+ 
++## Elias's colours, shared by the doll and every figure of him.
++func _style_mat(part: StringName) -> StandardMaterial3D:
++	return _mat(ELIAS_STYLE[part].to_html(false), 0.9)
++
+ func _make_materials() -> void:
+ 	mat_floor_play = _mat("#7b5136", 0.82)
+ 	mat_floor_corridor = _mat("#4e392a", 0.92)
+@@ -134,6 +222,9 @@
+ 	mat_window.emission_enabled = true
+ 	mat_window.emission = Color.html("#5d8fa8")
+ 	mat_window.emission_energy_multiplier = 1.6
++	mat_glass = _mat("#9fb4c0", 0.05)
++	mat_glass.albedo_color.a = 0.18
++	mat_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+ 
+ func _make_environment() -> void:
+ 	var we := WorldEnvironment.new()
+@@ -323,7 +414,7 @@
+ 
+ 	# The four folds.
+ 	_hinge("F1", Vector3(WALL_T, WALL_H, 7.0), Vector3(WALL_T * 0.5, WALL_H * 0.5, 3.5),
+-			Vector3(0.0, 0.0, 0.0), Vector3.ZERO, Vector3(0.0, 0.0, deg_to_rad(-65.0)),
++			Vector3(0.0, 0.0, 0.0), Vector3.ZERO, Vector3(0.0, 0.0, deg_to_rad(-45.0)),
+ 			"dobrar a parede oeste", "desdobrar a parede oeste", false, false, false, mat_wall)
+ 
+ 	_hinge("F2", Vector3(0.12, WALL_H, 1.4), Vector3(0.0, WALL_H * 0.5, 0.7),
+@@ -416,8 +507,8 @@
+ 		_box(self, Vector3(0.18, 0.18, 0.18), Vector3(2.85 + i * 0.22, 0.65, 4.45 + (i % 2) * 0.18), mat_red if i == 1 else mat_cream, false)
+ 
+ 	# The F1 cabana: blanket and cushion under the folded wall.
+-	_box(self, Vector3(1.4, 0.03, 1.2), Vector3(1.4, 0.015, 3.5), mat_rug_play, false)
+-	_box(self, Vector3(0.5, 0.12, 0.5), Vector3(1.2, 0.06, 3.5), mat_cream, false)
++	_box(self, Vector3(1.4, 0.03, 1.2), Vector3(1.5, 0.015, 3.5), mat_rug_play, false)
++	_box(self, Vector3(0.5, 0.12, 0.5), Vector3(1.5, 0.06, 3.5), mat_cream, false)
+ 
+ 	# A small house inside the house.
+ 	_box(self, Vector3(0.9, 0.55, 0.7), Vector3(7.5, 0.275, 1.0), mat_wood, true)
+@@ -500,7 +591,7 @@
+ 	var torso_mesh := BoxMesh.new()
+ 	torso_mesh.size = Vector3(0.34, 0.5, 0.2)
+ 	torso.mesh = torso_mesh
+-	torso.material_override = mat_doll_cloth
++	torso.material_override = _style_mat(&"coat")
+ 	torso.position = Vector3(0.0, 0.25, 0.0)
+ 	doll.add_child(torso)
+ 	var head := MeshInstance3D.new()
+@@ -508,15 +599,16 @@
+ 	head_mesh.radius = 0.13
+ 	head_mesh.height = 0.26
+ 	head.mesh = head_mesh
+-	head.material_override = mat_doll_skin
++	head.material_override = _style_mat(&"skin")
+ 	head.position = Vector3(0.0, 0.58, 0.0)
+ 	doll.add_child(head)
++	_box(doll, Vector3(0.27, 0.1, 0.28), Vector3(0.0, 0.69, 0.0), _style_mat(&"hair"), false)
+ 	for side in [-1.0, 1.0]:
+ 		var limb := MeshInstance3D.new()
+ 		var limb_mesh := BoxMesh.new()
+ 		limb_mesh.size = Vector3(0.09, 0.4, 0.09)
+ 		limb.mesh = limb_mesh
+-		limb.material_override = mat_doll_skin
++		limb.material_override = _style_mat(&"coat")
+ 		limb.position = Vector3(side * 0.2, 0.22, 0.0)
+ 		limb.rotation.z = deg_to_rad(side * 12.0)
+ 		doll.add_child(limb)
+@@ -557,6 +649,7 @@
+ 		occ_head.material_override = mat_dark
+ 		occ_head.position = Vector3(x, 1.28, 8.35)
+ 		add_child(occ_head)
++	_build_story_props()
+ 
+ 	var figure = preload("res://scripts/figure.gd").new()
+ 	figure.name = "Figure"
+@@ -598,104 +691,336 @@
+ 		add_child(hook)
+ 	_box(self, Vector3(0.1, 0.8, 0.4), Vector3(0.14, 1.2, 7.6), mat_red, false)
+ 	_box(self, Vector3(1.2, 0.02, 0.8), Vector3(1.82, 0.01, 8.9), mat_rug_corridor, false)
++	_build_entry_clock()
+ 
+-func _build_atelier() -> void:
+-	# West strip of the atelier: what F1 opens onto. The player cannot enter
+-	# it in the blockout; it exists so the fold reveals a room, not a void.
++func _build_entry_clock() -> void:
++	# Tall case clock against the facade, beside the front door, facing in.
++	var clock = preload("res://scripts/entry_clock.gd").new()
++	clock.name = "EntryClock"
++	clock.position = Vector3(3.1, 1.0, 8.88)
++	add_child(clock)
++	var case_mesh := MeshInstance3D.new()
++	var case_box := BoxMesh.new()
++	case_box.size = Vector3(0.5, 2.0, 0.28)
++	case_mesh.mesh = case_box
++	case_mesh.material_override = mat_dark
++	clock.add_child(case_mesh)
++	var case_cs := CollisionShape3D.new()
++	var case_shape := BoxShape3D.new()
++	case_shape.size = Vector3(0.5, 2.0, 0.28)
++	case_cs.shape = case_shape
++	clock.add_child(case_cs)
++	# Dial, hour hand fixed on the 3, minute hand on a pivot.
++	_box(clock, Vector3(0.36, 0.36, 0.02), Vector3(0.0, 0.6, -0.15), mat_cream, false)
++	_box(clock, Vector3(0.12, 0.02, 0.01), Vector3(-0.06, 0.6, -0.165), mat_dark, false)
++	var minute_pivot := Node3D.new()
++	minute_pivot.position = Vector3(0.0, 0.6, -0.17)
++	clock.add_child(minute_pivot)
++	_box(minute_pivot, Vector3(0.015, 0.15, 0.01), Vector3(0.0, 0.075, 0.0), mat_dark, false)
++	# Pendulum swinging in front of the lower case.
++	var pendulum_pivot := Node3D.new()
++	pendulum_pivot.position = Vector3(0.0, 0.3, -0.16)
++	clock.add_child(pendulum_pivot)
++	_box(pendulum_pivot, Vector3(0.015, 0.7, 0.01), Vector3(0.0, -0.35, 0.0), mat_brass, false)
++	var bob := CylinderMesh.new()
++	bob.top_radius = 0.07
++	bob.bottom_radius = 0.07
++	bob.height = 0.02
++	_add_mesh(pendulum_pivot, bob, Vector3(0.0, -0.72, 0.0), mat_brass, Vector3(deg_to_rad(90.0), 0.0, 0.0))
++	clock.call("setup", clock_model, minute_pivot, pendulum_pivot)
++
++func _build_tampo() -> void:
++	# The bench top the model stands on. Its walls are the glass of the dome:
++	# same collision as the old atelier walls, but the workshop shows through.
+ 	var west := Node3D.new()
+-	west.name = "WestAtelier"
++	west.name = "WestTampo"
+ 	add_child(west)
+-	_floor(west, -3.2, 0.0, 0.0, 9.1, mat_floor_atelier)
+-	_wall_x(west, -3.2, 0.0, 9.1, 0.0, WALL_H, mat_wall_atelier)
+-	_wall_z(west, 0.0, -3.2, 0.0, 0.0, WALL_H, mat_wall_atelier)
+-	_wall_z(west, 9.1, -3.2, 0.0, 0.0, WALL_H, mat_wall_atelier)
+-	_ceiling(west, -3.2, 0.0, 0.0, 9.1)
++	_floor(west, -3.2, 0.0, 0.0, 9.1, mat_wood)
++	_wall_x(west, -3.2, 0.0, 9.1, 0.0, WALL_H, mat_glass)
++	_wall_z(west, 0.0, -3.2, 0.0, 0.0, WALL_H, mat_glass)
++	_wall_z(west, 9.1, -3.2, 0.0, 0.0, WALL_H, mat_glass)
+ 	_omni(west, Vector3(-1.6, 2.2, 4.0), Color(1.0, 0.72, 0.45), 0.5, 5.0, false)
+-	_box(west, Vector3(0.04, 1.5, 2.8), Vector3(-3.12, 1.65, 4.2), mat_window, false)
+-	_box(west, Vector3(0.08, 0.08, 3.0), Vector3(-3.1, 0.9, 4.2), mat_wood, false)
+-	_box(west, Vector3(0.08, 0.08, 3.0), Vector3(-3.1, 2.4, 4.2), mat_wood, false)
+-	_box(west, Vector3(0.08, 1.5, 0.08), Vector3(-3.1, 1.65, 2.8), mat_wood, false)
+-	_box(west, Vector3(0.08, 1.5, 0.08), Vector3(-3.1, 1.65, 5.6), mat_wood, false)
+-	for i in range(7):
+-		_box(west, Vector3(0.012, 1.2, 0.012), Vector3(-3.09, 1.65, 3.1 + i * 0.36), mat_rain, false)
+-
+-	var atelier := Node3D.new()
+-	atelier.name = "Atelier"
+-	add_child(atelier)
+-	_floor(atelier, 0.0, 9.1, 15.4, 12.5, mat_floor_atelier)
+-	_ceiling(atelier, 0.0, 9.1, 15.4, 12.5)
+-	_wall_x(atelier, 0.0, 9.1, 12.5, 0.0, WALL_H, mat_wall_atelier)
+-	_wall_x(atelier, 15.4, 9.1, 12.5, 0.0, WALL_H, mat_wall_atelier)
+-	_wall_z(atelier, 12.5, 0.0, 15.4, 0.0, WALL_H, mat_wall_atelier)
+-
+-	# Desk.
+-	_box(atelier, Vector3(3.4, 0.12, 1.2), Vector3(11.2, 0.8, 11.2), mat_wood, true)
+-	for dx in [-1.5, 1.5]:
+-		for dz in [-0.45, 0.45]:
+-			_box(atelier, Vector3(0.1, 0.8, 0.1), Vector3(11.2 + dx, 0.4, 11.2 + dz), mat_wood_dark, false)
+-
+-	# Lamp: base, stem, shade, warm light.
+-	var base_mesh := CylinderMesh.new()
+-	base_mesh.top_radius = 0.2
+-	base_mesh.bottom_radius = 0.2
+-	base_mesh.height = 0.06
+-	_add_mesh(atelier, base_mesh, Vector3(12.3, 0.86, 11.15), mat_brass)
+-	var stem := MeshInstance3D.new()
+-	var stem_mesh := CylinderMesh.new()
+-	stem_mesh.top_radius = 0.025
+-	stem_mesh.bottom_radius = 0.025
+-	stem_mesh.height = 0.45
+-	stem.mesh = stem_mesh
+-	stem.material_override = mat_brass
+-	stem.position = Vector3(12.3, 1.12, 11.15)
+-	atelier.add_child(stem)
+-	var shade := MeshInstance3D.new()
+-	var shade_mesh := CylinderMesh.new()
+-	shade_mesh.top_radius = 0.07
+-	shade_mesh.bottom_radius = 0.28
+-	shade_mesh.height = 0.22
+-	shade.mesh = shade_mesh
+-	shade.material_override = mat_cream
+-	shade.position = Vector3(12.3, 1.38, 11.15)
+-	atelier.add_child(shade)
+-	var bulb := MeshInstance3D.new()
+-	var bulb_mesh := SphereMesh.new()
+-	bulb_mesh.radius = 0.07
+-	bulb_mesh.height = 0.14
+-	bulb.mesh = bulb_mesh
+-	bulb.material_override = mat_candle
+-	bulb.position = Vector3(12.3, 1.28, 11.15)
+-	atelier.add_child(bulb)
+-	_omni(atelier, Vector3(12.3, 1.28, 11.15), Color(1.0, 0.74, 0.45), 2.2, 7.0, true)
+-
+-	# Desk chair.
+-	_box(atelier, Vector3(0.52, 0.06, 0.5), Vector3(11.2, 0.45, 10.55), mat_wood_dark, true)
+-	_box(atelier, Vector3(0.52, 0.55, 0.06), Vector3(11.2, 0.72, 10.3), mat_wood_dark, false)
+-	for dx in [-0.2, 0.2]:
+-		for dz in [-0.2, 0.2]:
+-			_box(atelier, Vector3(0.06, 0.45, 0.06), Vector3(11.2 + dx, 0.225, 10.55 + dz), mat_wood_dark, false)
+-	_omni(atelier, Vector3(3.2, 2.3, 11.0), Color(1.0, 0.72, 0.45), 0.7, 4.5, false)
+-
+-	# Notebook and pencil.
+-	_box(atelier, Vector3(0.5, 0.02, 0.35), Vector3(11.0, 0.87, 11.1), mat_cream, false)
+-	_box(atelier, Vector3(0.02, 0.02, 0.4), Vector3(10.6, 0.89, 11.15), mat_dark, false)
+-
+-	# Rain window on the south wall.
+-	_box(atelier, Vector3(5.0, 1.5, 0.04), Vector3(7.0, 1.65, 12.43), mat_window, false)
+-	_box(atelier, Vector3(5.2, 0.08, 0.08), Vector3(7.0, 0.9, 12.4), mat_wood, false)
+-	_box(atelier, Vector3(5.2, 0.08, 0.08), Vector3(7.0, 2.4, 12.4), mat_wood, false)
+-	_box(atelier, Vector3(0.08, 1.5, 0.08), Vector3(4.5, 1.65, 12.4), mat_wood, false)
+-	_box(atelier, Vector3(0.08, 1.5, 0.08), Vector3(9.5, 1.65, 12.4), mat_wood, false)
+-	for i in range(12):
+-		var x := 4.7 + i * 0.42
+-		_box(atelier, Vector3(0.012, 1.1, 0.012), Vector3(x, 1.65, 12.41), mat_rain, false, Vector3(0.0, 0.0, deg_to_rad(-8.0)))
+-	_omni(atelier, Vector3(7.0, 1.6, 12.1), Color(0.45, 0.6, 0.8), 0.6, 4.5, false)
++
++	var tampo := Node3D.new()
++	tampo.name = "Tampo"
++	add_child(tampo)
++	_floor(tampo, 0.0, 9.1, 15.4, 12.5, mat_wood)
++	_wall_x(tampo, 0.0, 9.1, 12.5, 0.0, WALL_H, mat_glass)
++	_wall_x(tampo, 15.4, 9.1, 12.5, 0.0, WALL_H, mat_glass)
++	_wall_z(tampo, 12.5, 0.0, 15.4, 0.0, WALL_H, mat_glass)
++
++	# Giant tools left on the bench: a gear lying flat and a pencil.
++	var gear := CylinderMesh.new()
++	gear.top_radius = 1.2
++	gear.bottom_radius = 1.2
++	gear.height = 0.3
++	_add_mesh(tampo, gear, Vector3(11.0, 0.15, 11.0), mat_brass)
++	_box(tampo, Vector3(0.25, 0.25, 4.0), Vector3(6.5, 0.12, 11.6), mat_wood_dark, false, Vector3(0.0, deg_to_rad(90.0), 0.0))
++	_omni(tampo, Vector3(3.2, 2.3, 11.0), Color(1.0, 0.72, 0.45), 0.7, 4.5, false)
++
++	# The dome: visual glass only, over the whole model.
++	var redoma := Node3D.new()
++	redoma.name = "Redoma"
++	add_child(redoma)
++	var x0 := -3.4
++	var x1 := 15.6
++	var z0 := -0.2
++	var z1 := 12.7
++	var top := 3.6
++	_box(redoma, Vector3(x1 - x0, 0.03, z1 - z0), Vector3((x0 + x1) * 0.5, top, (z0 + z1) * 0.5), mat_glass, false)
++	_box(redoma, Vector3(0.03, top, z1 - z0), Vector3(x0, top * 0.5, (z0 + z1) * 0.5), mat_glass, false)
++	_box(redoma, Vector3(0.03, top, z1 - z0), Vector3(x1, top * 0.5, (z0 + z1) * 0.5), mat_glass, false)
++	_box(redoma, Vector3(x1 - x0, top, 0.03), Vector3((x0 + x1) * 0.5, top * 0.5, z0), mat_glass, false)
++	_box(redoma, Vector3(x1 - x0, top, 0.03), Vector3((x0 + x1) * 0.5, top * 0.5, z1), mat_glass, false)
++
++	# The tampo edge: walking to it is how Elias leaves.
++	var edge := Area3D.new()
++	edge.name = "ExitEdge"
++	edge.collision_layer = 0
++	edge.collision_mask = 1
++	edge.position = Vector3(7.7, 1.25, 12.2)
++	var edge_shape := CollisionShape3D.new()
++	var edge_box := BoxShape3D.new()
++	edge_box.size = Vector3(15.4, 2.5, 0.6)
++	edge_shape.shape = edge_box
++	edge.add_child(edge_shape)
++	edge.body_entered.connect(func(body: Node3D) -> void:
++		if body == player:
++			exit_edge_reached.emit())
++	add_child(edge)
++
++func _build_oficina() -> void:
++	# Inácio's real workshop at GIANT scale. Nothing here collides: it is only
++	# ever seen through the dome and the windows.
++	var oficina := Node3D.new()
++	oficina.name = "Oficina"
++	add_child(oficina)
++	var bench_y := -0.8 * GIANT
++	# Bench top around the model, its front edge and the floor far below.
++	_box(oficina, Vector3(80.0, 0.4, 53.5), Vector3(6.0, -0.32, -13.25), mat_wood_dark, false)
++	_box(oficina, Vector3(80.0, 9.6, 0.4), Vector3(6.0, -4.8, 13.5), mat_wood_dark, false)
++	_box(oficina, Vector3(90.0, 0.4, 40.0), Vector3(6.0, bench_y - 0.2, 33.5), mat_floor_corridor, false)
++	# Back wall to the north, with a rain window at 12x.
++	_box(oficina, Vector3(90.0, 40.0, 0.5), Vector3(6.0, 10.0, -40.0), mat_wall_exterior, false)
++	var win_c := Vector3(6.0, 12.0, -39.7)
++	_box(oficina, Vector3(2.8 * GIANT, 1.5 * GIANT, 0.2), win_c, mat_window, false)
++	_box(oficina, Vector3(3.0 * GIANT, 0.08 * GIANT, 0.6), win_c + Vector3(0.0, 0.75 * GIANT, 0.2), mat_wood, false)
++	_box(oficina, Vector3(3.0 * GIANT, 0.08 * GIANT, 0.6), win_c + Vector3(0.0, -0.75 * GIANT, 0.2), mat_wood, false)
++	_box(oficina, Vector3(0.08 * GIANT, 1.5 * GIANT, 0.6), win_c + Vector3(-1.4 * GIANT, 0.0, 0.2), mat_wood, false)
++	_box(oficina, Vector3(0.08 * GIANT, 1.5 * GIANT, 0.6), win_c + Vector3(1.4 * GIANT, 0.0, 0.2), mat_wood, false)
++	for i in range(14):
++		var x := win_c.x - 1.3 * GIANT + i * 0.2 * GIANT
++		_box(oficina, Vector3(0.012 * GIANT, 1.2 * GIANT, 0.1), Vector3(x, win_c.y, win_c.z + 0.2), mat_rain, false, Vector3(0.0, 0.0, deg_to_rad(-8.0)))
++	_omni(oficina, Vector3(6.0, 10.0, -36.0), Color(0.45, 0.6, 0.8), 1.2, 30.0, false)
++	# The giant desk lamp leaning over the bench.
++	var shade := CylinderMesh.new()
++	shade.top_radius = 0.07 * GIANT
++	shade.bottom_radius = 0.28 * GIANT
++	shade.height = 0.22 * GIANT
++	_add_mesh(oficina, shade, Vector3(6.0, 19.2, 16.0), mat_cream)
++	_omni(oficina, Vector3(6.0, 18.0, 16.0), Color(1.0, 0.74, 0.45), 1.6, 45.0, false)
++
++## The pieces of the truth: the two Inácio figures wear the same pocket watch;
++## the cataloger figure has none, only a notebook and a letter on its lap.
++## Under the cabana cushion, a page that only shows after 03:33.
++func _build_story_props() -> void:
++	var watch := CylinderMesh.new()
++	watch.top_radius = 0.05
++	watch.bottom_radius = 0.05
++	watch.height = 0.018
++	for pair in [["PocketWatchA", 11.15], ["PocketWatchB", 11.85]]:
++		var w := _add_mesh(self, watch, Vector3(pair[1], 1.0, 8.2), mat_brass, Vector3(deg_to_rad(90.0), 0.0, 0.0))
++		w.name = pair[0]
++	var book := _box(self, Vector3(0.2, 0.035, 0.26), Vector3(12.55, 0.6, 8.13), mat_cream, false)
++	book.name = "CatalogerNotebook"
++	var letter := _box(self, Vector3(0.16, 0.006, 0.21), Vector3(12.58, 0.623, 8.11), mat_cream, false, Vector3(0.0, deg_to_rad(14.0), 0.0))
++	letter.name = "CatalogerLetter"
++	var page := _box(self, Vector3(0.22, 0.004, 0.29), Vector3(1.5, 0.13, 3.5), mat_cream, false, Vector3(0.0, deg_to_rad(-18.0), 0.0))
++	page.name = "CabanaPage"
++	page.visible = false
++
++## After 03:33: the loose page shows under the cabana cushion, catalogable.
++func reveal_cabana_page() -> void:
++	var page := get_node_or_null("CabanaPage") as Node3D
++	if page == null or page.visible:
++		return
++	page.visible = true
++	_catalog_target(self, &"pagina_cabana", page.position + Vector3(0.0, 0.05, 0.0), Vector3(0.5, 0.2, 0.5))
++
++func _build_giant_elias() -> void:
++	var giant := Mannequin.new()
++	giant.name = "GiantElias"
++	add_child(giant)
++	giant.build(ELIAS_STYLE, GIANT)
++	giant.set_pose(&"sentado")
++	giant.position = GIANT_SEAT
++	giant.set_lean(deg_to_rad(22.0))
++	giant.reach(1.0, GIANT_HAND)
++	giant.visible = false
++
++func _catalog_target(parent: Node3D, item: StringName, pos: Vector3, size: Vector3) -> Area3D:
++	var area: Area3D = CatalogTarget.new()
++	area.name = "Catalog_" + String(item)
++	area.item_id = item
++	area.position = pos
++	var cs := CollisionShape3D.new()
++	var shape := BoxShape3D.new()
++	shape.size = size
++	cs.shape = shape
++	area.add_child(cs)
++	parent.add_child(area)
++	return area
++
++func _build_catalog_targets() -> void:
++	_catalog_target(self, &"relogio_entrada", Vector3(3.1, 1.2, 8.8), Vector3(0.55, 1.6, 0.4))
++	_catalog_target(get_node("Ball"), &"bola", Vector3.ZERO, Vector3(0.4, 0.4, 0.4))
++	_catalog_target(self, &"caixa_musica", Vector3(3.35, 0.7, 4.45), Vector3(0.45, 0.3, 0.35))
++	_catalog_target(self, &"desenho", Vector3(6.7, 1.6, 0.1), Vector3(0.8, 0.6, 0.15))
++	_catalog_target(self, &"casinha", Vector3(7.5, 0.3, 1.0), Vector3(1.0, 0.8, 0.8))
++	_catalog_target(self, &"cabana", Vector3(1.0, 0.4, 3.5), Vector3(1.4, 0.8, 1.6))
++	_catalog_target(self, &"cama", Vector3(13.2, 0.5, 3.0), Vector3(2.2, 0.6, 3.1))
++	_catalog_target(self, &"espelho", Vector3(15.25, 1.35, 2.0), Vector3(0.15, 1.6, 1.0))
++	_catalog_target(get_node("Doll"), &"boneco", Vector3(0.0, 0.3, 0.0), Vector3(0.55, 1.0, 0.35))
++	_catalog_target(self, &"vela", Vector3(11.85, 0.6, 7.7), Vector3(0.25, 0.3, 0.25))
++	_catalog_target(self, &"casaco", Vector3(0.2, 1.2, 7.6), Vector3(0.25, 0.9, 0.5))
++	_catalog_target(self, &"figura_inacio_a", Vector3(11.15, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
++	_catalog_target(self, &"figura_inacio_b", Vector3(11.85, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
++	_catalog_target(self, &"figura_catalogador", Vector3(12.55, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
++
++func _wire_catalog() -> void:
++	_build_catalog_targets()
++	get_node("F1").toggled.connect(func(at_b: bool) -> void:
++		catalog.set_flag(&"f1_folded", at_b))
++	get_node("Doll").toggled.connect(func(lying: bool) -> void:
++		catalog.set_flag(&"doll_sat", not lying))
++	player.catalog_requested.connect(_on_catalog_requested)
++	player.acted.connect(func(verb: StringName, _collider: Node) -> void:
++		recorder.mark_action(verb))
++	get_node("EntryClock").wound.connect(func(_amount: float) -> void:
++		if visit.on_wind() == &"hora_ended":
++			hora_ended.emit())
++	cataloged.connect(func(entry: Dictionary) -> void:
++		visit.on_cataloged(entry.item))
++	hora_started.connect(func() -> void: print("03:33"))
++
++func _wire_sound() -> void:
++	get_node("EntryClock").sfx = sfx
++	for node in get_children():
++		if node.has_signal("toggled"):
++			node.toggled.connect(func(_state: bool) -> void:
++				sfx.play_at(&"fold", node.global_position))
++	player.stepped.connect(func() -> void:
++		sfx.play_at(&"step", player.global_position, &"Casa", -8.0))
++	# Mundo: rain behind the bedroom window and the giant workshop window,
++	# and the player's own breath, low and always there.
++	_loop_3d(&"rain", Vector3(12.5, 1.65, -0.4), -10.0)
++	_loop_3d(&"rain", Vector3(7.0, 6.0, -14.0), -6.0)
++	var breath := AudioStreamPlayer.new()
++	breath.name = "Breath"
++	breath.stream = sfx.stream(&"breath")
++	breath.bus = &"Mundo"
++	breath.volume_db = -24.0
++	breath.autoplay = not sfx.silent
++	add_child(breath)
++
++func _loop_3d(kind: StringName, pos: Vector3, volume_db: float) -> void:
++	var p := AudioStreamPlayer3D.new()
++	p.stream = sfx.stream(kind)
++	p.bus = &"Mundo"
++	p.volume_db = volume_db
++	p.unit_size = 6.0
++	p.position = pos
++	p.autoplay = not sfx.silent
++	add_child(p)
++
++func _wire_mirror() -> void:
++	house_mirror = HouseMirror.new()
++	house_mirror.name = "HouseMirror"
++	house_mirror.main = self
++	add_child(house_mirror)
++	var reflection := MirrorReflection.new()
++	reflection.name = "MirrorReflection"
++	reflection.main = self
++	reflection.style = ELIAS_STYLE
++	add_child(reflection)
++	player.camera.cull_mask &= ~(1 << (MirrorReflection.REFLECTION_LAYER - 1))
++	player.acted.connect(func(verb: StringName, _collider: Node) -> void:
++		if verb == &"bater":
++			sfx.play_at(&"knock", player.ray.get_collision_point())
++		if verb in MIRRORED_VERBS:
++			brain.register(verb))
++
++func _wire_hour() -> void:
++	var echoes := Node3D.new()
++	echoes.name = "Echoes"
++	add_child(echoes)
++	hour_event = HourEvent.new()
++	hour_event.name = "HourEvent"
++	hour_event.main = self
++	add_child(hour_event)
++	hora_started.connect(hour_event.begin)
++	hora_ended.connect(hour_event.end)
++	hour_event.ended.connect(func() -> void:
++		get_node("GiantElias").visible = true)
++
++func _wire_ending() -> void:
++	ending = Ending.new()
++	ending.name = "Ending"
++	ending.main = self
++	add_child(ending)
++	exit_edge_reached.connect(func() -> void:
++		var outcome: StringName = visit.on_exit()
++		if outcome == &"":
++			return
++		ended = true
++		ending_outcome = outcome
++		ending.finish(outcome))
++
++## Debug only: F9 lets the clock run out now, to reach 03:33 without waiting.
++func _unhandled_input(event: InputEvent) -> void:
++	if not OS.is_debug_build():
++		return
++	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F9:
++		visit.clock.can_stop = true
++		visit.clock.spring = 0.0
++
++func _update_mirror(delta: float) -> void:
++	_move_cool = maxf(0.0, _move_cool - delta)
++	if _move_cool <= 0.0 and Vector2(player.velocity.x, player.velocity.z).length() > 0.3:
++		_move_cool = 1.0
++		brain.register(&"mover")
++	var r: Dictionary = brain.update(delta)
++	if not r.is_empty():
++		house_mirror.respond(r)
++
++## In the player's view and not hidden behind anything solid.
++func is_seen(point: Vector3) -> bool:
++	var cam: Camera3D = player.camera
++	if not cam.is_position_in_frustum(point):
++		return false
++	var q := PhysicsRayQueryParameters3D.create(cam.global_position, point, 1, [player.get_rid()])
++	var hit := get_world_3d().direct_space_state.intersect_ray(q)
++	return hit.is_empty() or hit.position.distance_to(point) < 0.35
++
++func in_bedroom(pos: Vector3) -> bool:
++	return pos.x >= BEDROOM_X.x and pos.x <= BEDROOM_X.y and pos.z >= BEDROOM_Z.x and pos.z <= BEDROOM_Z.y
++
++func _on_catalog_requested(target: Area3D) -> void:
++	var entry: Dictionary = catalog.catalog(target.item_id)
++	if entry.is_empty():
++		return
++	player.examine()
++	sfx.play_pencil_pattern(target.global_position)
++	recorder.mark_action(&"catalogar")
++	cataloged.emit(entry)
+ 
+ func _build_player() -> void:
+ 	player = CharacterBody3D.new()
+ 	player.name = "Player"
+ 	player.set_script(preload("res://scripts/player.gd"))
+-	player.position = Vector3(2.0, 0.2, 11.2)
++	player.position = SPAWN
++	player.rotation.y = 0.0
++	player.set("respawn_point", SPAWN)
+ 
+ 	var capsule := CollisionShape3D.new()
+ 	var shape := CapsuleShape3D.new()
+@@ -720,6 +1045,15 @@
+ 	ray.enabled = true
+ 	camera.add_child(ray)
+ 
++	var catalog_ray := RayCast3D.new()
++	catalog_ray.name = "CatalogRay"
++	catalog_ray.target_position = Vector3(0.0, 0.0, -2.5)
++	catalog_ray.collision_mask = 2
++	catalog_ray.collide_with_areas = true
++	catalog_ray.collide_with_bodies = false
++	catalog_ray.enabled = true
++	camera.add_child(catalog_ray)
++
+ 	var flashlight := SpotLight3D.new()
+ 	flashlight.name = "SpotLight3D"
+ 	flashlight.position = Vector3(0.12, -0.08, 0.0)
+@@ -760,7 +1094,7 @@
+ 	prompt_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+ 	prompt_label.offset_left = -360.0
+ 	prompt_label.offset_right = 360.0
+-	prompt_label.offset_top = -78.0
++	prompt_label.offset_top = -96.0
+ 	prompt_label.offset_bottom = -42.0
+ 	prompt_label.add_theme_font_size_override("font_size", 18)
+ 	prompt_label.add_theme_color_override("font_color", Color(0.96, 0.91, 0.8))
+@@ -770,7 +1104,7 @@
+ 	root.add_child(prompt_label)
+ 
+ 	help_label = Label.new()
+-	help_label.text = "FAZ DE CONTA — blockout\nWASD mover · mouse olhar · E interagir · F lanterna · R reiniciar · ESC liberar mouse\nDobras: F1 parede oeste · F2/F4 painéis do corredor · F3 porta deitada\nThe front door is open. Exit is a choice."
++	help_label.text = "FAZ DE CONTA — blockout\nWASD mover · mouse olhar · E interagir · Q catalogar · Tab caderno · C agachar · F lanterna · R reiniciar · ESC liberar mouse\nDobras: F1 parede oeste · F2/F4 painéis do corredor · F3 porta deitada\nThe front door is open. Exit is a choice."
+ 	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+ 	help_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+ 	help_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+@@ -786,6 +1120,16 @@
+ 	help_label.add_theme_constant_override("shadow_offset_y", 2)
+ 	root.add_child(help_label)
+ 
++	notebook = preload("res://scripts/notebook_ui.gd").new()
++	notebook.name = "Notebook"
++	notebook.player = player
++	add_child(notebook)
++	notebook.refresh(catalog)
++	player.notebook_requested.connect(notebook.toggle)
++	cataloged.connect(func(entry: Dictionary) -> void:
++		notebook.refresh(catalog)
++		notebook.peek(entry))
++
+ 	var tw := create_tween()
+ 	tw.tween_interval(9.0)
+ 	tw.tween_property(help_label, "modulate:a", 0.0, 2.0)
+@@ -800,7 +1144,7 @@
+ 	_label("3 · CORREDOR", Vector3(9.45, 2.45, 0.8), cream, 30)
+ 	_label("3B · SALA DAS FIGURAS", Vector3(11.9, 2.2, 7.6), cream, 26)
+ 	_label("ENTRADA", Vector3(1.75, 2.3, 7.7), cream, 24)
+-	_label("ATELIÊ", Vector3(12.2, 2.45, 10.9), cream, 28)
++	_label("TAMPO", Vector3(12.2, 2.45, 10.9), cream, 28)
+ 
+ 	_label("F1", Vector3(0.9, 2.2, 3.5), orange, 46)
+ 	_label("F2", Vector3(8.72, 2.2, 1.3), orange, 34)
+@@ -850,6 +1194,49 @@
+ 			var f1 := get_node_or_null("F1")
+ 			if f1 != null and f1.has_method("interact"):
+ 				f1.interact()
++		"notebook":
++			player.position = Vector3(2.6, 0.2, 7.5)
++			for id in [&"relogio_entrada", &"bola", &"caixa_musica"]:
++				cataloged.emit(catalog.catalog(id))
++			notebook.open()
++		"mirror":
++			player.position = Vector3(13.3, 0.2, 2.3)
++			player.rotation.y = deg_to_rad(-75.0)
++			camera.rotation.x = deg_to_rad(-4.0)
++		"hour":
++			# A walk across the playroom and a pause, then 03:33 frozen in place.
++			for i in 300:
++				var t := i / 300.0
++				recorder.update(0.1, Vector3(2.4, 0.2, 6.2).lerp(Vector3(6.2, 0.2, 2.8), t), deg_to_rad(-135.0), 0.0, i > 200)
++			for i in 200:
++				recorder.update(0.1, Vector3(6.2, 0.2, 2.8), deg_to_rad(90.0), -0.3, i < 100)
++			hour_event.begin()
++			hour_event.end()
++			player.position = Vector3(7.4, 0.2, 6.4)
++			player.rotation.y = deg_to_rad(40.0)
++			camera.rotation.x = deg_to_rad(-10.0)
++		"double":
++			hour_event.begin()
++			get_node("Doll").become_double(hour_event.DOUBLE_SEAT)
++			hour_event.end()
++			player.position = Vector3(2.4, 0.2, 7.4)
++			player.rotation.y = deg_to_rad(120.0)
++			camera.rotation.x = deg_to_rad(-18.0)
++		"giant":
++			hour_event.begin()
++			hour_event.end()
++			player.position = Vector3(1.8, 0.2, 9.6)
++			player.rotation.y = PI
++			camera.rotation.x = deg_to_rad(14.0)
++		"ending":
++			hour_event.begin()
++			hour_event.end()
++			# The image behind the black, without the fade or the last entry.
++			ending._behind_black(&"corda")
++		"clock":
++			player.position = Vector3(2.6, 0.2, 7.5)
++			player.rotation.y = deg_to_rad(160.0)
++			camera.rotation.x = deg_to_rad(-12.0)
+ 		"top":
+ 			player.position = Vector3(7.7, 8.5, 5.8)
+ 			player.rotation.y = 0.0
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mannequin.gd faz-de-conta/scripts/mannequin.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mannequin.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/mannequin.gd	2026-10-28 21:07:59.488026848 -0300
+@@ -0,0 +1,121 @@
++extends Node3D
++## A body made of boxes, meshes only: no collision, nothing to bump into.
++## Used for Elias in the mirror, his echoes, the double and the new figure.
++## Faces -Z like the player, so a recorded yaw can be applied as-is.
++
++var _hips: Node3D
++var _head: Node3D
++var _legs: Array[Node3D] = []
++var _torso: Node3D
++var _arms := {}
++var _mats := {}
++
++func build(style: Dictionary, scale_factor := 1.0) -> void:
++	for part in style:
++		var m := StandardMaterial3D.new()
++		m.albedo_color = style[part]
++		m.roughness = 0.9
++		_mats[part] = m
++	scale = Vector3.ONE * scale_factor
++	_hips = Node3D.new()
++	add_child(_hips)
++	for side in [-1.0, 1.0]:
++		var leg := Node3D.new()
++		leg.position = Vector3(side * 0.1, 0.0, 0.0)
++		_hips.add_child(leg)
++		_part(leg, Vector3(0.14, 0.85, 0.16), Vector3(0.0, -0.425, 0.0), &"trousers")
++		_legs.append(leg)
++	_torso = Node3D.new()
++	_hips.add_child(_torso)
++	_part(_torso, Vector3(0.44, 0.62, 0.24), Vector3(0.0, 0.31, 0.0), &"coat")
++	_part(_torso, Vector3(0.46, 0.26, 0.26), Vector3(0.0, -0.03, 0.0), &"coat")
++	for side in [-1.0, 1.0]:
++		var arm := Node3D.new()
++		arm.position = Vector3(side * 0.29, 0.6, 0.0)
++		arm.rotation.z = deg_to_rad(side * 4.0)
++		_torso.add_child(arm)
++		_arms[side] = arm
++		_part(arm, Vector3(0.11, 0.6, 0.12), Vector3(0.0, -0.28, 0.0), &"coat")
++	_head = Node3D.new()
++	_head.position = Vector3(0.0, 0.66, 0.0)
++	_torso.add_child(_head)
++	var skull := MeshInstance3D.new()
++	var sphere := SphereMesh.new()
++	sphere.radius = 0.11
++	sphere.height = 0.24
++	skull.mesh = sphere
++	skull.material_override = _mats.get(&"skin")
++	skull.position = Vector3(0.0, 0.13, 0.0)
++	_head.add_child(skull)
++	_part(_head, Vector3(0.23, 0.12, 0.24), Vector3(0.0, 0.2, 0.01), &"hair")
++	set_pose(&"em_pe")
++
++func set_pose(pose: StringName) -> void:
++	if _hips == null:
++		return
++	var hip_y := 0.85
++	var leg_angle := 0.0
++	var lean := 0.0
++	match pose:
++		&"agachado":
++			hip_y = 0.45
++			leg_angle = deg_to_rad(58.0)
++			lean = deg_to_rad(-18.0)
++		&"sentado":
++			hip_y = 0.45
++			leg_angle = deg_to_rad(84.0)
++		&"no_chao":
++			hip_y = 0.1
++			leg_angle = deg_to_rad(86.0)
++	_hips.position.y = hip_y
++	_torso.rotation.x = lean
++	for leg in _legs:
++		leg.rotation.x = leg_angle
++
++func set_look(yaw: float, pitch: float) -> void:
++	rotation.y = yaw
++	if _head != null:
++		_head.rotation.x = clampf(pitch, -0.8, 0.8) * 0.7
++
++## Leans the torso forward (radians), for a body bent over a bench.
++func set_lean(angle: float) -> void:
++	if _torso != null:
++		_torso.rotation.x = -angle
++
++## Points one arm (side -1 left, +1 right) at a point in the world.
++func reach(side: float, target: Vector3) -> void:
++	var arm: Node3D = _arms.get(side)
++	if arm == null:
++		return
++	arm.look_at(target, Vector3.UP)
++	# The arm hangs along -Y; turn it so -Y takes the direction -Z was given.
++	arm.rotate_object_local(Vector3.RIGHT, PI * 0.5)
++
++## One arm's pivot (side -1 left, +1 right), for small gestures.
++func arm(side: float) -> Node3D:
++	return _arms.get(side)
++
++func set_render_layer(bit: int) -> void:
++	for mi in find_children("*", "MeshInstance3D", true, false):
++		(mi as MeshInstance3D).layers = 1 << (bit - 1)
++
++## A notebook on the lap (the double writing, the new figure).
++func add_notebook() -> void:
++	var paper := StandardMaterial3D.new()
++	paper.albedo_color = Color("#e9e1cc")
++	paper.roughness = 0.95
++	_mats[&"paper"] = paper
++	var book := _part(_hips, Vector3(0.22, 0.025, 0.3), Vector3(0.0, 0.06, -0.3), &"paper")
++	book.rotation.x = deg_to_rad(-10.0)
++	var layer: int = (_legs[0].get_child(0) as MeshInstance3D).layers if not _legs.is_empty() else 1
++	book.layers = layer
++
++func _part(parent: Node3D, size: Vector3, pos: Vector3, mat: StringName) -> MeshInstance3D:
++	var mi := MeshInstance3D.new()
++	var mesh := BoxMesh.new()
++	mesh.size = size
++	mi.mesh = mesh
++	mi.material_override = _mats.get(mat)
++	mi.position = pos
++	parent.add_child(mi)
++	return mi
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mirror_brain.gd faz-de-conta/scripts/mirror_brain.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mirror_brain.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/mirror_brain.gd	2026-10-28 20:40:45.593919059 -0300
+@@ -0,0 +1,69 @@
++extends RefCounted
++## The house as a mirror: it gives back what the player did, after a silence,
++## once per action, and never something the player did not do. The only
++## exception is a single invitation (the ball) after a long idle.
++
++const COOLDOWN := 4.0
++const SILENCE_AFTER_PLAYER := 2.0
++const IDLE_INVITE := 60.0
++const KNOCK_GROUP := 1.5
++const EPS := 0.000001
++
++## verb -> {"n": registrations, "order": recency}
++var _pending := {}
++var _order := 0
++var _since_action := 0.0
++var _since_response := INF
++var _idle := 0.0
++var _invited := false
++var _since_knock := INF
++var _knock_count := 0
++var _responses := 0
++
++func register(verb: StringName) -> void:
++	_idle = 0.0
++	if verb == &"mover":
++		return
++	_since_action = 0.0
++	if verb == &"bater":
++		_knock_count = _knock_count + 1 if _since_knock <= KNOCK_GROUP else 1
++		_since_knock = 0.0
++	_order += 1
++	var n: int = _pending[verb].n + 1 if _pending.has(verb) else 1
++	_pending[verb] = {"n": n, "order": _order}
++
++func update(dt: float) -> Dictionary:
++	_since_action += dt
++	_since_response += dt
++	_since_knock += dt
++	_idle += dt
++	if _since_response <= COOLDOWN + EPS:
++		return {}
++	if not _pending.is_empty() and _since_action >= SILENCE_AFTER_PLAYER - EPS:
++		var verb := _pick()
++		_pending.erase(verb)
++		_since_response = 0.0
++		_responses += 1
++		return {"verb": verb, "count": _knock_count if verb == &"bater" else 1, "invite": false}
++	if not _invited and _idle >= IDLE_INVITE - EPS:
++		_invited = true
++		_since_response = 0.0
++		_responses += 1
++		return {"verb": &"rolar", "count": 1, "invite": true}
++	return {}
++
++func responses_given() -> int:
++	return _responses
++
++## Most registrations wins; a tie goes to the most recent.
++func _pick() -> StringName:
++	var best := &""
++	for verb in _pending:
++		if best == &"":
++			best = verb
++			continue
++		var a: Dictionary = _pending[verb]
++		var b: Dictionary = _pending[best]
++		if a.n > b.n or (a.n == b.n and a.order > b.order):
++			best = verb
++	return best
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mirror_reflection.gd faz-de-conta/scripts/mirror_reflection.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/mirror_reflection.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/mirror_reflection.gd	2026-10-28 20:44:04.187541234 -0300
+@@ -0,0 +1,80 @@
++extends Node3D
++## The bedroom mirror. It does not show the player: it shows Elias, standing
++## where the player stood half a second ago. Only the mirror camera sees
++## layer 11; the player's own camera never does.
++
++const Mannequin = preload("res://scripts/mannequin.gd")
++
++const REFLECTION_LAYER := 11
++const GLASS_LAYER := 12
++const DELAY := 0.5
++## Front face of the mirror glass, facing -X into the bedroom.
++const PLANE_X := 15.285
++const CENTER := Vector3(15.285, 1.35, 2.0)
++const SIZE := Vector2(1.0, 1.6)
++
++## Set by main before add_child.
++var main: Node
++var style: Dictionary
++
++var _viewport: SubViewport
++var _camera: Camera3D
++var _elias: Node3D
++var _active := false
++
++func _ready() -> void:
++	_viewport = SubViewport.new()
++	# Same aspect as the glass (1.0 x 1.6) so the image is not stretched.
++	_viewport.size = Vector2i(320, 512)
++	_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
++	add_child(_viewport)
++	_camera = Camera3D.new()
++	_camera.projection = Camera3D.PROJECTION_FRUSTUM
++	_camera.keep_aspect = Camera3D.KEEP_HEIGHT
++	_camera.size = SIZE.y
++	_camera.far = 30.0
++	_camera.cull_mask = 0xFFFFF & ~(1 << (GLASS_LAYER - 1))
++	_viewport.add_child(_camera)
++
++	var glass := MeshInstance3D.new()
++	var quad := QuadMesh.new()
++	quad.size = SIZE
++	glass.mesh = quad
++	glass.position = CENTER
++	glass.rotation.y = deg_to_rad(-90.0)
++	glass.layers = 1 << (GLASS_LAYER - 1)
++	var mat := StandardMaterial3D.new()
++	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
++	mat.albedo_texture = _viewport.get_texture()
++	mat.albedo_color = Color(0.86, 0.9, 0.92)
++	# The camera looks back into the room: flip u so the image reads as a mirror.
++	mat.uv1_scale = Vector3(-1.0, 1.0, 1.0)
++	mat.uv1_offset = Vector3(1.0, 0.0, 0.0)
++	glass.material_override = mat
++	add_child(glass)
++
++	_elias = Mannequin.new()
++	_elias.build(style)
++	_elias.set_render_layer(REFLECTION_LAYER)
++	_elias.visible = false
++	add_child(_elias)
++
++func _process(_delta: float) -> void:
++	var on: bool = main.in_bedroom(main.player.global_position)
++	if on != _active:
++		_active = on
++		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
++		_elias.visible = on
++	if not on:
++		return
++	var s: Dictionary = main.recorder.delayed(DELAY)
++	if not s.is_empty():
++		_elias.global_position = s.pos
++		_elias.set_look(s.yaw, s.pitch)
++		_elias.set_pose(&"agachado" if s.crouched else &"em_pe")
++	var eye: Vector3 = main.player.camera.global_position
++	var mirrored := Vector3(2.0 * PLANE_X - eye.x, eye.y, eye.z)
++	# Looking from behind the glass toward -X; the near plane sits on the glass.
++	_camera.global_transform = Transform3D(Basis(Vector3(0, 0, -1), Vector3(0, 1, 0), Vector3(1, 0, 0)), mirrored)
++	_camera.near = maxf(0.05, mirrored.x - PLANE_X)
++	_camera.frustum_offset = Vector2(eye.z - CENTER.z, CENTER.y - eye.y)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/notebook_ui.gd faz-de-conta/scripts/notebook_ui.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/notebook_ui.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/notebook_ui.gd	2026-10-28 21:04:54.256585185 -0300
+@@ -0,0 +1,267 @@
++extends CanvasLayer
++## Elias's catalogue notebook, drawn as paper: entries on the left page, the
++## diary pages glued on the right. Numbered blank lines ahead are the only hint
++## that there is more to find; there is never a total.
++
++const Catalog = preload("res://scripts/catalog.gd")
++const Data = preload("res://scripts/catalog_data.gd")
++
++const PAPER := Color("#e9e1cc")
++const RULE := Color("#b8ae96")
++const GLUED := Color("#d8ccad")
++const INK := Color("#2a2420")
++const PENCIL := Color("#4a4440")
++const BLANK_LINES := 3
++const RULE_STEP := 30.0
++const PEEK_TIME := 2.5
++
++## Set by main: the notebook locks this player's input while open.
++var player: Node
++
++var _root: Control
++var _entries_box: VBoxContainer
++var _entries_scroll: ScrollContainer
++var _pages_box: VBoxContainer
++var _peek: PanelContainer
++var _peek_label: Label
++var _peek_tween: Tween
++var _final: Control
++var _final_label: Label
++var _font: SystemFont
++var _font_pencil: SystemFont
++var _open := false
++
++func _ready() -> void:
++	layer = 5
++	_font = SystemFont.new()
++	_font.font_names = PackedStringArray(["Liberation Serif", "FreeSerif", "Noto Serif", "DejaVu Serif", "Serif"])
++	_font.font_italic = true
++	_font_pencil = SystemFont.new()
++	_font_pencil.font_names = _font.font_names
++	_font_pencil.font_italic = true
++	_font_pencil.font_weight = 300
++	_build_book()
++	_build_peek()
++	_build_final()
++
++func open() -> void:
++	if _final.visible:
++		return
++	_open = true
++	_root.visible = true
++	_peek.visible = false
++	_set_locked(true)
++	_scroll_to_end.call_deferred()
++
++func close() -> void:
++	_open = false
++	_root.visible = false
++	_set_locked(false)
++
++func toggle() -> void:
++	if _open:
++		close()
++	else:
++		open()
++
++func is_open() -> bool:
++	return _open
++
++func refresh(catalog) -> void:
++	for c in _entries_box.get_children():
++		_entries_box.remove_child(c)
++		c.queue_free()
++	for c in _pages_box.get_children():
++		_pages_box.remove_child(c)
++		c.queue_free()
++	for entry in catalog.entries:
++		var line := _line(Catalog.format(entry), PENCIL if entry.author == &"duplo" else INK)
++		if entry.author == &"duplo":
++			line.add_theme_font_override("font", _font_pencil)
++		_entries_box.add_child(line)
++	var next: int = catalog.next_number()
++	for i in BLANK_LINES:
++		_entries_box.add_child(_line("Item %d —" % (next + i), RULE.darkened(0.25)))
++	var tilt := -1.0
++	for page_id in catalog.pages:
++		_pages_box.add_child(_glued_page(String(Data.PAGES.get(page_id, "")), tilt))
++		tilt = -tilt
++
++## A strip of paper with the newest line, briefly, at the bottom of the screen.
++func peek(entry: Dictionary) -> void:
++	_peek_label.text = Catalog.format(entry)
++	_peek.visible = true
++	_peek.modulate.a = 0.0
++	if _peek_tween != null and _peek_tween.is_valid():
++		_peek_tween.kill()
++	_peek_tween = create_tween()
++	_peek_tween.tween_property(_peek, "modulate:a", 1.0, 0.3)
++	_peek_tween.tween_interval(PEEK_TIME)
++	_peek_tween.tween_property(_peek, "modulate:a", 0.0, 0.6)
++	_peek_tween.tween_callback(func() -> void: _peek.visible = false)
++
++## The closing image: one last entry on a page, nothing else.
++## The player stays locked: the visit is over.
++func show_final(text: String) -> void:
++	_open = false
++	_root.visible = false
++	_peek.visible = false
++	_final_label.text = text
++	_final.visible = true
++	_final.modulate.a = 0.0
++	var tw := create_tween()
++	tw.tween_property(_final, "modulate:a", 1.0, 2.5)
++
++## Both visible pages as plain text (for tests).
++func page_text() -> String:
++	var parts: Array[String] = []
++	for c in _entries_box.get_children():
++		parts.append((c as Label).text)
++	for c in _pages_box.get_children():
++		var label := c.get_child(0) as Label
++		parts.append(label.text)
++	return "\n".join(parts)
++
++func _set_locked(on: bool) -> void:
++	if player != null:
++		player.input_locked = on
++	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if on else Input.MOUSE_MODE_CAPTURED)
++
++func _scroll_to_end() -> void:
++	_entries_scroll.scroll_vertical = int(_entries_scroll.get_v_scroll_bar().max_value)
++
++func _line(text: String, color: Color) -> Label:
++	var label := Label.new()
++	label.text = text
++	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
++	label.custom_minimum_size = Vector2(380.0, 0.0)
++	label.add_theme_font_override("font", _font)
++	label.add_theme_font_size_override("font_size", 17)
++	label.add_theme_color_override("font_color", color)
++	label.add_theme_constant_override("line_spacing", 9)
++	return label
++
++func _glued_page(text: String, tilt: float) -> PanelContainer:
++	var panel := PanelContainer.new()
++	var style := StyleBoxFlat.new()
++	style.bg_color = GLUED
++	style.content_margin_left = 18.0
++	style.content_margin_right = 18.0
++	style.content_margin_top = 14.0
++	style.content_margin_bottom = 14.0
++	style.shadow_color = Color(0, 0, 0, 0.18)
++	style.shadow_size = 4
++	panel.add_theme_stylebox_override("panel", style)
++	panel.rotation_degrees = tilt * 1.2
++	var label := _line(text, INK)
++	label.add_theme_font_size_override("font_size", 16)
++	label.custom_minimum_size = Vector2(360.0, 0.0)
++	panel.add_child(label)
++	return panel
++
++func _paper(rect: Rect2) -> Panel:
++	var page := Panel.new()
++	page.position = rect.position
++	page.size = rect.size
++	var style := StyleBoxFlat.new()
++	style.bg_color = PAPER
++	page.add_theme_stylebox_override("panel", style)
++	page.draw.connect(func() -> void:
++		var y := 64.0
++		while y < page.size.y - 20.0:
++			page.draw_line(Vector2(24.0, y), Vector2(page.size.x - 24.0, y), RULE, 1.0)
++			y += RULE_STEP)
++	return page
++
++func _build_book() -> void:
++	_root = Control.new()
++	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
++	_root.visible = false
++	add_child(_root)
++	var dim := ColorRect.new()
++	dim.color = Color(0, 0, 0, 0.6)
++	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
++	_root.add_child(dim)
++
++	var book := Control.new()
++	book.set_anchors_preset(Control.PRESET_CENTER)
++	book.offset_left = -470.0
++	book.offset_right = 470.0
++	book.offset_top = -290.0
++	book.offset_bottom = 290.0
++	_root.add_child(book)
++	var left := _paper(Rect2(0.0, 0.0, 465.0, 580.0))
++	var right := _paper(Rect2(475.0, 0.0, 465.0, 580.0))
++	book.add_child(left)
++	book.add_child(right)
++	var spine := ColorRect.new()
++	spine.color = Color("#8a7f68")
++	spine.position = Vector2(465.0, 0.0)
++	spine.size = Vector2(10.0, 580.0)
++	book.add_child(spine)
++
++	_entries_scroll = ScrollContainer.new()
++	_entries_scroll.position = Vector2(28.0, 40.0)
++	_entries_scroll.size = Vector2(420.0, 520.0)
++	_entries_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
++	_entries_scroll.focus_mode = Control.FOCUS_NONE
++	left.add_child(_entries_scroll)
++	_entries_box = VBoxContainer.new()
++	_entries_box.add_theme_constant_override("separation", 12)
++	_entries_scroll.add_child(_entries_box)
++
++	var pages_scroll := ScrollContainer.new()
++	pages_scroll.position = Vector2(30.0, 40.0)
++	pages_scroll.size = Vector2(415.0, 520.0)
++	pages_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
++	pages_scroll.focus_mode = Control.FOCUS_NONE
++	right.add_child(pages_scroll)
++	_pages_box = VBoxContainer.new()
++	_pages_box.add_theme_constant_override("separation", 22)
++	pages_scroll.add_child(_pages_box)
++
++func _build_peek() -> void:
++	_peek = PanelContainer.new()
++	var style := StyleBoxFlat.new()
++	style.bg_color = PAPER
++	style.content_margin_left = 16.0
++	style.content_margin_right = 16.0
++	style.content_margin_top = 10.0
++	style.content_margin_bottom = 10.0
++	style.shadow_color = Color(0, 0, 0, 0.3)
++	style.shadow_size = 5
++	_peek.add_theme_stylebox_override("panel", style)
++	_peek.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
++	_peek.offset_left = 28.0
++	_peek.offset_top = -120.0
++	_peek.offset_right = 520.0
++	_peek.offset_bottom = -30.0
++	_peek.rotation_degrees = -1.0
++	_peek.visible = false
++	_peek.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	add_child(_peek)
++	_peek_label = _line("", INK)
++	_peek_label.custom_minimum_size = Vector2(460.0, 0.0)
++	_peek.add_child(_peek_label)
++
++func _build_final() -> void:
++	_final = Control.new()
++	_final.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
++	_final.visible = false
++	add_child(_final)
++	var black := ColorRect.new()
++	black.color = Color(0.02, 0.018, 0.016)
++	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
++	_final.add_child(black)
++	var page := _paper(Rect2(0.0, 0.0, 560.0, 300.0))
++	page.set_anchors_preset(Control.PRESET_CENTER)
++	page.offset_left = -280.0
++	page.offset_right = 280.0
++	page.offset_top = -150.0
++	page.offset_bottom = 150.0
++	_final.add_child(page)
++	_final_label = _line("", INK)
++	_final_label.position = Vector2(40.0, 58.0)
++	_final_label.size = Vector2(480.0, 200.0)
++	_final_label.custom_minimum_size = Vector2(480.0, 0.0)
++	page.add_child(_final_label)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/player.gd faz-de-conta/scripts/player.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/player.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/player.gd	2026-10-28 21:05:00.172437866 -0300
+@@ -2,20 +2,61 @@
+ ## First-person blockout controller. No HUD, no combat, no fail state.
+ 
+ @export var speed := 2.6
++@export var crouch_speed := 1.3
+ @export var mouse_sensitivity := 0.0022
+ 
++const STAND_EYE := 1.62
++const CROUCH_EYE := 0.92
++
++signal catalog_requested(target: Area3D)
++signal notebook_requested
++## Once per footfall, at the low point of the head bob.
++signal stepped
++## Every use of the hands, for the house's recording.
++signal acted(verb: StringName, collider: Node)
++
++const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
++
++const EXAMINE_FOV := 45.0
++const KNOCK_REACH := 1.5
++
+ var camera: Camera3D
+ var ray: RayCast3D
++var catalog_ray: RayCast3D
+ var flashlight: SpotLight3D
++var crouched := false
++## While true (notebook open, ending) only Tab is read.
++var input_locked := false
++## Where a fall or a restart puts the player back; set by main.
++var respawn_point := Vector3(1.8, 0.2, 8.3)
+ var _bob_time := 0.0
++var _eye := STAND_EYE
++var _stand_query: CapsuleShape3D
++var _base_fov := 70.0
++var _examine_tween: Tween
+ 
+ func _ready() -> void:
+ 	camera = $Camera3D
+ 	ray = $Camera3D/RayCast3D
+ 	flashlight = $Camera3D/SpotLight3D
++	catalog_ray = get_node_or_null("Camera3D/CatalogRay")
++	_base_fov = camera.fov
+ 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+ 
+ func _unhandled_input(event: InputEvent) -> void:
++	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_TAB:
++		notebook_requested.emit()
++		get_viewport().set_input_as_handled()
++		return
++	# ESC and R work even while locked: after the ending, too.
++	if event is InputEventKey and event.pressed and not event.echo:
++		if event.physical_keycode == KEY_ESCAPE:
++			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
++		elif event.physical_keycode == KEY_R:
++			get_tree().reload_current_scene()
++			return
++	if input_locked:
++		return
+ 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+ 		rotation.y -= event.relative.x * mouse_sensitivity
+ 		camera.rotation.x = clampf(camera.rotation.x - event.relative.y * mouse_sensitivity, -1.45, 1.45)
+@@ -23,14 +64,18 @@
+ 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+ 	if event is InputEventKey and event.pressed and not event.echo:
+ 		match event.physical_keycode:
+-			KEY_ESCAPE:
+-				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+ 			KEY_E:
+ 				_interact()
++			KEY_Q:
++				var target := catalog_target_in_view()
++				if target != null:
++					catalog_requested.emit(target)
++			KEY_B:
++				_knock()
++			KEY_C:
++				set_crouched(not crouched)
+ 			KEY_F:
+ 				flashlight.visible = not flashlight.visible
+-			KEY_R:
+-				get_tree().reload_current_scene()
+ 
+ func _physics_process(delta: float) -> void:
+ 	var input_dir := Vector2.ZERO
+@@ -42,12 +87,12 @@
+ 		input_dir.x -= 1.0
+ 	if Input.is_physical_key_pressed(KEY_D):
+ 		input_dir.x += 1.0
+-	input_dir = input_dir.normalized()
++	input_dir = Vector2.ZERO if input_locked else input_dir.normalized()
+ 
+ 	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+ 	if direction.length() > 0.01:
+-		velocity.x = move_toward(velocity.x, direction.x * speed, 10.0 * delta)
+-		velocity.z = move_toward(velocity.z, direction.z * speed, 10.0 * delta)
++		velocity.x = move_toward(velocity.x, direction.x * _speed(), 10.0 * delta)
++		velocity.z = move_toward(velocity.z, direction.z * _speed(), 10.0 * delta)
+ 	else:
+ 		velocity.x = move_toward(velocity.x, 0.0, 12.0 * delta)
+ 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
+@@ -61,21 +106,108 @@
+ 
+ 	var horizontal := Vector2(velocity.x, velocity.z).length()
+ 	if horizontal > 0.1 and is_on_floor():
++		var before := floori(_bob_time / PI)
+ 		_bob_time += delta * horizontal * 4.0
+-		camera.position.y = 1.62 + sin(_bob_time) * 0.018
++		if floori(_bob_time / PI) != before:
++			stepped.emit()
++		camera.position.y = _eye + sin(_bob_time) * 0.018
+ 	else:
+-		camera.position.y = lerpf(camera.position.y, 1.62, 8.0 * delta)
++		camera.position.y = lerpf(camera.position.y, _eye, 8.0 * delta)
+ 
+ 	if position.y < -5.0:
+-		position = Vector3(2.0, 0.25, 11.2)
++		position = respawn_point
+ 		velocity = Vector3.ZERO
+ 
++func _speed() -> float:
++	return crouch_speed if crouched else speed
++
++## Crouch or stand. Standing up is refused when a standing capsule would hit
++## the world (under the folded F1, for example). Returns the resulting state
++## as requested: true when the request was honoured.
++func set_crouched(on: bool) -> bool:
++	if on == crouched:
++		return true
++	if not on and not _can_stand():
++		return false
++	crouched = on
++	var cs := get_node_or_null("CollisionShape3D") as CollisionShape3D
++	if cs == null:
++		for child in get_children():
++			if child is CollisionShape3D:
++				cs = child
++				break
++	if cs != null and cs.shape is CapsuleShape3D:
++		(cs.shape as CapsuleShape3D).height = 1.0 if on else 1.7
++		cs.position.y = 0.5 if on else 0.85
++	_eye = CROUCH_EYE if on else STAND_EYE
++	return true
++
++func _can_stand() -> bool:
++	if _stand_query == null:
++		_stand_query = CapsuleShape3D.new()
++		_stand_query.radius = 0.28
++		_stand_query.height = 1.6
++	var params := PhysicsShapeQueryParameters3D.new()
++	params.shape = _stand_query
++	params.transform = Transform3D(Basis.IDENTITY, global_position + Vector3(0.0, 0.85, 0.0))
++	params.collision_mask = 1
++	params.collide_with_bodies = true
++	params.collide_with_areas = false
++	params.exclude = [get_rid()]
++	return get_world_3d().direct_space_state.intersect_shape(params, 1).is_empty()
++
+ func _interact() -> void:
+ 	if ray == null or not ray.is_colliding():
+ 		return
+ 	var collider := ray.get_collider()
+ 	if collider != null and collider.has_method("interact"):
+ 		collider.interact()
++		var verb := verb_for(collider)
++		if verb != &"":
++			acted.emit(verb, collider)
++
++## Knuckles on whatever is right in front: a wall, a door, a piece of furniture.
++func _knock() -> void:
++	if ray == null or not ray.is_colliding():
++		return
++	if camera.global_position.distance_to(ray.get_collision_point()) > KNOCK_REACH:
++		return
++	acted.emit(&"bater", ray.get_collider())
++
++## What the house calls this gesture: doors open, other hinges fold.
++static func verb_for(collider: Node) -> StringName:
++	if VERBS.has(collider.name):
++		return VERBS[collider.name]
++	if "rotation_a" in collider:
++		return &"abrir" if String(collider.name).begins_with("Door") else &"dobrar"
++	return &""
++
++## The catalogue spot under the crosshair, unless something solid stands
++## clearly in front of it.
++func catalog_target_in_view() -> Area3D:
++	if catalog_ray == null or not catalog_ray.is_colliding():
++		return null
++	var area := catalog_ray.get_collider() as Area3D
++	if area == null:
++		return null
++	if ray != null and ray.is_colliding():
++		var origin := catalog_ray.global_position
++		var solid := origin.distance_to(ray.get_collision_point())
++		if solid < origin.distance_to(catalog_ray.get_collision_point()) - 0.35:
++			return null
++	return area
++
++## Lean in to look: the view narrows, holds, and comes back.
++func examine() -> void:
++	if camera == null:
++		return
++	if _examine_tween != null and _examine_tween.is_valid():
++		_examine_tween.kill()
++	_examine_tween = create_tween()
++	_examine_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
++	_examine_tween.tween_property(camera, "fov", EXAMINE_FOV, 0.4)
++	_examine_tween.tween_interval(1.2)
++	_examine_tween.tween_property(camera, "fov", _base_fov, 0.4)
+ 
+ func get_look_ray() -> RayCast3D:
+ 	return ray
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/selftest.gd faz-de-conta/scripts/selftest.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/selftest.gd	2026-10-27 19:52:06.252472311 -0300
++++ faz-de-conta/scripts/selftest.gd	2026-10-28 21:05:43.047373907 -0300
+@@ -8,12 +8,50 @@
+ var failures := 0
+ var checks := 0
+ var query_shape: CapsuleShape3D
++var crouch_shape: CapsuleShape3D
+ var player_rid: RID
++var _errors := _ErrorCounter.new()
++
++## A script error mid-run must not end as a green result.
++class _ErrorCounter extends Logger:
++	var count := 0
++	func _log_error(_function: String, _file: String, _line: int, _code: String, _rationale: String,
++			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
++		count += 1
++
++## The walking loop: spawn, playroom, corridor, bedroom, passage, tampo edge.
++const LOOP := [
++	[Vector3(1.8, 0.85, 8.3), Vector3(1.7, 0.85, 7.9), "spawn -> entry"],
++	[Vector3(1.7, 0.85, 9.4), Vector3(1.7, 0.85, 7.9), "front door -> entry"],
++	[Vector3(1.7, 0.85, 7.9), Vector3(1.7, 0.85, 6.4), "entry -> playroom door"],
++	[Vector3(1.7, 0.85, 6.4), Vector3(5.5, 0.85, 6.0), "playroom entry"],
++	[Vector3(5.5, 0.85, 6.0), Vector3(6.0, 0.85, 4.8), "playroom east path"],
++	[Vector3(6.0, 0.85, 4.8), Vector3(5.4, 0.85, 3.8), "playroom around the ball"],
++	[Vector3(5.4, 0.85, 3.8), Vector3(5.4, 0.85, 2.5), "playroom north path"],
++	[Vector3(5.4, 0.85, 2.5), Vector3(8.0, 0.85, 2.5), "playroom -> F3 opening"],
++	[Vector3(8.0, 0.85, 2.5), Vector3(9.4, 0.85, 2.5), "F3 opening -> corridor"],
++	[Vector3(9.4, 0.85, 2.5), Vector3(11.5, 0.85, 2.5), "corridor -> bedroom front"],
++	[Vector3(11.5, 0.85, 2.5), Vector3(11.5, 0.85, 5.0), "bedroom west path"],
++	[Vector3(11.5, 0.85, 5.0), Vector3(9.4, 0.85, 5.0), "bedroom back -> corridor"],
++	[Vector3(9.4, 0.85, 5.0), Vector3(9.4, 0.85, 7.9), "corridor south"],
++	[Vector3(9.4, 0.85, 7.9), Vector3(10.6, 0.85, 7.95), "corridor -> figure-room threshold"],
++	[Vector3(9.4, 0.85, 8.3), Vector3(7.0, 0.85, 8.3), "corridor -> passage"],
++	[Vector3(7.0, 0.85, 8.3), Vector3(3.2, 0.85, 8.3), "passage -> entry"],
++	[Vector3(3.2, 0.85, 8.3), Vector3(3.2, 0.85, 7.9), "entry east turn"],
++	[Vector3(3.2, 0.85, 7.9), Vector3(1.7, 0.85, 7.9), "entry north of bench"],
++	[Vector3(1.7, 0.85, 7.9), Vector3(1.7, 0.85, 9.4), "entry -> front door"],
++	[Vector3(1.7, 0.85, 9.4), Vector3(2.0, 0.85, 12.0), "front door -> tampo edge"],
++]
+ 
+ func _ready() -> void:
++	OS.add_logger(_errors)
++	main.autonomous = false
+ 	query_shape = CapsuleShape3D.new()
+ 	query_shape.radius = 0.28
+ 	query_shape.height = 1.6
++	crouch_shape = CapsuleShape3D.new()
++	crouch_shape.radius = 0.28
++	crouch_shape.height = 1.0
+ 	player_rid = main.player.get_rid()
+ 	call_deferred("_run")
+ 
+@@ -49,27 +87,20 @@
+ 	_expect_clear(Vector3(10.5, 0.85, 5.0), "open bedroom back door is walkable")
+ 	_expect_clear(Vector3(10.5, 0.85, 8.0), "open figure-room door is walkable")
+ 
++	print("SELFTEST: space")
++	_record(main.player.global_position.distance_to(main.SPAWN) < 0.3, "player spawns at the entry", str(main.player.global_position))
++	_record(main.get_node_or_null("ExitEdge") is Area3D, "tampo edge trigger exists", "")
++	_record(main.get_node_or_null("Atelier") == null and main.get_node_or_null("Tampo") != null, "atelier became the tampo", "")
++	_expect_clear(Vector3(1.8, 0.85, 8.3), "spawn point is clear")
++	_expect_blocked(Vector3(3.1, 0.85, 8.88), "entry clock is solid")
++	_record(main.get_node_or_null("EntryClock") != null and main.get_node("EntryClock").get_prompt() == "dar corda", "entry clock can be wound", "")
++	_record(main.visit.act == main.VisitState.Act.CHEGADA, "visit starts at arrival", "")
++	var verbs := [main.player.verb_for(main.get_node("DoorFront")), main.player.verb_for(main.get_node("F1")), main.player.verb_for(main.get_node("EntryClock")), main.player.verb_for(main.get_node("Doll"))]
++	_record(verbs == [&"abrir", &"dobrar", &"corda", &"boneco"], "gestures have the house's verbs", str(verbs))
++	_record(AudioServer.get_bus_index("Casa") >= 0 and AudioServer.get_bus_index("Mundo") >= 0, "audio buses exist", "")
++
+ 	print("SELFTEST: loop clearance")
+-	_check_segment(Vector3(2.0, 0.85, 11.2), Vector3(1.7, 0.85, 9.4), "atelier -> front door")
+-	_check_segment(Vector3(1.7, 0.85, 9.4), Vector3(1.7, 0.85, 7.9), "front door -> entry")
+-	_check_segment(Vector3(1.7, 0.85, 7.9), Vector3(1.7, 0.85, 6.4), "entry -> playroom door")
+-	_check_segment(Vector3(1.7, 0.85, 6.4), Vector3(5.5, 0.85, 6.0), "playroom entry")
+-	_check_segment(Vector3(5.5, 0.85, 6.0), Vector3(6.0, 0.85, 4.8), "playroom east path")
+-	_check_segment(Vector3(6.0, 0.85, 4.8), Vector3(5.4, 0.85, 3.8), "playroom around the ball")
+-	_check_segment(Vector3(5.4, 0.85, 3.8), Vector3(5.4, 0.85, 2.5), "playroom north path")
+-	_check_segment(Vector3(5.4, 0.85, 2.5), Vector3(8.0, 0.85, 2.5), "playroom -> F3 opening")
+-	_check_segment(Vector3(8.0, 0.85, 2.5), Vector3(9.4, 0.85, 2.5), "F3 opening -> corridor")
+-	_check_segment(Vector3(9.4, 0.85, 2.5), Vector3(11.5, 0.85, 2.5), "corridor -> bedroom front")
+-	_check_segment(Vector3(11.5, 0.85, 2.5), Vector3(11.5, 0.85, 5.0), "bedroom west path")
+-	_check_segment(Vector3(11.5, 0.85, 5.0), Vector3(9.4, 0.85, 5.0), "bedroom back -> corridor")
+-	_check_segment(Vector3(9.4, 0.85, 5.0), Vector3(9.4, 0.85, 7.9), "corridor south")
+-	_check_segment(Vector3(9.4, 0.85, 7.9), Vector3(10.6, 0.85, 7.95), "corridor -> figure-room threshold")
+-	_check_segment(Vector3(9.4, 0.85, 8.3), Vector3(7.0, 0.85, 8.3), "corridor -> passage")
+-	_check_segment(Vector3(7.0, 0.85, 8.3), Vector3(3.2, 0.85, 8.3), "passage -> entry")
+-	_check_segment(Vector3(3.2, 0.85, 8.3), Vector3(3.2, 0.85, 7.9), "entry east turn")
+-	_check_segment(Vector3(3.2, 0.85, 7.9), Vector3(1.7, 0.85, 7.9), "entry north of bench")
+-	_check_segment(Vector3(1.7, 0.85, 7.9), Vector3(1.7, 0.85, 9.4), "entry -> front door")
+-	_check_segment(Vector3(1.7, 0.85, 9.4), Vector3(2.0, 0.85, 10.6), "front door -> atelier")
++	_loop_segments("")
+ 
+ 	print("SELFTEST: folds")
+ 	_expect_clear(Vector3(1.5, 0.85, 3.5), "F1 upright leaves the playroom floor clear")
+@@ -93,6 +124,103 @@
+ 	await _toggle("F3")
+ 	_expect_clear(Vector3(8.4, 0.85, 2.5), "lowered F3 reopens the playroom doorway")
+ 
++	print("SELFTEST: cabana")
++	await _toggle("F1")
++	_expect_blocked(Vector3(1.5, 0.85, 3.5), "folded F1 still blocks a standing player")
++	_expect_clear_shape(Vector3(1.5, 0.52, 3.5), crouch_shape, "crouched player fits inside the cabana")
++	_check_segment_shape(Vector3(2.6, 0.52, 3.5), Vector3(1.5, 0.52, 3.5), crouch_shape, "crouched path into the cabana")
++	var saved: Vector3 = main.player.global_position
++	main.player.global_position = Vector3(1.5, 0.0, 3.5)
++	main.player.set_crouched(true)
++	await get_tree().physics_frame
++	_record(not main.player.set_crouched(false), "cannot stand up under folded F1", "")
++	_record(main.player.crouched, "player stays crouched under folded F1", "")
++	_node("F1").interact()
++	await get_tree().create_timer(1.3).timeout
++	_expect_at("F1", true, "F1 refuses to move with the player inside the cabana")
++	main.player.global_position = saved
++	await get_tree().physics_frame
++	_record(main.player.set_crouched(false), "player stands up outside the cabana", "")
++	await _toggle("F1")
++
++	print("SELFTEST: catalog")
++	var targets := get_tree().get_nodes_in_group("catalog_target")
++	for tg in targets:
++		_record(tg is Area3D and tg.collision_layer == 2, "catalog target %s is an area on layer 2" % tg.item_id, "")
++	_record(targets.size() == main.CatalogData.ITEMS.size() - 1, "every item but the cabana page has a target", str(targets.size()))
++	var saved_view: Vector3 = main.player.global_position
++	main.player.global_position = Vector3(3.1, 0.2, 7.9)
++	main.player.rotation.y = PI
++	main.player.camera.rotation.x = deg_to_rad(-15.0)
++	await get_tree().physics_frame
++	main.player.ray.force_raycast_update()
++	main.player.catalog_ray.force_raycast_update()
++	var seen: Area3D = main.player.catalog_target_in_view()
++	_record(seen != null and seen.item_id == &"relogio_entrada", "looking at the entry clock offers it to Q", str(seen))
++	main.player.global_position = saved_view
++	main.player.rotation.y = 0.0
++	main.player.camera.rotation.x = 0.0
++
++	print("SELFTEST: notebook")
++	main.notebook.refresh(main.catalog)
++	main.notebook.open()
++	var text: String = main.notebook.page_text()
++	_record(text.contains("Item 214 —"), "notebook shows the opening entry", "")
++	_record(text.contains("Item 215 —"), "notebook shows numbered blank lines ahead", "")
++	var counter := RegEx.create_from_string("\\d+\\s*(/|de)\\s*\\d+")
++	_record(counter.search(text) == null, "notebook has no x-of-y counter", text)
++	_record(main.player.input_locked, "notebook locks player input", "")
++	main.notebook.close()
++	_record(not main.player.input_locked, "closing the notebook unlocks input", "")
++
++	print("SELFTEST: house mirror")
++	var f1_before: bool = _node("F1").is_at_b()
++	var f3_before: bool = _node("F3").is_at_b()
++	_record(main.house_mirror.respond({"verb": &"dobrar", "count": 1, "invite": false}), "house folds back from far away", "")
++	await get_tree().create_timer(1.3).timeout
++	_record(_node("F2").is_at_b() or _node("F4").is_at_b(), "house used F2 or F4", "")
++	_record(_node("F1").is_at_b() == f1_before and _node("F3").is_at_b() == f3_before, "house never touches F1 or F3", "")
++	for n in ["F2", "F4"]:
++		if _node(n).is_at_b():
++			await _toggle(n)
++	var saved_m: Vector3 = main.player.global_position
++	main.player.global_position = Vector3(8.0, 0.2, 2.6)
++	await get_tree().physics_frame
++	main.house_mirror.respond({"verb": &"dobrar", "count": 1, "invite": false})
++	await get_tree().create_timer(1.3).timeout
++	_record(not _node("F2").is_at_b() and not _node("F4").is_at_b(), "house does not fold within 3 m of the player", "")
++	main.player.global_position = saved_m
++	_record((main.player.get_node("Camera3D").cull_mask & (1 << 10)) == 0, "player camera does not see the reflection layer", "")
++
++	print("SELFTEST: 03:33")
++	_feed_loop()
++	main.hour_event.begin()
++	await get_tree().create_timer(0.5).timeout
++	_record(main.hour_event.echoes.size() > 0, "echoes appear at 03:33", "")
++	_record(main.get_node("Echoes").find_children("*", "CollisionObject3D", true, false).is_empty(), "echoes have no collision", "")
++	_expect_at("DoorFront", true, "front door stays open during 03:33")
++	_record(main.find_children("CrackThing*", "", true, false).size() == 3, "three things come out of the cracks", "")
++	_record(main.find_children("CrackThing*", "", true, false).all(func(n): return n.find_children("*", "CollisionObject3D", true, false).is_empty()), "crack things have no collision", "")
++	_check_segment(Vector3(1.8, 0.85, 8.3), Vector3(1.7, 0.85, 9.4), "spawn -> front door during 03:33")
++	_check_segment(Vector3(1.7, 0.85, 9.4), Vector3(2.0, 0.85, 12.0), "front door -> tampo edge during 03:33")
++	main.hour_event.end()
++	_record(main.hour_event.echoes.all(func(e): return e.is_frozen()), "winding freezes the echoes", "")
++	var duplo: Array = main.catalog.entries.filter(func(e): return e.author == &"duplo")
++	_record(duplo.size() == 3, "the double wrote three entries", str(duplo.size()))
++	_record(main.catalog.entries[-1].number == main.catalog.entries[-2].number + 1, "double entries continue the numbering", "")
++	_record(_node("Doll").global_position.distance_to(Vector3(0.7, 0.45, 8.5)) < 0.3, "the double sits on the entry bench", "")
++	_loop_segments(" with frozen echoes")
++
++	print("SELFTEST: truth props")
++	_record(main.find_child("PocketWatchA", true, false) != null and main.find_child("PocketWatchB", true, false) != null, "two Inácio figures carry the same pocket watch", "")
++	_record(main.find_child("CatalogerLetter", true, false) != null, "the cataloger figure holds the letter", "")
++	_record(main.catalog.can_catalog(&"pagina_cabana"), "cabana page appears after 03:33", "")
++	var targets2 := get_tree().get_nodes_in_group("catalog_target")
++	_record(targets2.size() == main.CatalogData.ITEMS.size(), "every catalog item now has a target", str(targets2.size()))
++	var giant := main.get_node_or_null("GiantElias")
++	_record(giant != null and giant.visible, "Elias's giant body is seen after 03:33", "")
++	_record(giant != null and giant.find_children("*", "CollisionObject3D", true, false).is_empty(), "giant body has no collision", "")
++
+ 	print("SELFTEST: final state")
+ 	_expect_at("DoorFront", true, "front door remains open")
+ 	_expect_at("DoorPlayroom", true, "playroom door remains open")
+@@ -101,9 +229,61 @@
+ 	_expect_at("F3", false, "F3 ends flat")
+ 	_expect_at("F4", false, "F4 ends closed")
+ 
++	print("SELFTEST: exit")
++	_expect_at("DoorFront", true, "front door is still open before leaving")
++	main.player.set_physics_process(true)
++	main.player.global_position = Vector3(2.0, 0.2, 12.2)
++	for i in 4:
++		await get_tree().physics_frame
++	main.player.set_physics_process(false)
++	_record(main.ended and main.ending_outcome == &"incompleto", "reaching the tampo edge ends the visit", str(main.ending_outcome))
++	await get_tree().create_timer(1.2).timeout
++	_record(main.ending.final_camera.current, "final camera takes over", "")
++	await get_tree().create_timer(3.2).timeout
++	_record(main.notebook._final.visible, "the last entry is shown on paper", "")
++	_record(main.player.input_locked, "the player stays still after the last entry", "")
++	main.player.notebook_requested.emit()
++	main.player.notebook_requested.emit()
++	_record(main.player.input_locked and not main.notebook.is_open(), "the notebook does not reopen over the last entry", "")
++
++	print("SELFTEST: what stays")
++	var fig := main.get_node_or_null("NewFigure")
++	_record(fig != null, "a new figure stays in the maquete", "")
++	if fig != null:
++		var head: Vector3 = fig.global_position + Vector3(0, 0.9, 0)
++		var cam: Camera3D = main.ending.final_camera
++		_record(fig.find_children("*", "CollisionObject3D", true, false).is_empty(), "new figure has no collision", "")
++		_record(fig.global_position.distance_to(Vector3(main.SPAWN.x, 0.0, main.SPAWN.z)) < 0.2, "new figure sits where Elias arrived", "")
++		_record(cam.is_position_in_frustum(head), "final camera frames the new figure", "")
++		var q := PhysicsRayQueryParameters3D.create(cam.global_position, head, 1)
++		_record(main.get_world_3d().direct_space_state.intersect_ray(q).is_empty(), "new figure is seen through the redoma and the open door", "")
++		_record(not main.get_node("GiantElias").visible, "the giant body is gone: the camera is him", "")
++		_record(main.hour_event.echoes.all(func(e): return e.is_frozen()), "leaving early keeps the echoes as they were", "")
++
++	_record(_errors.count == 0, "no script errors during the selftest", "%d errors" % _errors.count)
+ 	print("SELFTEST RESULT: %d checks, %d failures" % [checks, failures])
+ 	get_tree().quit(0 if failures == 0 else 1)
+ 
++func _loop_segments(suffix: String) -> void:
++	for seg in LOOP:
++		_check_segment(seg[0], seg[1], seg[2] + suffix)
++
++## The whole loop walked at 1.4 m/s, then 10 s crouched in the cabana.
++func _feed_loop() -> void:
++	var rec = main.recorder
++	var dt := 0.1
++	var foot := Vector3(0.0, 0.65, 0.0)
++	for seg in LOOP:
++		var a: Vector3 = seg[0] - foot
++		var b: Vector3 = seg[1] - foot
++		var dir := b - a
++		var yaw := atan2(-dir.x, -dir.z)
++		var steps := maxi(1, int(ceil(a.distance_to(b) / (1.4 * dt))))
++		for i in range(steps + 1):
++			rec.update(dt, a.lerp(b, float(i) / float(steps)), yaw, 0.0, false)
++	for i in 100:
++		rec.update(dt, Vector3(1.5, 0.0, 3.5), PI * 0.5, -0.2, true)
++
+ func _toggle(node_name: String) -> void:
+ 	var node := _node(node_name)
+ 	if node == null:
+@@ -120,7 +300,10 @@
+ 	_record(actual == expected, label, "expected at_b=%s, got %s" % [str(expected), str(actual)])
+ 
+ func _expect_clear(pos: Vector3, label: String) -> void:
+-	var hits := _hits(pos)
++	_expect_clear_shape(pos, query_shape, label)
++
++func _expect_clear_shape(pos: Vector3, shape: Shape3D, label: String) -> void:
++	var hits := _hits_shape(pos, shape)
+ 	_record(hits.is_empty(), label, "blocked by " + _hit_names(hits))
+ 
+ func _expect_blocked(pos: Vector3, label: String) -> void:
+@@ -128,18 +311,24 @@
+ 	_record(not hits.is_empty(), label, "expected a blocker at " + str(pos))
+ 
+ func _check_segment(a: Vector3, b: Vector3, label: String) -> void:
++	_check_segment_shape(a, b, query_shape, label)
++
++func _check_segment_shape(a: Vector3, b: Vector3, shape: Shape3D, label: String) -> void:
+ 	var steps: int = maxi(1, int(ceil(a.distance_to(b) / 0.25)))
+ 	for i in range(steps + 1):
+ 		var pos := a.lerp(b, float(i) / float(steps))
+-		var hits := _hits(pos)
++		var hits := _hits_shape(pos, shape)
+ 		if not hits.is_empty():
+ 			_record(false, label, "blocked at %s by %s" % [str(pos), _hit_names(hits)])
+ 			return
+ 	_record(true, label, "")
+ 
+ func _hits(pos: Vector3) -> Array:
++	return _hits_shape(pos, query_shape)
++
++func _hits_shape(pos: Vector3, shape: Shape3D) -> Array:
+ 	var params := PhysicsShapeQueryParameters3D.new()
+-	params.shape = query_shape
++	params.shape = shape
+ 	params.transform = Transform3D(Basis.IDENTITY, pos)
+ 	params.collision_mask = 1
+ 	params.collide_with_bodies = true
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/sfx_bank.gd faz-de-conta/scripts/sfx_bank.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/sfx_bank.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/sfx_bank.gd	2026-10-28 20:34:13.717393823 -0300
+@@ -0,0 +1,136 @@
++extends Node
++## Prototype sound, synthesised at load: sine, seeded noise and exponential
++## envelopes. Nothing is ever loud; the house is heard, not announced.
++## Two layers: "Mundo" (rain, breath; never muted) and "Casa" (the house).
++
++const KINDS := [&"tick", &"click", &"knock", &"step", &"pencil", &"fold", &"rain", &"hum", &"breath"]
++const LOOPED := [&"rain", &"hum", &"breath"]
++const RATE := 22050
++const POOL_SIZE := 12
++const PENCIL_PATTERN := [0.0, 0.18, 0.31, 0.55, 0.7]
++
++## Headless runs (tests) have only a dummy audio driver: play nothing, so no
++## playback is left behind at quit.
++var silent := DisplayServer.get_name() == "headless"
++var _streams := {}
++var _pool: Array[AudioStreamPlayer3D] = []
++var _next := 0
++
++static func make(kind: StringName, seed: int = 7) -> AudioStreamWAV:
++	var rng := RandomNumberGenerator.new()
++	rng.seed = seed
++	var samples := PackedFloat32Array()
++	match kind:
++		&"tick":
++			samples = _render(0.06, func(t: float) -> float:
++				return (sin(TAU * 2400.0 * t) * 0.6 + rng.randf_range(-1.0, 1.0) * 0.4) * exp(-t * 90.0) * 0.4)
++		&"click":
++			samples = _render(0.04, func(t: float) -> float:
++				return rng.randf_range(-1.0, 1.0) * exp(-t * 140.0) * 0.35)
++		&"knock":
++			samples = _render(0.22, func(t: float) -> float:
++				var body := sin(TAU * 140.0 * t) + sin(TAU * 230.0 * t) * 0.5
++				return (body * 0.7 + rng.randf_range(-1.0, 1.0) * 0.3) * exp(-t * 28.0) * 0.32)
++		&"step":
++			samples = _render(0.12, func(t: float) -> float:
++				return (rng.randf_range(-1.0, 1.0) * 0.6 + sin(TAU * 90.0 * t) * 0.4) * exp(-t * 40.0) * 0.22)
++		&"pencil":
++			samples = _render(0.09, func(t: float) -> float:
++				var grain := rng.randf_range(-1.0, 1.0)
++				return grain * sin(PI * t / 0.09) * 0.16)
++		&"fold":
++			samples = _render(0.35, func(t: float) -> float:
++				var creak := sin(TAU * (60.0 + 40.0 * t) * t)
++				return (rng.randf_range(-1.0, 1.0) * 0.5 + creak * 0.5) * exp(-t * 9.0) * 0.25)
++		&"rain":
++			var low := 0.0
++			samples = _render(2.0, func(t: float) -> float:
++				low = lerpf(low, rng.randf_range(-1.0, 1.0), 0.25)
++				var drop := rng.randf_range(-1.0, 1.0) if rng.randf() < 0.004 else 0.0
++				return low * 0.18 + drop * 0.12)
++		&"hum":
++			samples = _render(2.0, func(t: float) -> float:
++				return (sin(TAU * 55.0 * t) * 0.7 + sin(TAU * 110.0 * t) * 0.3) * 0.12)
++		&"breath":
++			var air := 0.0
++			samples = _render(4.0, func(t: float) -> float:
++				air = lerpf(air, rng.randf_range(-1.0, 1.0), 0.08)
++				var swell := pow(sin(PI * fmod(t, 4.0) / 4.0), 2.0)
++				return air * swell * 0.3)
++		_:
++			push_error("sfx_bank: unknown kind %s" % kind)
++			return null
++	return _to_wav(samples, kind in LOOPED)
++
++static func _render(seconds: float, f: Callable) -> PackedFloat32Array:
++	var n := int(seconds * RATE)
++	var out := PackedFloat32Array()
++	out.resize(n)
++	for i in n:
++		out[i] = f.call(float(i) / RATE)
++	return out
++
++static func _to_wav(samples: PackedFloat32Array, loop: bool) -> AudioStreamWAV:
++	var data := PackedByteArray()
++	data.resize(samples.size() * 2)
++	for i in samples.size():
++		data.encode_s16(i * 2, int(clampf(samples[i], -0.5, 0.5) * 32767.0))
++	var w := AudioStreamWAV.new()
++	w.format = AudioStreamWAV.FORMAT_16_BITS
++	w.mix_rate = RATE
++	w.stereo = false
++	w.data = data
++	if loop:
++		w.loop_mode = AudioStreamWAV.LOOP_FORWARD
++		w.loop_begin = 0
++		w.loop_end = samples.size()
++	return w
++
++func _ready() -> void:
++	ensure_buses()
++	for k in KINDS:
++		_streams[k] = make(k)
++	for i in POOL_SIZE:
++		var p := AudioStreamPlayer3D.new()
++		p.unit_size = 4.0
++		p.max_distance = 30.0
++		add_child(p)
++		_pool.append(p)
++
++func stream(kind: StringName) -> AudioStreamWAV:
++	return _streams.get(kind)
++
++func ensure_buses() -> void:
++	for bus in [&"Casa", &"Mundo"]:
++		if AudioServer.get_bus_index(bus) >= 0:
++			continue
++		var idx := AudioServer.bus_count
++		AudioServer.add_bus(idx)
++		AudioServer.set_bus_name(idx, bus)
++		AudioServer.set_bus_send(idx, &"Master")
++
++func play_at(kind: StringName, pos: Vector3, bus: StringName = &"Casa", volume_db := 0.0) -> void:
++	if silent or not _streams.has(kind) or _pool.is_empty():
++		return
++	var p := _pool[_next]
++	_next = (_next + 1) % _pool.size()
++	p.stop()
++	p.stream = _streams[kind]
++	p.bus = bus
++	p.volume_db = volume_db
++	p.pitch_scale = randf_range(0.94, 1.06)
++	p.global_position = pos
++	p.play()
++
++## Five strokes of a pencil. The double's writing (Task 12) uses the same rhythm.
++func play_pencil_pattern(pos: Vector3) -> void:
++	for delay in PENCIL_PATTERN:
++		if delay <= 0.0:
++			play_at(&"pencil", pos)
++		else:
++			get_tree().create_timer(delay).timeout.connect(play_at.bind(&"pencil", pos))
++
++func set_casa_muted(muted: bool) -> void:
++	var idx := AudioServer.get_bus_index(&"Casa")
++	if idx >= 0:
++		AudioServer.set_bus_mute(idx, muted)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/visit_state.gd faz-de-conta/scripts/visit_state.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/visit_state.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/visit_state.gd	2026-10-28 20:29:38.714875177 -0300
+@@ -0,0 +1,87 @@
++extends RefCounted
++## The visit as acts, driving the entrance clock. The 03:33 gate opens on the
++## doll plus a few pieces, or on time; winding only postpones it, and it
++## happens once. Leaving is always possible and only reads where the visit is.
++
++enum Act { CHEGADA, BRINCAR, DUPLO, HORA, DEPOIS, ESCOLHA, FIM }
++
++const MIN_ITEMS_FOR_HORA := 5
++const HURRY_SPRING := 20.0
++const MAX_PRE_HORA := 1200.0
++const HARD_LIMIT := 1380.0
++const ESCOLHA_SPRING := 30.0
++const DRAIN_CALM := 0.45
++const DRAIN_DUPLO := 0.9
++
++var act: int = Act.CHEGADA
++var elapsed := 0.0
++var wound_since_escolha := false
++var clock
++var catalog
++var _gate_open := false
++
++func _init(clock_model, catalog_model) -> void:
++	clock = clock_model
++	catalog = catalog_model
++	clock.drain_rate = DRAIN_CALM
++
++## Advance the visit. Returns &"hora_started" on the tick the clock stops.
++func update(dt: float, in_bedroom: bool) -> StringName:
++	if act == Act.FIM:
++		return &""
++	elapsed += dt
++	if in_bedroom and act < Act.DUPLO:
++		act = Act.DUPLO
++	clock.drain_rate = DRAIN_DUPLO if act == Act.DUPLO else DRAIN_CALM
++	if act < Act.HORA:
++		_check_gate()
++		if elapsed >= HARD_LIMIT:
++			clock.force_stop()
++			act = Act.HORA
++			return &"hora_started"
++	var stopped: bool = clock.tick(dt)
++	if stopped and act < Act.HORA:
++		act = Act.HORA
++		return &"hora_started"
++	return &""
++
++func on_cataloged(item: StringName) -> void:
++	if act == Act.CHEGADA:
++		act = Act.BRINCAR
++	if item == &"pagina_cabana" and act == Act.DEPOIS:
++		act = Act.ESCOLHA
++		clock.clamp_spring(ESCOLHA_SPRING)
++	if act < Act.HORA:
++		_check_gate()
++
++## Call after the clock was wound. Returns &"hora_ended" when it ends the 03:33.
++func on_wind() -> StringName:
++	if act == Act.HORA:
++		act = Act.DEPOIS
++		clock.can_stop = false
++		return &"hora_ended"
++	if act == Act.ESCOLHA:
++		wound_since_escolha = true
++	return &""
++
++## The tampo edge. Only the first call counts.
++func on_exit() -> StringName:
++	if act == Act.FIM:
++		return &""
++	var before: int = act
++	act = Act.FIM
++	if before < Act.ESCOLHA:
++		return &"incompleto"
++	return &"corda" if wound_since_escolha else &"parar"
++
++func recording_enabled() -> bool:
++	return act != Act.HORA and act != Act.FIM
++
++func _check_gate() -> void:
++	if _gate_open:
++		return
++	var by_catalog: bool = catalog.has(&"boneco") and catalog.count_elias_items() >= MIN_ITEMS_FOR_HORA
++	if by_catalog or elapsed >= MAX_PRE_HORA:
++		_gate_open = true
++		clock.can_stop = true
++		clock.clamp_spring(HURRY_SPRING)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/wind_clock_model.gd faz-de-conta/scripts/wind_clock_model.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/scripts/wind_clock_model.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/scripts/wind_clock_model.gd	2026-10-27 19:49:25.976545287 -0300
+@@ -0,0 +1,59 @@
++extends RefCounted
++## The entrance clock as pure state. The spring runs down one unit per second
++## (times drain_rate); each wind gives back less than the one before. Until
++## can_stop is set the clock stalls just short of stopping.
++
++const SPRING_MAX := 600.0
++const FIRST_WIND := 180.0
++const WIND_FACTOR := 0.7
++const WIND_FLOOR := 15.0
++const STALL_SPRING := 5.0
++
++var spring := 600.0
++var winds := 0
++var drain_rate := 1.0
++var can_stop := false
++var _stopped := false
++
++## Advance by dt seconds. Returns true only on the tick the clock stops.
++func tick(dt: float) -> bool:
++	if _stopped:
++		return false
++	var next := spring - dt * drain_rate
++	if not can_stop:
++		spring = maxf(next, minf(spring, STALL_SPRING))
++		return false
++	spring = maxf(next, 0.0)
++	if spring <= 0.0:
++		_stopped = true
++		return true
++	return false
++
++## Wind once. Returns how much spring went in. A stopped clock runs again.
++func wind() -> float:
++	var amount := maxf(WIND_FLOOR, FIRST_WIND * pow(WIND_FACTOR, winds))
++	var added := minf(amount, SPRING_MAX - spring)
++	spring += added
++	winds += 1
++	if spring > 0.0:
++		_stopped = false
++	return added
++
++func clamp_spring(max_value: float) -> void:
++	spring = minf(spring, max_value)
++
++func force_stop() -> void:
++	spring = 0.0
++	_stopped = true
++
++func is_stopped() -> bool:
++	return _stopped
++
++## Minutes past three: 0 = 03:00, 33 = 03:33.
++func display_minutes() -> float:
++	return (1.0 - spring / SPRING_MAX) * 33.0
++
++## The audible tick drifts late as the spring runs out, while the pendulum
++## animation stays on a fixed 1.0 s.
++func audio_tick_period() -> float:
++	return 1.0 + 0.25 * (1.0 - spring / SPRING_MAX)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/run_unit.gd faz-de-conta/tests/run_unit.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/run_unit.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/run_unit.gd	2026-10-28 20:36:34.414676219 -0300
+@@ -0,0 +1,62 @@
++extends SceneTree
++## Unit harness for the pure models. Run with:
++##   godot --headless --path . -s res://tests/run_unit.gd
++## Loads every res://tests/test_*.gd and calls each test_* method with this
++## runner as the only argument.
++
++var checks := 0
++var failures := 0
++var _errors := _ErrorCounter.new()
++
++## A script error aborts the test method silently; count it as a failure.
++class _ErrorCounter extends Logger:
++	var count := 0
++	func _log_error(_function: String, _file: String, _line: int, _code: String, _rationale: String,
++			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
++		count += 1
++
++func _init() -> void:
++	OS.add_logger(_errors)
++	var dir := DirAccess.open("res://tests")
++	var files: Array[String] = []
++	if dir != null:
++		for f in dir.get_files():
++			if f.begins_with("test_") and f.ends_with(".gd"):
++				files.append(f)
++	files.sort()
++	for f in files:
++		var path := "res://tests/" + f
++		var script = load(path)
++		if script == null or not script.can_instantiate():
++			_fail("could not load %s" % path)
++			continue
++		var suite = script.new()
++		for m in script.get_script_method_list():
++			var method: String = m["name"]
++			if method.begins_with("test_"):
++				print("UNIT: %s::%s" % [f, method])
++				var errors_before := _errors.count
++				suite.call(method, self)
++				if _errors.count > errors_before:
++					_fail("%s::%s raised a script error" % [f, method])
++	print("UNIT RESULT: %d checks, %d failures" % [checks, failures])
++	quit(1 if failures > 0 else 0)
++
++func ok(cond: bool, label: String) -> void:
++	checks += 1
++	if not cond:
++		_fail(label)
++
++func eq(actual, expected, label: String) -> void:
++	checks += 1
++	if actual != expected:
++		_fail("%s (got %s, expected %s)" % [label, str(actual), str(expected)])
++
++func near(actual: float, expected: float, eps: float, label: String) -> void:
++	checks += 1
++	if absf(actual - expected) > eps:
++		_fail("%s (got %f, expected %f)" % [label, actual, expected])
++
++func _fail(label: String) -> void:
++	failures += 1
++	print("UNIT FAIL ", label)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_catalog.gd faz-de-conta/tests/test_catalog.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_catalog.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_catalog.gd	2026-10-28 20:18:32.650156298 -0300
+@@ -0,0 +1,43 @@
++extends RefCounted
++const Catalog = preload("res://scripts/catalog.gd")
++const Data = preload("res://scripts/catalog_data.gd")
++
++func test_opening_entry(t) -> void:
++	var c = Catalog.new()
++	t.eq(Catalog.format(c.entries[0]), "Item 214 — maquete de casa sob redoma, relógio no telhado, parado. Dei corda para testar o mecanismo.", "opening entry text")
++	t.eq(c.next_number(), 215, "next is 215")
++
++func test_sequential_and_no_repeat(t) -> void:
++	var c = Catalog.new()
++	t.eq(c.catalog(&"bola").get("number"), 215, "first catalog is 215")
++	t.ok(c.catalog(&"bola").is_empty(), "same item twice is refused")
++	t.eq(c.catalog(&"vela").get("number"), 216, "numbering continues")
++
++func test_gates(t) -> void:
++	var c = Catalog.new()
++	t.ok(not c.can_catalog(&"cabana"), "cabana needs the fold")
++	t.ok(not c.can_catalog(&"boneco"), "doll needs to be turned")
++	t.ok(not c.can_catalog(&"pagina_cabana"), "page needs the 03:33")
++	c.set_flag(&"f1_folded", true)
++	t.ok(c.can_catalog(&"cabana"), "fold opens cabana")
++
++func test_pages_follow_items(t) -> void:
++	var c = Catalog.new()
++	c.catalog(&"relogio_entrada")
++	t.ok(c.pages.has(&"p1"), "entry clock reveals page 1")
++
++func test_double_entries(t) -> void:
++	var c = Catalog.new()
++	c.catalog(&"bola")
++	c.add_double_entries(["catalogador. A mão direita gasta de um lado só."])
++	t.eq(c.entries[-1].get("author"), &"duplo", "author is the double")
++	t.eq(c.entries[-1].get("number"), 216, "double continues numbering")
++	t.eq(c.count_elias_items(), 1, "double and 214 do not count")
++
++func test_data_integrity(t) -> void:
++	for id in Data.ITEMS:
++		var item: Dictionary = Data.ITEMS[id]
++		t.ok(String(item.text) != "", "%s has text" % id)
++		t.ok(item.page == &"" or Data.PAGES.has(item.page), "%s page exists" % id)
++	for p in Data.PAGES:
++		t.ok(String(Data.PAGES[p]).split("\n").size() <= 4, "%s has at most 4 lines" % p)
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_crack_placement.gd faz-de-conta/tests/test_crack_placement.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_crack_placement.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_crack_placement.gd	2026-10-28 20:52:10.553505869 -0300
+@@ -0,0 +1,18 @@
++extends RefCounted
++const Crack = preload("res://scripts/crack_placement.gd")
++var A: Array[Vector3] = [Vector3(0.3, 0, 0.3), Vector3(8.1, 0, 0.3), Vector3(2.0, 0, 8.6), Vector3(15.1, 0, 5.3)]
++var never := func(_p): return false
++
++func test_respects_distances(t) -> void:
++	var i: int = Crack.pick(A, Vector3(1.0, 0, 1.0), -1, never)
++	t.eq(i, 3, "farthest valid anchor")
++	t.ok(A[i].distance_to(Vector3(1, 0, 1)) >= 4.0, "never near the player")
++
++func test_never_near_door_or_current_or_seen(t) -> void:
++	t.ok(Crack.pick(A, Vector3(14.0, 0, 5.0), -1, never) != 2, "never next to the front door")
++	t.ok(Crack.pick(A, Vector3(1.0, 0, 1.0), 3, never) != 3, "always somewhere else")
++	var seen_far := func(p): return p.x > 10.0
++	t.ok(Crack.pick(A, Vector3(1.0, 0, 1.0), -1, seen_far) != 3, "never where the player is looking")
++
++func test_hides_when_nothing_fits(t) -> void:
++	t.eq(Crack.pick(A, Vector3(4.0, 0, 3.0), -1, func(_p): return true), -1, "hide instead of coming close")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_double_writer.gd faz-de-conta/tests/test_double_writer.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_double_writer.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_double_writer.gd	2026-10-28 20:53:49.570468408 -0300
+@@ -0,0 +1,19 @@
++extends RefCounted
++const Writer = preload("res://scripts/double_writer.gd")
++func _stats(c := 0.0, s := 0.0, a := {}) -> Dictionary:
++	return {"crouched_s": c, "still_s": s, "meters": 100.0, "actions": a}
++
++func test_first_and_last_are_fixed(t) -> void:
++	var e: Array[String] = Writer.entries(_stats())
++	t.eq(e.size(), 3, "three entries")
++	t.eq(e[0], "catalogador. A mão direita gasta de um lado só.", "spec example first")
++	t.eq(e[2], "catalogador. Entrou pela porta da rua. Ainda não saiu.", "closing entry")
++
++func test_dominant_behavior(t) -> void:
++	t.eq(Writer.entries(_stats(90.0))[1], "catalogador. Passa muito tempo agachado, como criança.", "crouching wins")
++	t.eq(Writer.entries(_stats(0.0, 0.0, {&"bater": 5, &"dobrar": 2}))[1], "catalogador. Bate nas paredes e espera resposta.", "most counted action")
++	t.eq(Writer.entries(_stats())[1], "catalogador. Anda pela casa como quem já conhece.", "default")
++
++func test_never_invents(t) -> void:
++	var e: Array[String] = Writer.entries(_stats(0.0, 0.0, {&"rolar": 1}))
++	t.ok(not e[1].contains("Bate") and not e[1].contains("Dobra"), "only what the player did")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_echo.gd faz-de-conta/tests/test_echo.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_echo.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_echo.gd	2026-10-28 20:49:36.746557486 -0300
+@@ -0,0 +1,20 @@
++extends RefCounted
++const Rec = preload("res://scripts/echo_recorder.gd")
++const Echo = preload("res://scripts/echo.gd")
++
++func _line(r) -> void:
++	for i in 1200:
++		r.update(1.0 / 60.0, Vector3(i / 60.0, 0, 0), 0.0, 0.0, false)
++
++func test_loops_inside_segment(t) -> void:
++	var r = Rec.new(); _line(r)
++	var seg := Vector2i(0, 80)
++	t.near(Echo.sample_at(r, seg, 0.0).pos.x, r.get_sample(0).pos.x, 0.001, "starts at the segment start")
++	t.near(Echo.sample_at(r, seg, 8.0).pos.x, r.get_sample(0).pos.x, 0.001, "loops after 8 s")
++
++func test_never_leaves_recorded_path(t) -> void:
++	var r = Rec.new(); _line(r)
++	var seg := Vector2i(80, 160)
++	for k in 100:
++		var x: float = Echo.sample_at(r, seg, k * 0.137).pos.x
++		t.ok(x >= r.get_sample(80).pos.x - 0.001 and x <= r.get_sample(159).pos.x + 0.001, "echo stays on what the player did")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_echo_recorder.gd faz-de-conta/tests/test_echo_recorder.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_echo_recorder.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_echo_recorder.gd	2026-10-28 20:35:46.695592807 -0300
+@@ -0,0 +1,47 @@
++extends RefCounted
++const Rec = preload("res://scripts/echo_recorder.gd")
++
++func _feed(r, seconds: float, pos: Vector3, crouched := false, step := Vector3.ZERO) -> void:
++	var n := int(seconds * 60.0)
++	for i in n:
++		pos += step / 60.0
++		r.update(1.0 / 60.0, pos, 0.0, 0.0, crouched)
++
++func test_samples_at_10hz(t) -> void:
++	var r = Rec.new()
++	_feed(r, 1.0, Vector3.ZERO)
++	t.eq(r.sample_count(), 10, "one second = 10 samples")
++
++func test_cap_and_segments_in_range(t) -> void:
++	var r = Rec.new()
++	_feed(r, 2000.0, Vector3.ZERO, false, Vector3(0.5, 0, 0))
++	t.eq(r.sample_count(), Rec.MAX_SAMPLES, "recorder respects the cap")
++	for seg in r.select_segments():
++		t.ok(seg.x >= 0 and seg.y <= r.sample_count() and seg.y - seg.x == 80, "segment inside retained samples")
++
++func test_segments_limit_and_no_overlap(t) -> void:
++	var r = Rec.new()
++	_feed(r, 120.0, Vector3.ZERO, false, Vector3(1, 0, 0))
++	var segs: Array[Vector2i] = r.select_segments()
++	t.ok(segs.size() <= Rec.MAX_ECHOES, "at most 6 echoes")
++	for i in range(1, segs.size()):
++		t.ok(segs[i].x >= segs[i - 1].y, "segments do not overlap")
++
++func test_crouch_and_actions_win(t) -> void:
++	var r = Rec.new()
++	_feed(r, 8.0, Vector3.ZERO)          # parado em pé
++	_feed(r, 8.0, Vector3.ZERO, true)    # agachado
++	for i in 6:
++		r.mark_action(&"dobrar")
++		_feed(r, 8.0 / 6.0, Vector3(5, 0, 0))
++	var segs: Array[Vector2i] = r.select_segments()
++	t.ok(segs.has(Vector2i(80, 160)), "crouched window chosen")
++	t.ok(segs.has(Vector2i(160, 240)), "action window chosen")
++	t.eq(r.stats().actions.get(&"dobrar", 0), 6, "actions counted")
++
++func test_delayed(t) -> void:
++	var r = Rec.new()
++	_feed(r, 2.0, Vector3.ZERO, false, Vector3(1, 0, 0))
++	var d: Dictionary = r.delayed(0.5)
++	t.near(d.pos.x, r.get_sample(r.sample_count() - 6).pos.x, 0.001, "delayed picks the sample 0.5 s back")
++	t.ok(Rec.new().delayed(0.5).is_empty(), "empty recorder has nothing delayed")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_ending_model.gd faz-de-conta/tests/test_ending_model.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_ending_model.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_ending_model.gd	2026-10-28 21:01:47.989298472 -0300
+@@ -0,0 +1,15 @@
++extends RefCounted
++const End = preload("res://scripts/ending_model.gd")
++
++func test_final_entries_are_the_spec_texts(t) -> void:
++	t.eq(End.final_entry(&"corda"), "Item 214 — maquete de casa. Dei corda. Dentro, uma figura nova. Ele não está mais sozinho.", "with winding")
++	t.eq(End.final_entry(&"parar"), "Item 214 — maquete de casa. Deixei parar às 03:33. As figuras pararam de olhar para mim. A minha não.", "letting it stop")
++	t.eq(End.final_entry(&"incompleto"), "Item 214 — maquete de casa. Funciona. Não sei por que há uma figura a mais.", "leaving early")
++
++func test_world_after_exit(t) -> void:
++	t.ok(End.clock_running(&"corda") and End.clock_running(&"incompleto"), "clock keeps running")
++	t.ok(not End.clock_running(&"parar"), "clock stops behind him")
++	t.eq(End.echoes_mode(&"corda"), &"loop", "company in a loop")
++	t.eq(End.echoes_mode(&"parar"), &"frozen", "stopped together")
++	t.eq(End.echoes_mode(&"incompleto"), &"as_is", "echoes stay as they were")
++	t.ok(End.figure_alive(&"corda") and not End.figure_alive(&"parar") and not End.figure_alive(&"incompleto"), "only the wound clock keeps him moving")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_mirror_brain.gd faz-de-conta/tests/test_mirror_brain.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_mirror_brain.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_mirror_brain.gd	2026-10-28 20:38:28.680499485 -0300
+@@ -0,0 +1,51 @@
++extends RefCounted
++const Brain = preload("res://scripts/mirror_brain.gd")
++
++func _run(b, seconds: float) -> Array:
++	var out := []
++	for i in int(seconds * 10.0):
++		var r: Dictionary = b.update(0.1)
++		if not r.is_empty():
++			out.append(r)
++	return out
++
++func test_waits_for_silence(t) -> void:
++	var b = Brain.new()
++	b.register(&"dobrar")
++	t.eq(_run(b, 1.9).size(), 0, "no response within 2 s of the action")
++	t.eq(_run(b, 0.3).size(), 1, "responds after silence")
++
++func test_one_response_per_action(t) -> void:
++	var b = Brain.new()
++	b.register(&"dobrar")
++	var got := _run(b, 50.0).filter(func(r): return not r.invite)
++	t.eq(got.size(), 1, "one action, one response")
++
++func test_cooldown_and_tie_break(t) -> void:
++	var b = Brain.new()
++	b.register(&"rolar"); b.register(&"dobrar")
++	var got := _run(b, 6.0)
++	t.eq(got[0].verb, &"dobrar", "tie goes to the most recent")
++	t.eq(got.size(), 1, "cooldown holds the second response")
++	t.eq(_run(b, 2.0)[0].verb, &"rolar", "second response after cooldown")
++
++func test_knock_count(t) -> void:
++	var b = Brain.new()
++	for i in 3:
++		b.register(&"bater"); _run(b, 0.3)
++	var got := _run(b, 3.0)
++	t.eq(got[0].count, 3, "house knocks back the same count")
++
++func test_move_is_not_a_gesture_and_invite_once(t) -> void:
++	var b = Brain.new()
++	b.register(&"mover")
++	t.eq(_run(b, 59.0).size(), 0, "moving is never answered")
++	var inv := _run(b, 200.0)
++	t.eq(inv.size(), 1, "idle invite happens once")
++	t.ok(inv[0].invite and inv[0].verb == &"rolar", "invite is the ball")
++
++func test_never_invents(t) -> void:
++	var b = Brain.new()
++	b.register(&"bater"); b.register(&"dobrar")
++	for r in _run(b, 30.0):
++		t.ok(r.verb in [&"bater", &"dobrar"] or r.invite, "only answers what the player did")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_sfx_bank.gd faz-de-conta/tests/test_sfx_bank.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_sfx_bank.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_sfx_bank.gd	2026-10-28 20:31:41.856387423 -0300
+@@ -0,0 +1,23 @@
++extends RefCounted
++const Sfx = preload("res://scripts/sfx_bank.gd")
++
++func _peak(w: AudioStreamWAV) -> float:
++	var d := w.data
++	var peak := 0
++	for i in range(0, d.size() - 1, 2):
++		peak = maxi(peak, absi(d.decode_s16(i)))
++	return peak / 32768.0
++
++func test_every_kind_is_wav(t) -> void:
++	for k in Sfx.KINDS:
++		var w: AudioStreamWAV = Sfx.make(k)
++		t.ok(w != null and w.data.size() > 0, "%s has data" % k)
++		t.eq(w.format, AudioStreamWAV.FORMAT_16_BITS, "%s is 16-bit" % k)
++		t.eq(w.loop_mode != AudioStreamWAV.LOOP_DISABLED, k in [&"rain", &"hum", &"breath"], "%s loop flag" % k)
++
++func test_no_loud_sting(t) -> void:
++	for k in Sfx.KINDS:
++		t.ok(_peak(Sfx.make(k)) <= 0.5, "%s peak <= 0.5" % k)
++
++func test_deterministic(t) -> void:
++	t.eq(Sfx.make(&"knock", 3).data, Sfx.make(&"knock", 3).data, "same seed, same sound")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_visit_state.gd faz-de-conta/tests/test_visit_state.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_visit_state.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_visit_state.gd	2026-10-28 20:28:44.607989369 -0300
+@@ -0,0 +1,75 @@
++extends RefCounted
++const Visit = preload("res://scripts/visit_state.gd")
++const WindClock = preload("res://scripts/wind_clock_model.gd")
++const Catalog = preload("res://scripts/catalog.gd")
++
++func _new() -> Visit:
++	return Visit.new(WindClock.new(), Catalog.new())
++
++func _run(v, seconds: int, in_bedroom := false) -> StringName:
++	for i in seconds:
++		var ev: StringName = v.update(1.0, in_bedroom)
++		if ev != &"":
++			return ev
++	return &""
++
++func test_acts_advance(t) -> void:
++	var v := _new()
++	t.eq(v.act, Visit.Act.CHEGADA, "starts at arrival")
++	v.catalog.catalog(&"bola"); v.on_cataloged(&"bola")
++	t.eq(v.act, Visit.Act.BRINCAR, "first catalog -> play")
++	v.update(1.0, true)
++	t.eq(v.act, Visit.Act.DUPLO, "bedroom -> double")
++
++func test_no_hora_before_gate(t) -> void:
++	var v := _new()
++	t.eq(_run(v, 1100), &"", "clock stalls instead of stopping before the gate")
++	t.ok(v.clock.spring >= WindClock.STALL_SPRING - 0.001, "spring stalled")
++
++func test_catalog_gate(t) -> void:
++	var v := _new()
++	for id in [&"boneco", &"bola", &"vela", &"cama", &"casaco"]:
++		v.catalog.set_flag(&"doll_sat", true)
++		v.catalog.catalog(id); v.on_cataloged(id)
++	t.ok(v.clock.spring <= Visit.HURRY_SPRING + 0.001, "gate hurries the clock")
++	t.eq(_run(v, 60), &"hora_started", "03:33 follows the gate")
++
++func test_time_gate_without_doll(t) -> void:
++	var v := _new()
++	var limit := int(Visit.MAX_PRE_HORA + Visit.HURRY_SPRING / Visit.DRAIN_CALM) + 1
++	t.eq(_run(v, limit), &"hora_started", "03:33 by time with nothing cataloged")
++
++func test_wind_spam_cannot_prevent_hora(t) -> void:
++	var v := _new()
++	var got := &""
++	for i in int(Visit.HARD_LIMIT) + 2:
++		v.clock.wind(); v.on_wind()
++		got = v.update(1.0, false)
++		if got != &"":
++			break
++	t.eq(got, &"hora_started", "03:33 arrives by HARD_LIMIT even when winding every second")
++	t.ok(v.elapsed <= Visit.HARD_LIMIT + 1.0, "no later than HARD_LIMIT")
++
++func test_hora_ends_on_wind_and_never_returns(t) -> void:
++	var v := _new()
++	_run(v, 2000)
++	t.eq(v.act, Visit.Act.HORA, "in hora")
++	t.ok(not v.recording_enabled(), "no recording during hora")
++	v.clock.wind()
++	t.eq(v.on_wind(), &"hora_ended", "wind ends hora")
++	t.eq(v.act, Visit.Act.DEPOIS, "after hora")
++	t.ok(v.recording_enabled(), "recording resumes")
++	t.eq(_run(v, 5000), &"", "there is no second 03:33")
++
++func test_exit_outcomes(t) -> void:
++	var v := _new()
++	t.eq(v.on_exit(), &"incompleto", "exit before choice")
++	var a := _new(); _run(a, 2000); a.clock.wind(); a.on_wind()
++	a.catalog.set_flag(&"after_hora", true); a.catalog.catalog(&"pagina_cabana"); a.on_cataloged(&"pagina_cabana")
++	t.eq(a.act, Visit.Act.ESCOLHA, "cabana page opens the choice")
++	t.ok(a.clock.spring <= Visit.ESCOLHA_SPRING + 0.001, "clock is almost unwound at the choice")
++	t.eq(a.on_exit(), &"parar", "leave without winding")
++	var b := _new(); _run(b, 2000); b.clock.wind(); b.on_wind()
++	b.catalog.set_flag(&"after_hora", true); b.catalog.catalog(&"pagina_cabana"); b.on_cataloged(&"pagina_cabana")
++	b.clock.wind(); b.on_wind()
++	t.eq(b.on_exit(), &"corda", "wind then leave")
+diff -ruN '--exclude=*.png' '--exclude=*.uid' '--exclude=.godot' '--exclude=*.import' .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_wind_clock.gd faz-de-conta/tests/test_wind_clock.gd
+--- .superpowers/sdd/2026-10-27-faz-de-conta-relojoeiro/backup-faz-de-conta-pre-plano/tests/test_wind_clock.gd	1969-12-31 21:00:00.000000000 -0300
++++ faz-de-conta/tests/test_wind_clock.gd	2026-10-27 19:49:15.632807870 -0300
+@@ -0,0 +1,42 @@
++extends RefCounted
++const WindClock = preload("res://scripts/wind_clock_model.gd")
++
++func test_starts_full_at_three(t) -> void:
++	var c = WindClock.new()
++	t.near(c.spring, 600.0, 0.001, "starts wound")
++	t.near(c.display_minutes(), 0.0, 0.001, "shows 03:00")
++
++func test_wind_diminishes_to_floor(t) -> void:
++	var c = WindClock.new()
++	c.spring = 0.0
++	t.near(c.wind(), 180.0, 0.001, "first wind 180")
++	t.near(c.wind(), 126.0, 0.001, "second wind 126")
++	t.near(c.wind(), 88.2, 0.01, "third wind 88.2")
++	for i in 200:
++		var got: float = c.wind()
++		t.ok(got >= 15.0 - 0.001 or c.spring >= 600.0 - 0.001, "wind %d never below floor" % i)
++		t.ok(c.spring <= 600.0 + 0.001, "spring never above max")
++
++func test_stall_without_permission(t) -> void:
++	var c = WindClock.new()
++	var stopped := false
++	for i in 2000:
++		stopped = c.tick(1.0) or stopped
++	t.ok(not stopped, "cannot stop while can_stop is false")
++	t.near(c.spring, 5.0, 0.001, "stalls at STALL_SPRING")
++	t.ok(not c.is_stopped(), "stalled is not stopped")
++
++func test_stops_once_when_allowed(t) -> void:
++	var c = WindClock.new()
++	c.can_stop = true
++	c.spring = 2.0
++	t.ok(not c.tick(1.0), "still running after 1 s")
++	t.ok(c.tick(1.5), "reports the stop")
++	t.ok(not c.tick(1.0), "reports it only once")
++	t.near(c.display_minutes(), 33.0, 0.001, "stopped shows 03:33")
++
++func test_tick_desyncs_as_spring_runs_out(t) -> void:
++	var c = WindClock.new()
++	t.near(c.audio_tick_period(), 1.0, 0.001, "in sync when full")
++	c.spring = 0.0
++	t.near(c.audio_tick_period(), 1.25, 0.001, "late when empty")
