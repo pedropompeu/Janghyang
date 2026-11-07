@@ -293,8 +293,8 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U35 — Rota da gaveta
 **Arquivos:** `Janghyang/scripts/selftest.gd`; leitura de `Janghyang/scripts/areas/gaveta.gd` (alçapão, escada para baixo).
 
-- [ ] **Teste (RED):** quarto de dormir → alçapão → escada → `room_at == &"gaveta"`.
-- **Gate:** selftest verde.
+- [x] **Teste (RED):** quarto de dormir → alçapão → escada → `room_at == &"gaveta"`. Checks: `three knocks break the trapdoor`, `S on the ladder goes down into the drawer`, `the foot of the ladder is the drawer`. RED por mutante do alçapão (999 pancadas): 3 FAIL. Sem segmento de caminhada até o alçapão: à altura do corpo em pé ele não toca o colisor do chão, então o check passaria mesmo no mutante (descartado).
+- [x] **Gate:** selftest 263/0 (+5 sobre 258), código 0; unit 1075/0.
 - **Commit:** `test: reach the drawer through the bedroom trapdoor in the selftest`.
 
 #### U36 — Rota do tampo e da Relojoaria
