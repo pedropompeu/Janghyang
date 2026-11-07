@@ -15,3 +15,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U12: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
 [2026-11-07] U12: Ruling: gate de `--tour` substituído por injeção de `R` num selftest de cópia (o tour pode não apertar R; a injeção prova o ramo) — custo se errado: log não aparece num tour real, só se confirma com o teclado; a investigação de A-017 segue aberta.
 [2026-11-07] U12: complete | gates: log `[reload] R via ...` confirmado em cópia; selftest 241/0; unit 1059/0; lint sem erro novo | commit: pendente | evidência: scratchpad a017/out.txt
+[2026-11-07] U13: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
+[2026-11-07] U13: Ruling: API nova `Echo.load_window(recorder, seg)` + `sample_at(t)` de instância (no lugar de `static sample_at(recorder, seg, t)`); `index` relativo à janela — custo se errado: chamadores de teste atualizados (test_echo.gd), hour_event.gd inalterado.
+[2026-11-07] U13: complete | gates: RED com API antiga = `got 15.200000, expected 5.200000`; GREEN: unit 1060/0 (+1), selftest 241/0; lint sem erro novo | commit: pendente | evidência: /tmp/claude-1001/unit-u13.txt

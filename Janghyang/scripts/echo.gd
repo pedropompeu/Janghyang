@@ -12,44 +12,50 @@ const STEP_EVERY := 0.6
 var sfx
 var style: Dictionary
 
-var _recorder
-var _seg := Vector2i.ZERO
+var _samples: Array[Dictionary] = []
 var _t := 0.0
 var _frozen := false
 var _body: Node3D
 var _last_index := -1
 var _walked := 0.0
 
-## Interpolated position and angles at time t inside the segment, looping
-## every (seg.y - seg.x) / SAMPLE_HZ seconds. crouched and action come from
-## the earlier sample.
-static func sample_at(recorder, seg: Vector2i, t: float) -> Dictionary:
-	var count := seg.y - seg.x
+## Copies the window's samples into the echo (A-013). The recorder drops its
+## oldest samples once it is full, which shifts any index into it, so the echo
+## must not read the recorder after this call.
+func load_window(recorder, seg: Vector2i) -> void:
+	_samples.clear()
+	for i in range(seg.x, seg.y):
+		_samples.append(recorder.get_sample(i))
+
+## Interpolated position and angles at time t, looping every
+## (window length) / SAMPLE_HZ seconds. crouched and action come from the
+## earlier sample. index is relative to the window.
+func sample_at(t: float) -> Dictionary:
+	var count := _samples.size()
 	if count <= 0:
 		return {}
 	var f := fposmod(t * SAMPLE_HZ, float(count))
 	var i := int(floor(f))
 	var w := f - i
-	var a: Dictionary = recorder.get_sample(seg.x + i)
+	var a: Dictionary = _samples[i]
 	# The last sample of the window holds still until the loop restarts.
-	var b: Dictionary = recorder.get_sample(seg.x + mini(i + 1, count - 1))
+	var b: Dictionary = _samples[mini(i + 1, count - 1)]
 	return {
 		"pos": a.pos.lerp(b.pos, w),
 		"yaw": lerp_angle(a.yaw, b.yaw, w),
 		"pitch": lerpf(a.pitch, b.pitch, w),
 		"crouched": a.crouched,
 		"action": a.action,
-		"index": seg.x + i,
+		"index": i,
 	}
 
 func setup(recorder, seg: Vector2i, phase: float) -> void:
-	_recorder = recorder
-	_seg = seg
+	load_window(recorder, seg)
 	_t = phase
 	_body = Mannequin.new()
 	_body.build(style)
 	add_child(_body)
-	_apply(sample_at(_recorder, _seg, _t))
+	_apply(sample_at(_t))
 
 func freeze() -> void:
 	_frozen = true
@@ -61,11 +67,11 @@ func is_frozen() -> bool:
 	return _frozen
 
 func _process(delta: float) -> void:
-	if _frozen or _recorder == null:
+	if _frozen or _samples.is_empty():
 		return
 	_t += delta
 	var before := global_position
-	var s := sample_at(_recorder, _seg, _t)
+	var s := sample_at(_t)
 	_apply(s)
 	if sfx == null:
 		return

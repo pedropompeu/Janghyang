@@ -92,6 +92,8 @@ relacionado:
 - **Por que importa:** "a casa devolve o que você fez" fica impreciso em sessões longas.
 - **Fix recomendado:** copiar as ~80 amostras de cada eco em `Echo.setup`.
 - **Estado:** aberto (minor adiado na revisão final).
+- [2026-11-07] (e) ← `Janghyang/tests/test_echo.gd` RED com a API antiga: após 18 000 amostras no gravador, o eco lido em `t=2,0 s` devolvia x = 15,2 em vez de 5,2 (deslocamento de 1000 amostras descartadas). GREEN: `Echo.load_window` copia a janela; `sample_at` virou método de instância. Unidade `1060 checks, 0 failures`; selftest `241/0`.
+- [2026-11-07 ~superseded 2026-11-07] ~~**Estado:** aberto (minor adiado na revisão final).~~ → **Estado:** corrigido na U13 do plano de lançamento. (e)
 
 ### [A-014] Quem nunca sentou o boneco antes do 03:33 não consegue mais catalogá-lo {#a-014}
 

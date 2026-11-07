@@ -216,3 +216,8 @@ criado: 2026-09-12
   **Por quê:** A-006. A execução completa leva 43 s; 120 s deixa margem sem esperar o `timeout` externo.
   **Fecha:** comportamento do `--selftest` quando a execução para no meio.
   **Descartado:** depender só de `timeout 150` na linha de comando (funciona, mas o processo não se explica sozinho).
+
+- [2026-11-07] (i) **O eco copia a própria janela de amostras ao ser montado.** `Echo.load_window(recorder, seg)` copia; `sample_at(t)` é método de instância e não lê mais o gravador.
+  **Por quê:** A-013. O gravador descarta as amostras mais antigas ao passar de `MAX_SAMPLES`, e os índices guardados apontavam para o lugar errado.
+  **Fecha:** ecos em sessões longas reproduzem o trecho escolhido no 03:33. `index` do eco passa a ser relativo à janela (só é usado para detectar troca de ação).
+  **Descartado:** guardar um deslocamento de descarte no gravador (mais estado, mesmo risco de drift).
