@@ -48,3 +48,26 @@ func test_a_bad_file_falls_back_to_defaults(t) -> void:
 	s.read(cfg)
 	t.eq(s.get_value(&"fov"), 70.0, "wrong type ignored")
 	t.eq(s.get_value(&"master"), 1.0, "out of range clamped")
+
+## U43 (cobertura extra): a missing or corrupt options file never breaks the menu;
+## load_from keeps every default and reports nothing as an error.
+func test_a_missing_file_keeps_every_default(t) -> void:
+	var s := Settings.new()
+	s.load_from("user://__ausente_u43__/opcoes.cfg")
+	t.eq(s.get_value(&"sensitivity"), Settings.DEFAULTS[&"sensitivity"], "mouse kept")
+	t.eq(s.get_value(&"fov"), Settings.DEFAULTS[&"fov"], "field of view kept")
+	t.eq(s.get_value(&"fullscreen"), Settings.DEFAULTS[&"fullscreen"], "window kept")
+	for k in Settings.DEFAULTS:
+		t.eq(s.get_value(k), Settings.DEFAULTS[k], "%s is the default" % k)
+
+func test_a_partly_bad_file_keeps_the_good_values(t) -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("opcoes", "fov", 90.0)
+	cfg.set_value("opcoes", "invert_y", "sim")
+	cfg.set_value("opcoes", "music", -4.0)
+	var s := Settings.new()
+	s.read(cfg)
+	t.eq(s.get_value(&"fov"), 90.0, "a valid value is read")
+	t.eq(s.get_value(&"invert_y"), false, "a wrong type falls back to the default")
+	t.eq(s.get_value(&"music"), 0.0, "a value under the range is clamped")
+	t.eq(s.get_value(&"effects"), 1.0, "a key not in the file keeps its default")
