@@ -321,6 +321,23 @@ func _run() -> void:
 	await _frames(3)
 	main.player.set_physics_process(false)
 
+	# U36 (Review Focus 4): the tampo edge, the dome glass broken, the bench, then the Varela shop.
+	print("SELFTEST: tampo route")
+	var glass = main.find_child("CrackedGlass", true, false)
+	_record(glass != null and glass.is_in_group(&"Breakable"), "the dome glass is a breakable", "")
+	for i in 3:
+		glass.hit()
+	await _frames(2)
+	_record(glass.broken, "three knocks break the dome glass", "")
+	_check_segment(Vector3(12.0, 0.85, 10.4), Vector3(16.6, 0.85, 10.4), "the tampo edge walks over the broken dome glass to the bench")
+	_check_segment(Vector3(16.6, 0.85, 10.4), Vector3(23.4, 0.85, 10.4), "the south bench runs east to the steel shaft")
+	_check_segment(Vector3(23.4, 0.85, 10.4), Vector3(23.4, 0.85, 5.5), "Elias walks around the west end of the shaft to the ruler")
+	_check_segment(Vector3(23.4, 0.85, 5.5), Vector3(24.5, 0.85, 5.5), "the bench reaches the ruler at its south end")
+	_check_segment(Vector3(24.5, 0.85, 5.5), Vector3(24.5, 0.85, -1.0), "the steel ruler carries Elias across the crack to the north bench")
+	_check_segment(Vector3(24.5, 0.85, -1.0), Vector3(25.2, 0.85, -1.0), "the north bench leads to the Varela door")
+	_check_segment(Vector3(25.2, 0.85, -1.0), Vector3(25.2, 0.85, -4.0), "the door opening takes Elias into the Varela shop")
+	_record(main.atlas.room_at(Vector3(25.2, 0.85, -4.0)) == &"loja_varela", "the far end of the route is the Varela shop", str(main.atlas.room_at(Vector3(25.2, 0.85, -4.0))))
+
 	print("SELFTEST: story")
 	var quest = main.get("quest")
 	var gastos = main.get("gastos")
