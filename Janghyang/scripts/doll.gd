@@ -68,6 +68,8 @@ func become_double(seat: Vector3) -> void:
 	collision_layer = 0
 	_lying = false
 	_busy = false
+	# The double sits on the bench, so the catalogue sees it seated (A-014).
+	toggled.emit(false)
 	position = seat
 	rotation = Vector3(deg_to_rad(-8.0), 0.0, 0.0)
 	var paper := StandardMaterial3D.new()

@@ -427,6 +427,8 @@ func _run() -> void:
 	_record(duplo.size() - duplo_before == 3, "the double wrote three entries at 03:33", str(duplo.size() - duplo_before))
 	_record(main.catalog.entries[-1].number == main.catalog.entries[-2].number + 1, "double entries continue the numbering", "")
 	_record(_node("Doll").global_position.distance_to(Vector3(0.7, 0.45, 8.5)) < 0.3, "the double sits on the entry bench", "")
+	# A-014: the double counts as the seated doll, so the catalogue can take it.
+	_record(main.catalog.flags.get(&"doll_sat", false) == true, "the double counts as the seated doll for the catalogue (A-014)", str(main.catalog.flags.get(&"doll_sat", false)))
 	var pq := PhysicsPointQueryParameters3D.new()
 	pq.position = _node("Doll").global_position + Vector3(0.0, 0.3, 0.0)
 	var hits := main.get_world_3d().direct_space_state.intersect_point(pq)
