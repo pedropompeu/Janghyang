@@ -211,3 +211,8 @@ criado: 2026-09-12
   **Fecha:** o que entra e o que sai do lançamento.
   **Descartado:** continuar expandindo mecânicas antes do playtest; lançar sem playtest dos finais.
   **Pendente:** validação `(d)` de Pedro, porque corte de escopo afeta o produto.
+
+- [2026-11-07] (i) **Selftest tem guarda de tempo de 120 s que encerra com falha.** Um erro de script dentro de `_run` deixa o processo aberto; a guarda chama `quit(1)`.
+  **Por quê:** A-006. A execução completa leva 43 s; 120 s deixa margem sem esperar o `timeout` externo.
+  **Fecha:** comportamento do `--selftest` quando a execução para no meio.
+  **Descartado:** depender só de `timeout 150` na linha de comando (funciona, mas o processo não se explica sozinho).

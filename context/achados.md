@@ -68,7 +68,8 @@ relacionado:
 - **Reprodução:** referencie `main.SPAWN` antes de `SPAWN` existir e rode `godot --headless --path . -- --selftest`; o processo não termina.
 - **Por que importa:** sem `timeout`, a verificação fica pendurada e pode ser lida como lentidão.
 - **Fix recomendado:** sempre rodar com `timeout 150`; opcionalmente, um timer de guarda no selftest que chama `quit(1)`. Custo: minutos.
-- **Estado:** aberto (contornado com `timeout`).
+- [2026-10-27 ~superseded 2026-11-07] ~~**Estado:** aberto (contornado com `timeout`).~~ → **Estado:** corrigido na U10 do plano de lançamento. (e)
+- [2026-11-07] (e) ← `Janghyang/scripts/selftest.gd` (`GUARD_S`, `_on_guard`, `_ready`) Cópia com erro de execução injetado em `_run`: antes da correção, o processo não terminava (saída 124 do `timeout 60`); depois, sai com código 1 e imprime `SELFTEST GUARD: no result after 120 s`. Selftest real: `241 checks, 0 failures`, código 0, 43 s.
 
 ### [A-007] Loops de áudio tocando no `quit()` deixam playbacks vazados {#a-007}
 

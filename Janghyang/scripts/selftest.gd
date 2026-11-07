@@ -43,8 +43,14 @@ const LOOP := [
 	[Vector3(1.7, 0.85, 9.4), Vector3(2.0, 0.85, 12.0), "front door -> tampo edge"],
 ]
 
+## A run that stops early (script error inside _run) never reaches quit(), so the
+## guard ends the process as a failure instead of letting it hang. The full run
+## takes about 43 s; 120 s leaves room for a slow machine.
+const GUARD_S := 120.0
+
 func _ready() -> void:
 	OS.add_logger(_errors)
+	get_tree().create_timer(GUARD_S).timeout.connect(_on_guard)
 	main.autonomous = false
 	query_shape = CapsuleShape3D.new()
 	query_shape.radius = 0.28
@@ -54,6 +60,10 @@ func _ready() -> void:
 	crouch_shape.height = 1.0
 	player_rid = main.player.get_rid()
 	call_deferred("_run")
+
+func _on_guard() -> void:
+	print("SELFTEST GUARD: no result after %.0f s, the run stopped early" % GUARD_S)
+	get_tree().quit(1)
 
 func _run() -> void:
 	await get_tree().physics_frame
