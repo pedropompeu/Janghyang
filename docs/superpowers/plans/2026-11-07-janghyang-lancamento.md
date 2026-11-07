@@ -349,8 +349,8 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U43 — Persistência de opções corrompidas (cobertura extra)
 **Arquivos:** `Janghyang/tests/test_settings_model.gd`; `Janghyang/scripts/settings_model.gd:57-68` (`read`, `load_from`).
 
-- [ ] **Teste (RED):** arquivo `user://opcoes.cfg` ausente ou com valor fora da faixa: `load_from` devolve os padrões sem erro.
-- **Gate:** unidade verde.
+- [x] **Teste:** arquivo `user://opcoes.cfg` ausente ou com valor fora da faixa: `load_from` devolve os padrões sem erro (`a missing file keeps every default`, `a partly bad file keeps the good values`). Sem RED no código atual: o comportamento já existia (cobertura extra, como em U16). Discriminação: mutante sem o `clampf` em `settings_model.gd` = 4 FAIL, incluindo o novo `a value under the range is clamped`.
+- **Gate:** unidade verde (1093/0).
 - **Commit:** `test: options fall back to defaults when the file is missing or invalid`.
 
 ---
