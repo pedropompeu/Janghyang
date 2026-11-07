@@ -585,7 +585,9 @@ CASINHA antes de adicionar qualquer sistema.
   listar 20 verbos do jogador e 20 respostas da casa, cruzar em 30 momentos, escolher 5 e
   escrever 3 batidas de horror para um cômodo. Testar em papelão ou blockout no Blender.
   O duplo teste é: **“isso é divertido sem objetivo?”** e **“isso fica errado quando a casa
-  devolve o gesto?”**. Revogável até `revisar: 2026-11-03`.
+  devolve o gesto?”**. Revogável até ~~revisar: 2026-11-03~~ ~superseded 2026-11-07 (ver a linha (i) de 2026-11-07 abaixo).
+
+- [2026-11-07] (i) **O default de 2026-10-20 segue como teste de design até o congelamento de escopo (D2, 2026-11-21).** Por quê: a revisão de 2026-11-03 não foi feita com o Pedro e o teste continua valendo com o blockout jogável; a escolha foi delegada pelo Pedro ("resolva e escolha tu"), não validada como (d). Fecha: a pendência de lint D8. Revisar em `revisar: 2026-11-21`. Descartado: remover o default (apagaria o teste de design); deixar a data vencida (lint vermelho).
 
 - [2026-10-20 ~superseded 2026-10-20] (e) ~~O default acima previa um protótipo “sem engine” e
   blockout no Blender.~~ → Já existe um blockout jogável em Godot 4.7; o teste de design

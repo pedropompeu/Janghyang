@@ -255,3 +255,21 @@ criado: 2026-09-12
   **Não verificado nesta unidade:** INPI e USPTO (classe de jogos eletrônicos); Facebook, TikTok e a conferência de grafia do handle (busca de handles não cobriu variações). Pendentes.
   **Leitura:** nenhuma das contas achadas é de um jogo com o mesmo nome; são contas de pessoas ou canais sem relação aparente. Colisão de handle é risco de marca para a página da loja e para as redes (U63), não de título. **Decisão de nome (d) só se Pedro julgar o risco de handle inaceitável** (D3).
   **Por quê:** U04 do plano de lançamento.
+
+> **Bloco de 2026-11-07 — escolhas delegadas.** O Pedro pediu "resolva e escolha tu". As escolhas abaixo são do modelo, seguindo a recomendação de cada decisão do plano (`docs/superpowers/plans/2026-11-07-janghyang-lancamento.md`, seção 2). Por isso estão marcadas `(i)`, não `(d)`: **não são validação do Pedro**. Os itens com custo financeiro ou aceitação de risco de marca continuam como `(d)` pendente, e cada um está marcado abaixo.
+
+- [2026-11-07] (i) **D6 (A-014): o duplo conta como sentado para o catálogo (opção a).** Por quê: o item `boneco` exige `doll_sat`, e o duplo já está sentado no banco; a flag tem que ficar verdadeira ao virar duplo. Fecha: U20, commit `67ccc48`; `Doll.become_double` emite `toggled(false)`. Descartado: `Q` valer direto no duplo (mexe em interação e amplia a superfície de bug).
+
+- [2026-11-07] (i) **D2: escopo congelado a partir de 2026-11-21 (fim da U38).** Por quê: prazo de lançamento em 2027-04-15 e risco de escopo aberto; a fase 3 (rotas e regressão) é a última que pode mexer em rota ou regra. Fecha: depois de 2026-11-21, só correção, texto e polimento, sem mecânica, área ou Gasto novo. Descartado: congelar só no lançamento (deixa as fases 4 e 5 abertas a mecânica nova); congelar já (bloqueia U30–U38).
+
+- [2026-11-07] (i) **D1: plataforma PC (Windows e Linux) via Steam e itch.io, com lançamento simultâneo.** Por quê: recomendação do plano; cobre os dois canais de jogo indie de horror e a demo no itch.io. Fecha: U60–U66 preparam as duas lojas. **Custo pendente (d):** a taxa de registro da Steam tem valor a confirmar na página oficial antes de qualquer pagamento, e o pagamento depende de aprovação explícita do Pedro. Descartado: uma só loja (perde um dos canais do plano).
+
+- [2026-11-07] (i) **D3: nome Janghyang mantido; handles de rede tratados em U63.** Por quê: U03 não achou colisão de título em Steam, itch.io e GOG; os handles `@janghyang` estão ocupados no X, Instagram, YouTube e itch.io (U04). Colisão de handle é risco de marca para a página de loja, não de título. Fecha: o nome segue; na U63 a conta de loja usa um slug verificado como livre. **Aceite formal do risco de handle (d) pendente** do Pedro antes de criar contas. Descartado: trocar o nome agora (sem colisão de título, custo alto); usar handle ocupado sem verificar.
+
+- [2026-11-07] (i) **D4: idiomas pt-BR como base e inglês no lançamento.** Por quê: recomendação do plano; o texto atual está só em pt-BR (D4), e o inglês amplia o alcance de lançamento. Fecha: U62 traduz catálogo, caderno, finais e ajuda. **Custo pendente (d):** revisão de falante nativo do inglês. Descartado: só pt-BR (perde o mercado de jogos em inglês).
+
+- [2026-11-07] (i) **D5: modelo premium com demo; preço decidido depois dos playtests.** Por quê: recomendação do plano; a demo reduz a compra às cegas. Fecha: U63 escreve a página com demo. **Preço (d) pendente** do Pedro, depois de U50–U52. Descartado: gratuito (não paga o esforço); preço fixo agora (sem dados de playtest).
+
+- [2026-11-07] (i) **D8: o default de 2026-10-20 segue como teste de design; a revisão vencida em 2026-11-03 fica para 2026-11-21.** Por quê: o teste "divertido sem objetivo?" continua valendo com o blockout jogável, e não houve revisão com o Pedro. Fecha: a pendência de lint (`modelo-arquitetural-dinamico-3d.md`, linha (i) de 2026-11-07). A linha antiga recebe `~superseded`, sem apagar. Descartado: remover o default (apaga o teste); deixar a data vencida (lint vermelho).
+
+- [2026-11-07] (e) **D7 segue aberta.** A aprovação visual das capturas de luz (U40, U41) é decisão de olho do Pedro e não pode ser delegada ao modelo. Bloqueia U40 e U41; o resto da fase 4 não depende dela.

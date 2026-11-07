@@ -104,7 +104,8 @@ relacionado:
 - **Reprodução:** não tocar no boneco até o 03:33; depois tentar `Q` nele.
 - **Por que importa:** é a peça de Inácio que o jogador mais vê.
 - **Fix recomendado:** o duplo contar como sentado, ou `Q` valer direto nele. Validar com Pedro (regra de catálogo).
-- **Estado:** aberto (minor adiado na revisão final).
+- **Estado:** aberto (minor adiado na revisão final) ~superseded 2026-11-07 → corrigido na U20 (commit 67ccc48).
+- [2026-11-07] (e) ← U20: `become_double` emite `toggled(false)` ao virar o duplo, e o catálogo lê `doll_sat` por esse sinal (`main.gd` `_wire_catalog`). Gates: RED unitário `becoming the double reports it seated` (1 falha); RED no selftest `the double counts as the seated doll for the catalogue (A-014) — false` (1 falha, 244 checks); GREEN unitário 1064/0 e selftest 244/0. Escolha (a) de D6 delegada pelo Pedro e registrada como (i).
 
 ### [A-016] No GL Compatibility, luzes do mundo não iluminam um SubViewport de mundo compartilhado {#a-016}
 

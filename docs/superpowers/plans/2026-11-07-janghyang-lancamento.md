@@ -228,18 +228,18 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 ### Fase 2 — Decisão e correção de catálogo
 
 #### P1 — Pedro decide D6 (A-014)
-- [ ] Mostrar as opções (seção 2, D6). **Bloqueado até a resposta.**
-- [ ] Registrar em `context/decisoes.md` com `(d)`: escolha, por quê, descartado.
+- [x] Mostrar as opções (seção 2, D6). Resolvido por delegação: "resolva e escolha tu" (2026-11-07).
+- [x] Registrar em `context/decisoes.md` como `(i)` delegado (não `(d)`): escolha (a), por quê, descartado.
 
 #### U20 — A-014: duplo conta como sentado (opção a, se confirmada em D6)
-**Arquivos:** `Janghyang/scripts/doll.gd` (`become_double`, linhas 63–68); `Janghyang/scripts/main.gd:1177` (escrita de `doll_sat`); `Janghyang/tests/test_catalog.gd`.
+**Arquivos:** `Janghyang/scripts/doll.gd` (`become_double`); `Janghyang/scripts/selftest.gd`; `Janghyang/tests/test_doll.gd` (novo; o comportamento está em `doll.gd` e `test_catalog.gd` não alcança o duplo). Commit 67ccc48.
 
 **Interface:** nenhuma nova. Após `become_double(seat)`, `catalog.set_flag(&"doll_sat", true)` (sinal ou chamada direta em `main`, decidido por leitura de `main.gd:1172-1180`).
 
-- [ ] **Teste (RED):** `test_catalog.gd`: `test_double_counts_as_seated_doll`: após `set_flag(&"doll_sat", true)` por caminho de duplo, `can_catalog(&"boneco")` é verdadeiro. Hoje falha quando o jogador não sentou o boneco antes do 03:33.
-- [ ] Implementar a escrita da flag no momento de `become_double`.
-- [ ] Selftest: check "boneco catalogável depois do duplo" (novo).
-- **Gate:** unidade e selftest verdes; check novo passa.
+- [x] **Teste (RED):** `test_doll.gd`: `test_double_counts_as_seated_doll` (falhou: `becoming the double reports it seated`).
+- [x] Implementar: `become_double` emite `toggled(false)`; `main` já escreve `doll_sat` por esse sinal.
+- [x] Selftest: check "the double counts as the seated doll for the catalogue (A-014)" (RED: `— false`; GREEN: passa).
+- **Gate:** unidade 1064/0 e selftest 244/0 — cumprido.
 - **Commit:** `fix: the double counts as the seated doll for the catalogue (A-014)`.
 
 ---
