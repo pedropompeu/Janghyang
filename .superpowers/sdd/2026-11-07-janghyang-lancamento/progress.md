@@ -9,3 +9,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U10: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
 [2026-11-07] U10: Ruling: guarda de 120 s (45 s medidos + margem) com quit(1); o RED usa erro injetado `_nothing.size()` em cópia descartável — custo se errado: limite ajustável em uma constante.
 [2026-11-07] U10: complete | gates: selftest 241/0 (43 s, código 0); mutante exit=1 com "SELFTEST GUARD: no result after 120 s" (antes: exit 124 em 60 s); unit 1059/0; lint sem erro novo | commit: pendente (ver git log) | evidência: rtk proxy timeout 60 godot ... --selftest (RED: exit 124)
+[2026-11-07] U11: start | baseline selftest 241/0 unit 1059/0 lint(1 pré-existente)
+[2026-11-07] U11: Ruling: sonda movida de z 8,88 para z 8,6 (cápsula de raio 0,28 não alcança a fachada em z≈9,03 e encosta no relógio, z 8,74–9,02) — custo se errado: ajuste de uma constante.
+[2026-11-07] U11: complete | gates: RED mutante (sem colisão do relógio) com sonda antiga = PASS; GREEN mutante com sonda nova = FAIL; selftest real 241/0 (código 0); unit 1059/0; lint sem erro novo | commit: pendente | evidência: scratchpad a005/m1 e a005/m2

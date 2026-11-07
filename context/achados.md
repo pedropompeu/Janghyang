@@ -59,6 +59,8 @@ relacionado:
 - **Por que importa:** é um teste que não pode falhar pelo motivo que nomeia.
 - **Fix recomendado:** sondar à frente do relógio, longe da fachada (ex.: z 8,6), ou sondar com uma forma menor; ver falhar sem o relógio. Custo: minutos.
 - **Estado:** aberto.
+- [2026-11-07] (e) ← `Janghyang/scripts/selftest.gd:105`, `Janghyang/scripts/main.gd` (`_build_entry_clock`). Mutante com `clock.collision_layer = 0` em cópia descartável: com a sonda antiga (z 8,88) a checagem continuava `PASS`; com a sonda nova (z 8,6) passa a `FAIL entry clock is solid — expected a blocker at (3.1, 0.85, 8.6)`. Original com a sonda nova: `241 checks, 0 failures`.
+- [2026-11-07 ~superseded 2026-11-07] ~~**Estado:** aberto.~~ → **Estado:** corrigido na U11 do plano de lançamento. (e)
 
 ### [A-006] O selftest trava em vez de sair quando há erro de script {#a-006}
 

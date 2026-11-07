@@ -102,7 +102,7 @@ func _run() -> void:
 	_record(main.get_node_or_null("ExitEdge") is Area3D, "tampo edge trigger exists", "")
 	_record(main.get_node_or_null("Atelier") == null and main.get_node_or_null("Tampo") != null, "atelier became the tampo", "")
 	_expect_clear(Vector3(1.8, 0.85, 8.3), "spawn point is clear")
-	_expect_blocked(Vector3(3.1, 0.85, 8.88), "entry clock is solid")
+	_expect_blocked(Vector3(3.1, 0.85, 8.6), "entry clock is solid")
 	_record(main.get_node_or_null("EntryClock") != null and main.get_node("EntryClock").get_prompt() == "dar corda", "entry clock can be wound", "")
 	_record(main.visit.act == main.VisitState.Act.CHEGADA, "visit starts at arrival", "")
 	var verbs := [main.player.verb_for(main.get_node("DoorFront")), main.player.verb_for(main.get_node("F1")), main.player.verb_for(main.get_node("EntryClock")), main.player.verb_for(main.get_node("Doll"))]
