@@ -101,16 +101,16 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 #### U00 — Ledger e pré-voo
 **Arquivos:** criar `.superpowers/sdd/2026-11-07-janghyang-lancamento/progress.md`; ler `.gitignore` (hoje: `.godot/`, `*.tmp`).
 
-- [ ] Verificar se `.superpowers/` está versionado: `git -C /home/usuario/Dev/Jogo check-ignore -v .superpowers/`. Se não estiver ignorado, decidir como `Ruling:`: versionar ou ignorar. Sem decisão do Pedro: ignorar (é estado de execução, não produto).
-- [ ] Criar `progress.md` com a linha de base da seção 1.3 e a primeira entrada `start`.
+- [x] Verificar se `.superpowers/` está versionado: `git -C /home/usuario/Dev/Jogo check-ignore -v .superpowers/`. Se não estiver ignorado, decidir como `Ruling:`: versionar ou ignorar. Sem decisão do Pedro: ignorar (é estado de execução, não produto).
+- [x] Criar `progress.md` com a linha de base da seção 1.3 e a primeira entrada `start`.
 - **Gate:** arquivo existe e a linha de base do ledger bate com a seção 1.3.
 - **Commit:** nenhum (ledger de execução), salvo se o Pedro pedir versionamento.
 
 #### U01 — Pendência de lint (D8)
 **Arquivos:** `context/discussoes/modelo-arquitetural-dinamico-3d.md:588`.
 
-- [ ] Mostrar ao Pedro o fato e a data (2026-11-03). **Bloqueado por D8.**
-- [ ] Após a resposta: atualizar o fato com `(d)` e data, ou marcar `~superseded 2026-11-07` apontando para o fato novo. Nunca apagar.
+- [x] Mostrar ao Pedro o fato e a data (2026-11-03). **Bloqueado por D8.** Delegada ao modelo em 2026-11-07 ("resolva e escolha tu"): default (i) registrado em `context/decisoes.md`; o fato ficou `~superseded` e `lint.py` está limpo.
+- [x] Após a resposta: atualizar o fato com `(d)` e data, ou marcar `~superseded 2026-11-07` apontando para o fato novo. Nunca apagar.
 - **Gate:** `python3 lint.py` sem a pendência de validade vencida.
 - **Commit:** `docs: review overdue architecture fact (lint)`.
 
@@ -146,27 +146,27 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 #### U10 — A-006: selftest não trava
 **Arquivos:** `Janghyang/scripts/selftest.gd` (`_ready`, linha 52).
 
-- [ ] **Teste de regressão (RED):** cópia descartável do projeto em `/tmp`-equivalente do scratchpad com uma linha de erro proposital em `_run` (ex.: `var _x = main.NOPE`). Rodar o selftest: hoje o processo não termina. Registrar o tempo até `timeout` matar o processo (esperado: não termina).
-- [ ] Adicionar em `_ready`: um `SceneTreeTimer` de `GUARD_S := 120.0` (acima dos 43 s medidos) que imprime `SELFTEST GUARD: timeout` e chama `get_tree().quit(1)`.
-- [ ] Repetir a cópia com o erro proposital: o processo deve sair com código 1 em até 120 s.
-- [ ] Rodar o selftest real: 241/0 sem alteração.
+- [x] **Teste de regressão (RED):** cópia descartável do projeto em `/tmp`-equivalente do scratchpad com uma linha de erro proposital em `_run` (ex.: `var _x = main.NOPE`). Rodar o selftest: hoje o processo não termina. Registrar o tempo até `timeout` matar o processo (esperado: não termina).
+- [x] Adicionar em `_ready`: um `SceneTreeTimer` de `GUARD_S := 120.0` (acima dos 43 s medidos) que imprime `SELFTEST GUARD: timeout` e chama `get_tree().quit(1)`.
+- [x] Repetir a cópia com o erro proposital: o processo deve sair com código 1 em até 120 s.
+- [x] Rodar o selftest real: 241/0 sem alteração.
 - **Gate:** saída com código 1 na cópia; 241/0 no projeto real.
 - **Commit:** `fix: exit the selftest with failure when it hangs (A-006)`.
 
 #### U11 — A-005: sonda do relógio que não pode passar sem o relógio
 **Arquivos:** `Janghyang/scripts/selftest.gd:95`.
 
-- [ ] **Teste de regressão (RED), mutação:** cópia descartável com a colisão do relógio desligada (`scripts/entry_clock.gd`/`main._build_entry_clock`, a colisão do `relogio_entrada`). Rodar o selftest: hoje o check `entry clock is solid` **passa**, o que é o defeito.
-- [ ] Trocar a sonda para `Vector3(3.1, 0.85, 8.6)` (a sonda fica à frente do relógio, longe da fachada, conforme o achado).
-- [ ] Na cópia mutada: o check deve **falhar**. No projeto real: deve **passar**.
+- [x] **Teste de regressão (RED), mutação:** cópia descartável com a colisão do relógio desligada (`scripts/entry_clock.gd`/`main._build_entry_clock`, a colisão do `relogio_entrada`). Rodar o selftest: hoje o check `entry clock is solid` **passa**, o que é o defeito.
+- [x] Trocar a sonda para `Vector3(3.1, 0.85, 8.6)` (a sonda fica à frente do relógio, longe da fachada, conforme o achado).
+- [x] Na cópia mutada: o check deve **falhar**. No projeto real: deve **passar**.
 - **Gate:** mutante falha; original passa; selftest 241/0 (contagem igual, check mantido).
 - **Commit:** `test: probe the entry clock where the facade cannot hide it (A-005)`.
 
 #### U12 — A-017: registrar a causa do reinício do tour (diagnóstico)
 **Arquivos:** `Janghyang/scripts/player.gd:94-95`.
 
-- [ ] Sem mudança de comportamento: antes de `reload_current_scene()`, `print("[reload] R via %s" % event)`.
-- [ ] Rodar `godot --path Janghyang -- --tour` com `DISPLAY=:0` ao menos uma vez e registrar se o log aparece com evento sintético.
+- [x] Sem mudança de comportamento: antes de `reload_current_scene()`, `print("[reload] R via %s" % event)`.
+- [x] Rodar `godot --path Janghyang -- --tour` com `DISPLAY=:0` ao menos uma vez e registrar se o log aparece com evento sintético.
 - **Gate:** selftest e unidade inalterados; log presente no `--tour`.
 - **Commit:** `chore: log the input that reloads the scene (A-017)`.
 
@@ -179,9 +179,9 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 - Consome: `EchoRecorder.get_sample(i)`.
 - Chamadores confirmados (OpenCode + grep): `echo.gd:52` (`setup`), `echo.gd:68` (`_process`), `tests/test_echo.gd:12,13,19`.
 
-- [ ] **Teste (RED):** em `test_echo.gd`, `test_echo_keeps_its_window_after_trim`: gravar amostras até passar de `MAX_SAMPLES`, criar `Echo` com um segmento, continuar gravando; o `_sample_at(t)` precisa devolver a mesma posição de antes do corte. Rodar a unidade: falha (chamadores antigos e índices deslocados).
-- [ ] Implementar a interface acima e adaptar os três chamadores de teste.
-- [ ] Rodar a unidade e o selftest.
+- [x] **Teste (RED):** em `test_echo.gd`, `test_echo_keeps_its_window_after_trim`: gravar amostras até passar de `MAX_SAMPLES`, criar `Echo` com um segmento, continuar gravando; o `_sample_at(t)` precisa devolver a mesma posição de antes do corte. Rodar a unidade: falha (chamadores antigos e índices deslocados).
+- [x] Implementar a interface acima e adaptar os três chamadores de teste.
+- [x] Rodar a unidade e o selftest.
 - **Gate:** unidade ≥ 1059 + novos checks, 0 falhas; selftest 241/0.
 - **Commit:** `fix: echoes keep their own samples after the recorder trims (A-013)`.
 
@@ -190,9 +190,9 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 
 **Regra (Ruling, `(i)`):** a entrada do caderno é sempre escrita; o som do lápis só toca se `doll.is_double()` for verdadeiro no momento. O flush de `end()` escreve as entradas que faltam, mas **sem som** se o duplo não estiver sentado. Custo se errado: um som a menos no fim da hora; a regra pode ser revertida em uma linha.
 
-- [ ] **Teste (RED):** selftest: com o banco vazio (duplo ainda não sentado) durante o 03:33, `main.sfx` não recebe `play_pencil_pattern`. Implementar um contador de chamadas ou um espião em `sfx` (scratch) e registrar o estado atual: hoje toca (defeito).
-- [ ] Implementar a regra nos dois pontos.
-- [ ] Mutação: reverter a checagem, o check deve falhar.
+- [x] **Teste (RED):** selftest: com o banco vazio (duplo ainda não sentado) durante o 03:33, `main.sfx` não recebe `play_pencil_pattern`. Implementar um contador de chamadas ou um espião em `sfx` (scratch) e registrar o estado atual: hoje toca (defeito).
+- [x] Implementar a regra nos dois pontos.
+- [x] Mutação: reverter a checagem, o check deve falhar.
 - **Gate:** check novo passa; mutante falha; selftest ≥ 241/0.
 - **Commit:** `fix: pencil sounds only when the double sits at the bench (A-015)`.
 
@@ -205,10 +205,10 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 - `main.shutdown() -> void`: `sfx.stop_all()`, `await get_tree().process_frame`, `get_tree().quit()`.
 - Chamadores de `shutdown`: `NOTIFICATION_WM_CLOSE_REQUEST` (novo `_notification` em `main.gd`), `settings_ui.gd:191` e `_take_shot`.
 
-- [ ] **Teste (RED):** `tests/test_sfx_bank.gd`: `test_stop_all_silences_loops` com `silent = false` e um player de loop criado: após `stop_all`, `playing == false` para todos. Falha hoje (método não existe).
-- [ ] Implementar `stop_all`, o registro e `shutdown`.
-- [ ] **Gate de saída (headful):** `DISPLAY=:0 timeout 30 godot --path Janghyang --resolution 1280x720 -- --shot-clock 2>&1 | grep -c "ObjectDB instances were leaked"` → **0**. Linha de base medida no achado: 5.
-- [ ] Se o gate não chegar a 0: não remendar. Registrar em `achados.md` o que sobrou (nomes dos objetos vazados do log) e parar a unidade como `blocked`.
+- [x] **Teste (RED):** `tests/test_sfx_bank.gd`: `test_stop_all_silences_loops` com `silent = false` e um player de loop criado: após `stop_all`, `playing == false` para todos. Falha hoje (método não existe).
+- [x] Implementar `stop_all`, o registro e `shutdown`.
+- [x] **Gate de saída (headful):** `DISPLAY=:0 timeout 30 godot --path Janghyang --resolution 1280x720 -- --shot-clock 2>&1 | grep -c "ObjectDB instances were leaked"` → **0**. Linha de base medida no achado: 5.
+- [x] Se o gate não chegar a 0: não remendar. Registrar em `achados.md` o que sobrou (nomes dos objetos vazados do log) e parar a unidade como `blocked`.
 - **Gate:** unidade ≥ 1059 + 1, 0 falhas; selftest 241/0; saída headful com 0 vazamentos.
 - **Commit:** `fix: stop looping audio before exit so no playback leaks (A-007)`.
 
@@ -217,9 +217,9 @@ Cada unidade tem: **Arquivos**, **Passos** (teste primeiro, depois implementaç�
 
 **Achado (novo, `(e)`):** `decisoes.md:70` diz que o 03:33 vem com "boneco + 5 itens, ou aos 1200 s". O spec de expansão (`§5`, regra "03:33 só começa na fase V") e o código (`visit_state.gd:9`, `MAX_PRE_HORA := 3600.0`) dizem outra coisa. Não há `~superseded` no fato antigo.
 
-- [ ] **Teste (RED):** `test_visit_state.gd`: `test_gate_uses_the_expansion_rule`: o gate é `pieces_ready or elapsed >= 3600`; teste de constante e de comportamento.
-- [ ] Em `decisoes.md:70`, marcar `~superseded 2026-11-07` apontando para a entrada de 2026-10-29 (linha 174) e para o spec de expansão `§5`. Não apagar o texto.
-- [ ] Registrar `A-019` em `achados.md` com severidade `baixo`, reprodução (ler `decisoes.md:70` contra `visit_state.gd:9`) e fix (esta unidade).
+- [x] **Teste (RED):** `test_visit_state.gd`: `test_gate_uses_the_expansion_rule`: o gate é `pieces_ready or elapsed >= 3600`; teste de constante e de comportamento.
+- [x] Em `decisoes.md:70`, marcar `~superseded 2026-11-07` apontando para a entrada de 2026-10-29 (linha 174) e para o spec de expansão `§5`. Não apagar o texto.
+- [x] Registrar `A-019` em `achados.md` com severidade `baixo`, reprodução (ler `decisoes.md:70` contra `visit_state.gd:9`) e fix (esta unidade).
 - **Gate:** unidade passa; lint sem erro novo.
 - **Commit:** `docs: mark the 1200 s 03:33 gate as superseded (A-019)`.
 
