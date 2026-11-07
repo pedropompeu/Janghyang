@@ -241,3 +241,17 @@ criado: 2026-09-12
   Vizinho de tema, não de nome: "Gwihyang: Homecoming" (귀향, horror coreano, Steam) — https://store.steampowered.com/app/3060970 (registrado para a leitura de posicionamento, não é colisão).
   **Ressalva:** a busca cobre o título e as grafias testadas; não cobre grafias alternativas (ex.: "Jang Hyang") nem a forma com Hanja. A busca web padrão e estendida não achou nada relevante; o resultado vale pelas buscas internas das lojas.
   **Por quê:** U03 do plano de lançamento (nome Janghyang, D3).
+
+- [2026-11-07] (e) **Checagem de domínio e handles (U04, parcial): domínios .com e .io sem registro; handles @janghyang ocupados no X, Instagram, YouTube e itch.io; Steam Community livre.**   | Item | Resultado | Fonte |
+  |---|---|---|
+  | janghyang.com | sem registro (WHOIS: "No match") | whois, 2026-11-07 |
+  | janghyang.io | sem registro (WHOIS: "Domain not found") | whois, 2026-11-07 |
+  | janghyang.games | **inconclusivo**: o WHOIS usado não suporta .games; DNS não resolve (ausência de resolução não prova registro livre) | whois, getent |
+  | X (@janghyang) | ocupado: perfil "jang (@janghyang)" | https://x.com/janghyang |
+  | Instagram (@janghyang) | ocupado: perfil "hyang (@janghyang)" (página com login) | https://www.instagram.com/janghyang/ |
+  | YouTube (@janghyang) | ocupado: canal "소리가 쌓이는 곳", 1 inscrito, 2 vídeos | https://www.youtube.com/@janghyang |
+  | itch.io (janghyang) | ocupado: perfil de usuário, sem posts recentes, sem jogo listado na página | https://itch.io/profile/janghyang |
+  | Steam Community (janghyang) | livre: "Não foi possível encontrar o perfil especificado" | https://steamcommunity.com/id/janghyang |
+  **Não verificado nesta unidade:** INPI e USPTO (classe de jogos eletrônicos); Facebook, TikTok e a conferência de grafia do handle (busca de handles não cobriu variações). Pendentes.
+  **Leitura:** nenhuma das contas achadas é de um jogo com o mesmo nome; são contas de pessoas ou canais sem relação aparente. Colisão de handle é risco de marca para a página da loja e para as redes (U63), não de título. **Decisão de nome (d) só se Pedro julgar o risco de handle inaceitável** (D3).
+  **Por quê:** U04 do plano de lançamento.

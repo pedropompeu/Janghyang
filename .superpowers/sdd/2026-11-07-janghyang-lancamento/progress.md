@@ -37,3 +37,6 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U03: start | baseline selftest 243/0 unit 1062/0 lint(1 pré-existente)
 [2026-11-07] U03: Ruling: buscas internas das lojas (WebFetch nas buscas da Steam; chrome-devtools nas do itch.io e GOG, que não renderizavam pelo WebFetch) em vez de WebSearch, que veio raso — custo se errado: nenhum, só mais uma verificação.
 [2026-11-07] U03: complete | gates: tabela 3 lojas × 2 termos com resultado e URL em decisoes.md; nenhuma colisão direta; vizinho de tema registrado | commit: docs: record store name collision check for Janghyang
+[2026-11-07] U04: start | baseline selftest 243/0 unit 1062/0 lint(1 pré-existente)
+[2026-11-07] U04: Ruling: handles conferidos no navegador (código HTTP 200 dava falso positivo em todas as redes); WHOIS para .com/.io; .games inconclusivo. Ruling (d) pendente: colisão de handle é risco de marca, Pedro decide se aceita — custo se errado: renomear handle de rede.
+[2026-11-07] U04: partial | gates: domínios e handles registrados com URL; INPI, USPTO, Facebook, TikTok e .games pendentes | commit: docs: record registry, domain and handle check for Janghyang (parcial)
