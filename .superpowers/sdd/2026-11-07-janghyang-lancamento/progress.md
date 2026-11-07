@@ -69,3 +69,8 @@ Setup: Ruling: commits locais, sem `Co-Authored-By` (regra do CLAUDE.md global d
 [2026-11-07] U36: start | baseline selftest 263/0 unit 1075/0 lint nada a reportar
 [2026-11-07] U36: Ruling (i): rota contorna a ponta oeste da haste de aço (x 23.4) e entra na loja pela porta em x 25.2; os bloqueios da primeira versão (caixa de parafusos e parede oeste da loja) são geometria de jogo, não defeito — custo se errado: nenhum, só teste.
 [2026-11-07] U36: complete | gates: RED mutante (main.gd:1020 com 999 pancadas) = 2 FAIL (três pancadas quebram o vidro; a borda do tampo bloqueia em (15.15, 0.85, 10.4) pelo CrackedGlass); GREEN selftest 273/0 (código 0, +10 sobre 263); unit 1075/0 sem mudança; lint nada a reportar | commit: 34f54de (código); docs no commit seguinte
+[2026-11-07] U37: start | baseline selftest 273/0 unit 1075/0 lint nada a reportar
+[2026-11-07] U37: Ruling (i): cobertura de corda/parar fica na unidade (test_exit_outcomes); o check de 'saída antes do fragmento 3 mantém a corda' vai para test_visit_state.gd e não para o selftest, porque é estado puro da visita — custo se errado: nenhum.
+[2026-11-07] U37: complete | gates: RED mutante (clock.wind() antes de incompleto em visit_state.gd) = 2 FAIL (mola e winds); GREEN unit 1078/0 (+3 sobre 1075); selftest 273/0 sem mudança; lint nada a reportar | commit: 6c82e01 (código); docs no commit seguinte
+[2026-11-07] U38: start | baseline selftest 273/0 unit 1078/0 lint nada a reportar
+[2026-11-07] U38: complete | gates: selftest 273/0 (código 0); unit 1078/0 (código 0); --shot-clock código 0 com err=0 (código de save_png; sem linha de vazamento na saída); lint nada a reportar | commit: nenhum código; D2 (escopo congelado) pendente de decisão do Pedro (d)

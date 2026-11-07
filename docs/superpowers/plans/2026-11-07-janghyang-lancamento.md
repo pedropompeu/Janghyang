@@ -308,15 +308,15 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U37 — Regressão dos finais e da saída antecipada
 **Arquivos:** `Janghyang/scripts/selftest.gd` (já cobre: `reaching the tampo edge ends the visit` linha 450; `leaving during 03:33 ends the hour` linha 454; `new figure stays in the maquete` linha 468).
 
-- [ ] Confirmar a cobertura de `corda`, `parar`, `incompleto`. Acrescentar apenas o que faltar: saída antes do fragmento 3 mantém a corda como estava (relojoeiro `§6.7`, linha 134).
-- **Gate:** selftest verde; cada final com ao menos um check.
-- **Commit:** `test: cover the stop-before-fragment-3 exit` (se houve adição).
+- [x] Cobertura confirmada: `incompleto` no selftest (`reaching the tampo edge ends the visit`) e na unidade (`test_exit_outcomes`); `corda` e `parar` só na unidade (`test_exit_outcomes`), porque o selftest não controla a corda na saída. **Adicionado (i):** `test_leaving_before_fragment_three_keeps_the_rope` em `Janghyang/tests/test_visit_state.gd` (em vez de selftest, por ser decisão de estado puro): sair antes do fragmento 3 dá `incompleto` e não muda a mola nem conta corda (relojoeiro `§6.7`, linha 134). Mola posta em 100 antes da saída, porque ela começa no teto (600) e um `wind()` não apareceria. RED por mutante (`clock.wind()` antes de `incompleto` em `visit_state.gd`): 2 FAIL.
+- [x] **Gate:** selftest 273/0 sem mudança; unit 1078/0 (+3 sobre 1075); cada final tem ao menos um check (`corda` e `parar` na unidade); lint nada a reportar.
+- **Commit:** `test: cover the stop-before-fragment-3 exit` (código `6c82e01`).
 
 #### U38 — Gate de fechamento da fase 3
-- [ ] Rodar os três gates e o lint. Registrar a contagem nova como linha de base.
-- [ ] Propor a D2 (escopo congelado) para o Pedro com a lista de unidades concluídas.
+- [x] Rodar os três gates e o lint. Linha de base nova: selftest 273/0; unit 1078/0; `--shot-clock` código 0, `err=0` (o `err` do log é o código de `save_png`, 0 = salvo; a saída não traz linha de vazamento, e a contagem anterior de vazamentos não foi reproduzida com este comando); lint nada a reportar.
+- [ ] Propor a D2 (escopo congelado) para o Pedro com a lista de unidades concluídas. **Pendente de decisão do Pedro (d).**
 - **Gate:** selftest e unidade com a contagem final; lint sem erro novo.
-- **Commit:** nenhum (só ledger).
+- **Commit:** nenhum código (só ledger e plano).
 
 ---
 
