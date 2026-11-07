@@ -283,8 +283,23 @@ func _run() -> void:
 	_record(shaft_top >= 2.9, "W climbs the shaft to the attic floor", "top y %.2f" % shaft_top)
 	_record(main.atlas.room_at(main.player.global_position) == &"sotao", "the top of the shaft is the attic", str(main.atlas.room_at(main.player.global_position)))
 
+	# U34 (partial): the attic floor from the shaft's east rim to the tower door, the door opened by
+	# interaction, then the floor inside the tower to the foot of LadderTowerA. Segments run at the
+	# capsule centre (feet + 0.85) on the attic floor (Y = 2.94).
+	var attic_h := 2.94 + 0.85
+	_check_segment(Vector3(11.2, attic_h, -0.6), Vector3(11.2, attic_h, 7.4), "the attic floor runs south past the east wall of the tower")
+	_check_segment(Vector3(11.2, attic_h, 7.4), Vector3(7.9, attic_h, 7.4), "the attic floor leads west to the tower door")
+	_expect_at("DoorTower", false, "the tower door starts shut")
+	_expect_blocked(Vector3(7.9, attic_h, 6.5), "the shut tower door blocks its gap")
+	await _toggle("DoorTower")
+	_expect_at("DoorTower", true, "interacting opens the tower door")
+	_expect_clear(Vector3(7.9, attic_h, 6.5), "the open tower door leaves its gap clear")
+	_check_segment(Vector3(7.9, attic_h, 7.4), Vector3(7.9, attic_h, 5.0), "the open door takes Elias into the tower")
+	_check_segment(Vector3(7.9, attic_h, 5.0), Vector3(5.7, attic_h, 5.0), "the tower floor runs west past the door leaf")
+	_check_segment(Vector3(5.7, attic_h, 5.0), Vector3(5.7, attic_h, 5.5), "the tower floor reaches the foot of LadderTowerA")
+
 	main.player.rotation.y = PI * 0.5
-	main.player.global_position = Vector3(6.0, 2.95, 5.5)
+	main.player.global_position = Vector3(5.7, 2.95, 5.5)
 	await _frames(3)
 	_record(main.player.ladders > 0, "the tower ladder counts Elias as on the ladder", str(main.player.ladders))
 	_key_event(KEY_W, true)
