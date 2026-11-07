@@ -284,10 +284,10 @@ Cada unidade desta fase cobre uma entrada do Review Focus (seção 5).
 #### U34 — Rota do sótão e do mecanismo, com escada (Review Focus 4)
 **Arquivos:** `Janghyang/scripts/selftest.gd`; leitura de `Janghyang/scripts/areas/sotao.gd` (torre, escada, `TurningGear`) e `Janghyang/scripts/ladder.gd`, `main.gd:503` (`_ladder_area`).
 
-- [ ] **Teste (RED):** `W` fora de escada não sobe (check de `ladders == 0` → movimento horizontal, sem `y` aumentando).
-- [ ] **Teste (RED):** dentro da escada, `W` sobe; ao chegar ao topo, `atlas.room_at` retorna `&"mecanismo"`.
-- [ ] Segmento da rota: sala → escada → sótão → torre.
-- **Gate:** selftest com os checks; 0 falhas.
+- [x] **Teste (RED):** `W` fora de escada não sobe — `W off the ladder walks, Elias stays on the floor` (teclas por `Input.parse_input_event`, como o `tour.gd`). RED por mutante do volume da escada (`ladder.gd` sem contar): 5 FAIL.
+- [x] **Teste (RED):** dentro da escada, `W` sobe; no topo da escada da torre, `atlas.room_at` retorna `&"mecanismo"` (`W climbs the tower ladder`; `at the top of the tower ladder Elias is in the mechanism`).
+- [~] Segmento da rota: sala → escada → sótão → torre. **Parcial (i):** a escada da passagem e a da torre são percorridas com `W`; o chão do sótão entre elas **não** é percorrido por segmento, e a base da escada da torre é alcançada por teleporte. A porta da torre (`DoorTower`) é fechada e exige interação, que o selftest ainda não faz.
+- [x] **Gate:** selftest 258/0 (+7 sobre 251), código 0; unit 1075/0 sem mudança.
 - **Commit:** `test: climb the attic ladder and reach the mechanism in the selftest`.
 
 #### U35 — Rota da gaveta
