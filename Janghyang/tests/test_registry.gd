@@ -153,3 +153,18 @@ func test_mecanismo_def_matches_today(t) -> void:
 	var ids: Array = Registry.defs().map(func(x): return x.id)
 	t.ok(ids.find(&"mecanismo") < ids.find(&"sotao"), "the tower is built and tried before the attic")
 	t.eq(Atlas.new().room_at(Vector3(7.9, 4.0, 3.75)), &"mecanismo", "inside the tower is the tower, not the attic")
+
+func test_gaveta_def_matches_today(t) -> void:
+	var d := Registry.def(&"gaveta")
+	t.ok(not d.is_empty(), "the drawer is registered")
+	if d.is_empty():
+		return
+	t.near(d.safe.distance_to(Vector3(14.9, -3.0, 1.9)), 0.0, 0.01, "safe point of the drawer")
+	t.eq(d.rooms.map(func(r): return r.id), [&"gaveta"], "one room")
+	t.eq(d.rooms[0].rect, Rect2(-1.0, -1.0, 18.0, 14.0), "rect of the drawer")
+	t.eq(d.rooms[0].y, Vector2(-3.6, -0.5), "height band of the drawer")
+	t.eq(d.tasks, {&"gaveta": &"descer_gaveta"}, "setting foot there goes down")
+	t.eq(d.breaks, {"Trapdoor": &"achar_alcapao"}, "breaking the trapdoor finds it")
+	var to := _links_by_target(d)
+	t.eq(to.keys(), [&"casa"], "a link up to the house")
+	t.eq(to.get(&"casa", {}).get("gate"), &"Trapdoor", "the trapdoor gates the house")

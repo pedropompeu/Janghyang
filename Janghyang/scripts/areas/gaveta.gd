@@ -14,6 +14,21 @@ const Z1 := 13.0
 const HOLE := Rect2(14.45, 0.0, 0.95, 1.0)
 const SLIT := -0.75
 
+const DEF := {
+	"id": &"gaveta",
+	"maquete": &"item_214",
+	"name": "A gaveta",
+	"rooms": [
+		{"id": &"gaveta", "name": "gaveta", "rect": Rect2(X0, Z0, X1 - X0, Z1 - Z0), "y": Vector2(-3.6, -0.5)},
+	],
+	"safe": Vector3(14.9, -3.0, 1.9),
+	"links": [
+		{"to": &"casa", "at": Vector3(14.9, 0.2, 1.3), "path": [Vector3(14.925, -3.0, 0.52), Vector3(14.925, 0.2, 0.52)], "gate": &"Trapdoor"},
+	],
+	"tasks": {&"gaveta": &"descer_gaveta"},
+	"breaks": {"Trapdoor": &"achar_alcapao"},
+}
+
 static func build(main: Node3D) -> void:
 	var root := Node3D.new()
 	root.name = "Gaveta"

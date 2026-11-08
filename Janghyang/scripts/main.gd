@@ -27,6 +27,8 @@ const DreadModel = preload("res://scripts/dread_model.gd")
 const Dread = preload("res://scripts/dread.gd")
 const Breakable = preload("res://scripts/breakable.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
+## Only for the drawer's hole in the floors above it, until the house and the
+## tabletop move into their own areas (Tasks 7 and 8).
 const AreaGaveta = preload("res://scripts/areas/gaveta.gd")
 const AreaLeste = preload("res://scripts/areas/leste.gd")
 const QuestModel = preload("res://scripts/quest_model.gd")
@@ -52,12 +54,11 @@ const CRACKED_Z := Vector2(9.1, 12.5)
 ## floor begins. The crawlspace has no room to stand, so its point is outside.
 const _LEGACY_SAFE := {
 	&"casa": SPAWN,
-	&"gaveta": Vector3(14.9, -3.0, 1.9),
 	&"tampo": AreaLeste.SAFE,
 }
 ## Lots struck by setting foot somewhere, breaking something, or cataloguing.
-const _LEGACY_ROOM_TASKS := {&"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}
-const _LEGACY_BREAK_TASKS := {"Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}
+const _LEGACY_ROOM_TASKS := {&"loja_varela": &"chegar_relojoaria"}
+const _LEGACY_BREAK_TASKS := {"CrackedGlass": &"quebrar_redoma"}
 const _LEGACY_CATALOG_TASKS := {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}
 ## The maps main reads: the legacy ones above with every registered area's own
 ## entries over them (an area's word wins once it has moved to the registry).
@@ -169,7 +170,6 @@ func _ready() -> void:
 	_build_oficina()
 	for area in Registry.AREAS:
 		area.build(self)
-	AreaGaveta.build(self)
 	AreaLeste.build(self)
 	_build_giant_elias()
 	_build_player()
