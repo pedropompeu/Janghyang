@@ -269,5 +269,17 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 ### Próximo passo
 
-1. [2026-11-08] (i) Pedro responde as perguntas de [[rumo-2026-11]].
-2. [2026-11-08] (i) Documento de direção: capítulos, maquetes e noites, ações, bússola, planta, pipeline de assets; depois, plano novo no lugar do de 2026-11-07.
+1. [2026-11-08 ~superseded 2026-11-08] (i) ~~Pedro responde as perguntas de [[rumo-2026-11]].~~ → respondidas em R10–R15; só os sustos com estouro de volume seguem abertos.
+2. [2026-11-08 ~superseded 2026-11-08] (i) ~~Documento de direção: capítulos, maquetes e noites, ações, bússola, planta, pipeline de assets; depois, plano novo no lugar do de 2026-11-07.~~ → escrito; ver [[#sessao-2026-11-08-direcao]].
+
+## [2026-11-08] Documento de direção {#sessao-2026-11-08-direcao}
+
+- [2026-11-08] (d) Pedro: "pode começar o documento de direção".
+- [2026-11-08] (e) ← `docs/superpowers/specs/2026-11-08-janghyang-direcao-design.md` Escrito a partir de R1–R15: noites e maquetes, sete capítulos, a bússola, a planta em tempo real, as onze ações, a captura, a curva de segurança da casa, o registro de áreas, os sustos, o fluxo de assets e o recorte da demo (noites 1 e 2).
+- [2026-11-08] (i) Tudo marcado [escolha da IA] no documento espera a leitura de Pedro, em especial o conteúdo novo dos capítulos e a mansão como terceira maquete (Item 216, com os 3 cômodos novos).
+- [2026-11-08] (e) ← OpenCode (agente `consult`, sessão ses_e443c8982ffex4tasIyPlyBlka) Leitura de construtor: 14 pontos. Doze foram resolvidos no documento como [escolha da IA]: segurança por ponto no lugar de `REFUGE`, sobreposição torre/sótão, caderno sem pausa, termos nível/área/cômodo, gatilho do 03:33 por noite, rota da bússola, `capture_model`, grade da névoa, contrato do registro, encenação, névoa volumétrica ausente em Compatibility e a justificativa do `preload`. O risco da demo (22 semanas para onze ações) ficou no §15, com uma ordem que antecipa o primeiro playtest; o recorte das ações é pergunta para Pedro (§20).
+
+### Próximo passo
+
+1. [2026-11-08] (i) Pedro lê e aprova o documento de direção, ou pede mudanças.
+2. [2026-11-08] (i) Depois da aprovação: plano novo (superpowers:writing-plans) no lugar de `docs/superpowers/plans/2026-11-07-janghyang-lancamento.md`.
