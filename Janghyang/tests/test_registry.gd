@@ -35,8 +35,7 @@ func test_defs_are_valid(t) -> void:
 
 func test_atlas_rooms_are_unchanged_by_the_merge(t) -> void:
 	t.eq(Atlas.rooms().map(func(r): return r.id), TODAY, "same rooms, same order as today")
-	for lvl in [&"casa", &"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]:
-		t.ok(Atlas.levels().has(lvl), "level %s is still known" % lvl)
+	t.eq(Atlas.levels().keys(), [&"casa", &"passagem", &"mecanismo", &"sotao", &"gaveta", &"tampo"], "the plan's levels follow the registry")
 
 ## Every pair of rooms whose boxes overlap, the room tried first on the left.
 ## A new area that lands inside another, or a reordering, shows up here.
@@ -78,18 +77,10 @@ func test_every_def_spells_out_what_it_needs(t) -> void:
 			t.ok(r.get("rect") is Rect2 and r.rect.get_area() > 0.0, "room %s has a floor rect" % r.get("id"))
 			t.ok(r.get("y") is Vector2 and r.y.y > r.y.x, "room %s has a height band" % r.get("id"))
 
-func test_no_area_is_left_in_mains_legacy_maps(t) -> void:
-	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
-	var pairs := {"_LEGACY_SAFE": Registry.safe_points(), "_LEGACY_ROOM_TASKS": Registry.merged("tasks"), "_LEGACY_BREAK_TASKS": Registry.merged("breaks"), "_LEGACY_CATALOG_TASKS": Registry.merged("catalog")}
-	for name in pairs:
-		for k in consts.get(name, {}):
-			t.ok(not pairs[name].has(k), "%s is said once: in its area, not in main's %s" % [k, name])
-
 func test_the_maps_still_hold_todays_lots(t) -> void:
-	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
-	var tasks: Dictionary = consts.get("_LEGACY_ROOM_TASKS", {}).merged(Registry.merged("tasks"))
-	var breaks: Dictionary = consts.get("_LEGACY_BREAK_TASKS", {}).merged(Registry.merged("breaks"))
-	var catalog: Dictionary = consts.get("_LEGACY_CATALOG_TASKS", {}).merged(Registry.merged("catalog"))
+	var tasks := Registry.merged("tasks")
+	var breaks := Registry.merged("breaks")
+	var catalog := Registry.merged("catalog")
 	t.eq(tasks, {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}, "lots struck by setting foot")
 	t.eq(breaks, {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}, "lots struck by breaking")
 	t.eq(catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
@@ -187,3 +178,39 @@ func test_tampo_def_matches_today(t) -> void:
 	var to := _links_by_target(d)
 	t.eq(to.keys(), [&"casa"], "a link back into the dome")
 	t.eq(to.get(&"casa", {}).get("gate"), &"CrackedGlass", "the cracked glass gates the house")
+
+const HOUSE_ROOMS := [
+	[&"entrada", "entrada", Rect2(0.0, 7.0, 3.5, 2.1)],
+	[&"brincar", "quarto de brincar", Rect2(0.0, 0.0, 8.4, 7.0)],
+	[&"corredor", "corredor", Rect2(8.4, 0.0, 2.1, 7.7)],
+	[&"quarto", "quarto", Rect2(10.5, 0.0, 4.9, 5.6)],
+	[&"figuras", "sala das figuras", Rect2(10.5, 7.0, 2.8, 2.1)],
+	[&"corredor_sul", "corredor da frente", Rect2(3.5, 7.7, 7.0, 1.4)],
+	[&"beira_oeste", "beira oeste", Rect2(-3.2, 0.0, 3.2, 9.1)],
+	[&"beira_sul", "beira sul", Rect2(0.0, 9.1, 15.4, 3.4)],
+]
+
+func test_casa_def_matches_today(t) -> void:
+	var d := Registry.def(&"casa")
+	t.ok(not d.is_empty(), "the house is registered")
+	if d.is_empty():
+		return
+	t.eq(Registry.defs()[0].id, &"casa", "the house is built first")
+	t.near(d.safe.distance_to(Vector3(1.8, 0.2, 8.3)), 0.0, 0.01, "Elias wakes where the game starts")
+	t.eq(d.maquete, &"item_214", "the Moreira model")
+	t.eq(d.rooms.size(), HOUSE_ROOMS.size(), "eight rooms")
+	for i in mini(d.rooms.size(), HOUSE_ROOMS.size()):
+		t.eq(d.rooms[i].id, HOUSE_ROOMS[i][0], "room %d of the house" % i)
+		t.eq(d.rooms[i].name, HOUSE_ROOMS[i][1], "name of %s" % HOUSE_ROOMS[i][0])
+		t.eq(d.rooms[i].rect, HOUSE_ROOMS[i][2], "rect of %s" % HOUSE_ROOMS[i][0])
+		t.eq(d.rooms[i].y, Vector2(-0.4, 2.8), "height band of %s" % HOUSE_ROOMS[i][0])
+	t.eq(d.catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
+
+func test_main_knows_no_area_by_name(t) -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/main.gd")
+	t.ok(not src.contains("res://scripts/areas/") or src.count("res://scripts/areas/") == 1, "main só carrega o registry")
+	for id in [&"passagem", &"sotao", &"gaveta", &"tampo"]:
+		t.ok(not src.contains("Area%s" % String(id).capitalize()), "main não chama %s direto" % id)
+	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
+	for name in ["_LEGACY_SAFE", "_LEGACY_ROOM_TASKS", "_LEGACY_BREAK_TASKS", "_LEGACY_CATALOG_TASKS"]:
+		t.ok(not consts.has(name), "main keeps no %s" % name)

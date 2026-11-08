@@ -4,40 +4,13 @@ extends RefCounted
 ## has a height band so the attic is not the playroom. Order matters: the
 ## first room that contains a point wins (the tower sits inside the attic).
 ##
-## The rooms come from the area registry; the LEGACY_ lists hold the areas not
-## yet moved there. ROOM_ORDER and LEVEL_ORDER keep today's order while the
-## move is under way: a level's rooms come from the registry once it is there,
-## from LEGACY_ROOMS until then.
+## The rooms and levels come from the area registry, in its order.
 
 const Registry = preload("res://scripts/areas/registry.gd")
 
 const ATTIC_Y := 2.94
 const ATTIC_TOP := 5.24
 const DRAWER_Y := -3.2
-
-## Levels in the order their rooms are tried (the tower before the attic) and
-## in the order the plan shows them.
-const ROOM_ORDER := [&"casa", &"passagem", &"mecanismo", &"sotao", &"gaveta", &"tampo"]
-const LEVEL_ORDER := [&"casa", &"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]
-
-const LEGACY_LEVELS := {
-	&"casa": "A casa",
-	&"sotao": "O sótão",
-	&"mecanismo": "O mecanismo",
-	&"gaveta": "A gaveta",
-	&"tampo": "O tampo",
-}
-
-const LEGACY_ROOMS := [
-	{"id": &"entrada", "name": "entrada", "level": &"casa", "rect": Rect2(0.0, 7.0, 3.5, 2.1), "y": Vector2(-0.4, 2.8)},
-	{"id": &"brincar", "name": "quarto de brincar", "level": &"casa", "rect": Rect2(0.0, 0.0, 8.4, 7.0), "y": Vector2(-0.4, 2.8)},
-	{"id": &"corredor", "name": "corredor", "level": &"casa", "rect": Rect2(8.4, 0.0, 2.1, 7.7), "y": Vector2(-0.4, 2.8)},
-	{"id": &"quarto", "name": "quarto", "level": &"casa", "rect": Rect2(10.5, 0.0, 4.9, 5.6), "y": Vector2(-0.4, 2.8)},
-	{"id": &"figuras", "name": "sala das figuras", "level": &"casa", "rect": Rect2(10.5, 7.0, 2.8, 2.1), "y": Vector2(-0.4, 2.8)},
-	{"id": &"corredor_sul", "name": "corredor da frente", "level": &"casa", "rect": Rect2(3.5, 7.7, 7.0, 1.4), "y": Vector2(-0.4, 2.8)},
-	{"id": &"beira_oeste", "name": "beira oeste", "level": &"casa", "rect": Rect2(-3.2, 0.0, 3.2, 9.1), "y": Vector2(-0.4, 2.8)},
-	{"id": &"beira_sul", "name": "beira sul", "level": &"casa", "rect": Rect2(0.0, 9.1, 15.4, 3.4), "y": Vector2(-0.4, 2.8)},
-]
 
 ## Rooms whose name takes "na" (the rest take "no").
 const FEMININE := [&"entrada", &"figuras", &"beira_oeste", &"beira_sul", &"passagem", &"mecanismo", &"gaveta", &"loja_varela", &"oficina_varela", &"tampo_leste"]
@@ -47,28 +20,16 @@ var visited: Dictionary = {}
 static var _rooms: Array = []
 static var _levels: Dictionary = {}
 
-## Every room of the bench, in order: legacy ones and registered areas merged.
+## Every room of the bench, in registry order.
 static func rooms() -> Array:
 	if _rooms.is_empty():
-		for lvl in ROOM_ORDER:
-			if Registry.has_area(lvl):
-				_rooms.append_array(Registry.def(lvl).rooms)
-			else:
-				_rooms.append_array(LEGACY_ROOMS.filter(func(r): return r.level == lvl))
-		for d in Registry.defs():
-			if not ROOM_ORDER.has(d.id):
-				_rooms.append_array(d.rooms)
+		_rooms = Registry.rooms()
 	return _rooms
 
-## Level id → its name on the plan, in today's order, then new areas.
+## Level id → its name on the plan, in registry order.
 static func levels() -> Dictionary:
 	if _levels.is_empty():
-		var reg := Registry.levels()
-		for lvl in LEVEL_ORDER:
-			_levels[lvl] = reg.get(lvl, LEGACY_LEVELS.get(lvl, ""))
-		for lvl in reg:
-			if not _levels.has(lvl):
-				_levels[lvl] = reg[lvl]
+		_levels = Registry.levels()
 	return _levels
 
 ## "na passagem", "no corredor": where something happened, for the notebook.

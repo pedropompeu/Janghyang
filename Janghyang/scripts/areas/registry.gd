@@ -9,6 +9,7 @@ extends RefCounted
 ## packs only what is preloaded.
 
 const AREAS := [
+	preload("res://scripts/areas/casa.gd"),
 	preload("res://scripts/areas/passagem.gd"),
 	preload("res://scripts/areas/mecanismo.gd"),
 	preload("res://scripts/areas/sotao.gd"),
@@ -24,6 +25,7 @@ const HELPERS := {
 	&"_rungs": 4, &"_ladder_area": 4, &"_hideout": 4, &"_piece": 3,
 	&"_chalk": 4, &"_chalk_frame": 5, &"_catalog_target": 4,
 	&"_slab_with_holes": 9,
+	&"_ceiling": 5, &"_house_light": 6, &"_style_mat": 1,
 }
 
 const _EMPTY := {
