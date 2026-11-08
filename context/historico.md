@@ -311,4 +311,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 16. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 14: mãos e bolsos.~~ → feita na sessão principal: `hands_model.gd`, `T`, roda e clique esquerdo, página "bolsos" ([[achados#a-025]]); unidade 2106/0, selftest 356/0.
 17. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 15: a captura com fuga.~~ → feita na sessão principal: `capture_model.gd`, `capture_fx.gd`, opções de acessibilidade, som `crack` ([[achados#a-026]]); unidade 2155/0, selftest 373/0.
 18. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 16: o modelo da bússola.~~ → feita na sessão principal: `compass_model.gd` (rota BFS, mira, tique, tremor); unidade 2183/0.
-19. [2026-11-08] (i) Tarefa 17: o relógio de Elias na mão e a apresentação da noite 1.
+19. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 17: o relógio de Elias na mão e a apresentação da noite 1.~~ → feita na sessão principal: `pocket_watch.gd`, carta e apagão da noite 1, mutantes da T15 fechados; unidade 2188/0, selftest 393/0. Captura `blockout-watch.png` para o checkpoint D7.
+20. [2026-11-08] (i) Tarefa 18: a planta com névoa e o caderno sem pausa (fecha [[achados#a-026]]).
