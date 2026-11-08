@@ -168,6 +168,10 @@ var _shutting_down := false
 var campaign
 var night: Dictionary = {}
 var night_card
+## Grabs this session (the playtest log counts them).
+var grabs := 0
+## With --playtest (playtest_log.gd).
+var playtest_log
 ## The hand items Elias has on him this night.
 var pockets: Array[StringName] = []
 ## Where the campaign saves; empty when this run must not touch the save.
@@ -232,6 +236,12 @@ func _ready() -> void:
 		_save_path = Campaign.PATH
 		campaign.load_or_fresh(_save_path)
 		begin_night(campaign.night)
+
+	if args.has("--playtest"):
+		playtest_log = preload("res://scripts/playtest_log.gd").new()
+		playtest_log.name = "PlaytestLog"
+		playtest_log.main = self
+		add_child(playtest_log)
 
 	if args.has("--tour"):
 		var tour := preload("res://scripts/tour.gd").new()
@@ -1379,6 +1389,7 @@ func _track_place() -> void:
 ## A Gasto has Elias (gastos.gd, capture_model.gd): the notebook shuts, he
 ## can only push, and the screen flickers dark until he breaks free or not.
 func _on_grabbed(i: int) -> void:
+	grabs += 1
 	if notebook.is_open():
 		notebook.close()
 	player.input_locked = true

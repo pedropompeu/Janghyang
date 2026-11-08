@@ -204,3 +204,9 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `dread.gd`: `director`; a cada frame segue a hora (`hour_event.is_active()`) e o barulho (`loud_now()`: captura ou fôlego acima de 0,5); a lâmpada (`lampada`, fraco) e a lanterna (`lanterna_pisca`, forte) pedem licença; o rangido continua ambiente.
   - `main.gd`: `dread.director.new_night()` no começo de cada noite.
   - Contagens: unit 2486/0, selftest 446/0 (checks `sustos:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/lost_model.gd`, `scripts/playtest_log.gd`, `scripts/main.gd`, `context/discussoes/playtest-1.md` Tarefa 25, registro do playtest:
+  - `lost_model.gd`: `LOST_AFTER` 180, `PROGRESS` 2; `update(dt, goal_distance, goal_id)` avisa uma vez quando passam 180 s na mesma meta sem chegar 2 m mais perto do melhor ponto; `is_lost()`.
+  - `playtest_log.gd`: com `--playtest`, uma linha CSV a cada 5 s em `user://playtest/<data-hora>.csv` (`t, noite, area, comodo, meta, dist, relogio_aberto, caderno_aberto, capturas, perdido`); `header()`, `row(d)`, `sample()`, `start(path)`, `stop()`.
+  - `main.gd`: `grabs` (capturas da sessão) e `playtest_log` (nó `PlaytestLog`, só com `--playtest`).
+  - O export Linux (`build/linux/Janghyang`, fora do git) roda o `--selftest`.
+  - Contagens: unit 2502/0, selftest 449/0 (checks `playtest:`).

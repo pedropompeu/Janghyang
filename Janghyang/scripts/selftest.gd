@@ -529,6 +529,7 @@ func _run() -> void:
 
 	await _nights()
 	await _safety()
+	await _playtest_log()
 
 	print("SELFTEST: 03:33")
 	_feed_loop()
@@ -785,6 +786,24 @@ func _light() -> void:
 
 ## Spec §11: safety by point and by night, not a refuge floor. Ends on night 5,
 ## where the rest of the selftest plays.
+## The --playtest log: a file with the header and one line per sample.
+func _playtest_log() -> void:
+	print("SELFTEST: playtest log")
+	_record(main.playtest_log == null, "playtest: no log without --playtest", "")
+	var plog = preload("res://scripts/playtest_log.gd").new()
+	plog.main = main
+	plog.path = "user://playtest/selftest.csv"
+	add_child(plog)
+	await get_tree().process_frame
+	plog.write_row()
+	plog.stop()
+	var lines := FileAccess.get_file_as_string("user://playtest/selftest.csv").strip_edges().split("\n")
+	_record(lines.size() >= 2 and lines[0] == plog.header(), "playtest: the log starts with the columns", str(lines.size()))
+	var cols: PackedStringArray = lines[-1].split(",")
+	_record(cols.size() == 10 and cols[1] != "" and cols[3] != "", "playtest: a line has the night and the room", lines[-1])
+	plog.queue_free()
+	DirAccess.remove_absolute("user://playtest/selftest.csv")
+
 func _safety() -> void:
 	print("SELFTEST: safety")
 	var g = main.gastos
