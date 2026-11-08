@@ -37,9 +37,6 @@ const LEGACY_ROOMS := [
 	{"id": &"corredor_sul", "name": "corredor da frente", "level": &"casa", "rect": Rect2(3.5, 7.7, 7.0, 1.4), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_oeste", "name": "beira oeste", "level": &"casa", "rect": Rect2(-3.2, 0.0, 3.2, 9.1), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_sul", "name": "beira sul", "level": &"casa", "rect": Rect2(0.0, 9.1, 15.4, 3.4), "y": Vector2(-0.4, 2.8)},
-	{"id": &"loja_varela", "name": "Relojoaria Varela", "level": &"tampo", "rect": Rect2(20.0, -7.0, 10.0, 5.0), "y": Vector2(-0.4, 3.0)},
-	{"id": &"oficina_varela", "name": "oficina dos fundos", "level": &"tampo", "rect": Rect2(20.0, -12.0, 10.0, 5.0), "y": Vector2(-0.4, 3.0)},
-	{"id": &"tampo_leste", "name": "bancada", "level": &"tampo", "rect": Rect2(15.4, -16.0, 18.6, 29.4), "y": Vector2(-0.4, 3.0)},
 ]
 
 ## Rooms whose name takes "na" (the rest take "no").

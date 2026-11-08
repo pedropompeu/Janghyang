@@ -168,3 +168,22 @@ func test_gaveta_def_matches_today(t) -> void:
 	var to := _links_by_target(d)
 	t.eq(to.keys(), [&"casa"], "a link up to the house")
 	t.eq(to.get(&"casa", {}).get("gate"), &"Trapdoor", "the trapdoor gates the house")
+
+func test_tampo_def_matches_today(t) -> void:
+	var d := Registry.def(&"tampo")
+	t.ok(not d.is_empty(), "the tabletop is registered")
+	if d.is_empty():
+		return
+	t.near(d.safe.distance_to(Vector3(16.6, 0.2, 10.8)), 0.0, 0.01, "safe point of the tabletop: just outside the broken glass")
+	t.eq(d.rooms.map(func(r): return r.id), [&"loja_varela", &"oficina_varela", &"tampo_leste"], "the shop, its back room, the bench")
+	t.eq(d.rooms[0].rect, Rect2(20.0, -7.0, 10.0, 5.0), "rect of the shop")
+	t.eq(d.rooms[1].rect, Rect2(20.0, -12.0, 10.0, 5.0), "rect of the back room")
+	t.eq(d.rooms[2].rect, Rect2(15.4, -16.0, 18.6, 29.4), "rect of the bench")
+	for r in d.rooms:
+		t.eq(r.y, Vector2(-0.4, 3.0), "height band of %s" % r.id)
+	t.eq(d.maquete, &"item_215", "the Varela model")
+	t.eq(d.tasks, {&"loja_varela": &"chegar_relojoaria"}, "reaching the shop")
+	t.eq(d.breaks, {"CrackedGlass": &"quebrar_redoma"}, "breaking the dome glass")
+	var to := _links_by_target(d)
+	t.eq(to.keys(), [&"casa"], "a link back into the dome")
+	t.eq(to.get(&"casa", {}).get("gate"), &"CrackedGlass", "the cracked glass gates the house")

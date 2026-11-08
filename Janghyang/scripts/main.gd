@@ -30,7 +30,6 @@ const Registry = preload("res://scripts/areas/registry.gd")
 ## Only for the drawer's hole in the floors above it, until the house and the
 ## tabletop move into their own areas (Tasks 7 and 8).
 const AreaGaveta = preload("res://scripts/areas/gaveta.gd")
-const AreaLeste = preload("res://scripts/areas/leste.gd")
 const QuestModel = preload("res://scripts/quest_model.gd")
 const Atlas = preload("res://scripts/atlas.gd")
 const Gastos = preload("res://scripts/gastos.gd")
@@ -54,11 +53,10 @@ const CRACKED_Z := Vector2(9.1, 12.5)
 ## floor begins. The crawlspace has no room to stand, so its point is outside.
 const _LEGACY_SAFE := {
 	&"casa": SPAWN,
-	&"tampo": AreaLeste.SAFE,
 }
 ## Lots struck by setting foot somewhere, breaking something, or cataloguing.
-const _LEGACY_ROOM_TASKS := {&"loja_varela": &"chegar_relojoaria"}
-const _LEGACY_BREAK_TASKS := {"CrackedGlass": &"quebrar_redoma"}
+const _LEGACY_ROOM_TASKS := {}
+const _LEGACY_BREAK_TASKS := {}
 const _LEGACY_CATALOG_TASKS := {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}
 ## The maps main reads: the legacy ones above with every registered area's own
 ## entries over them (an area's word wins once it has moved to the registry).
@@ -167,10 +165,8 @@ func _ready() -> void:
 	_build_house()
 	_build_furniture()
 	_build_tampo()
-	_build_oficina()
 	for area in Registry.AREAS:
 		area.build(self)
-	AreaLeste.build(self)
 	_build_giant_elias()
 	_build_player()
 	# F1 never folds onto a player sitting in the cabana.
@@ -1074,37 +1070,6 @@ func _build_tampo() -> void:
 		if body == player:
 			exit_edge_reached.emit())
 	add_child(edge)
-
-func _build_oficina() -> void:
-	# Inácio's real workshop at GIANT scale. Nothing here collides: it is only
-	# ever seen through the dome and the windows.
-	var oficina := Node3D.new()
-	oficina.name = "Oficina"
-	add_child(oficina)
-	var bench_y := -0.8 * GIANT
-	# Bench top around the model, its front edge and the floor far below.
-	_slab_with_holes(oficina, -34.0, -40.0, 46.0, 13.5, -0.52, -0.12, [AreaGaveta.HOLE, AreaLeste.GROOVE], mat_wood_dark)
-	_box(oficina, Vector3(80.0, 9.6, 0.4), Vector3(6.0, -4.8, 13.5), mat_wood_dark, false)
-	_box(oficina, Vector3(90.0, 0.4, 40.0), Vector3(6.0, bench_y - 0.2, 33.5), mat_floor_corridor, false)
-	# Back wall to the north, with a rain window at 12x.
-	_box(oficina, Vector3(90.0, 40.0, 0.5), Vector3(6.0, 10.0, -40.0), mat_wall_exterior, false)
-	var win_c := Vector3(6.0, 12.0, -39.7)
-	_box(oficina, Vector3(2.8 * GIANT, 1.5 * GIANT, 0.2), win_c, mat_window, false)
-	_box(oficina, Vector3(3.0 * GIANT, 0.08 * GIANT, 0.6), win_c + Vector3(0.0, 0.75 * GIANT, 0.2), mat_wood, false)
-	_box(oficina, Vector3(3.0 * GIANT, 0.08 * GIANT, 0.6), win_c + Vector3(0.0, -0.75 * GIANT, 0.2), mat_wood, false)
-	_box(oficina, Vector3(0.08 * GIANT, 1.5 * GIANT, 0.6), win_c + Vector3(-1.4 * GIANT, 0.0, 0.2), mat_wood, false)
-	_box(oficina, Vector3(0.08 * GIANT, 1.5 * GIANT, 0.6), win_c + Vector3(1.4 * GIANT, 0.0, 0.2), mat_wood, false)
-	for i in range(14):
-		var x := win_c.x - 1.3 * GIANT + i * 0.2 * GIANT
-		_box(oficina, Vector3(0.012 * GIANT, 1.2 * GIANT, 0.1), Vector3(x, win_c.y, win_c.z + 0.2), mat_rain, false, Vector3(0.0, 0.0, deg_to_rad(-8.0)))
-	_omni(oficina, Vector3(6.0, 10.0, -36.0), Color(0.45, 0.6, 0.8), 1.2, 30.0, false)
-	# The giant desk lamp leaning over the bench.
-	var shade := CylinderMesh.new()
-	shade.top_radius = 0.07 * GIANT
-	shade.bottom_radius = 0.28 * GIANT
-	shade.height = 0.22 * GIANT
-	_add_mesh(oficina, shade, Vector3(6.0, 19.2, 16.0), mat_cream)
-	_omni(oficina, Vector3(6.0, 18.0, 16.0), Color(1.0, 0.74, 0.45), 1.6, 45.0, false)
 
 ## The pieces of the truth: the two Inácio figures wear the same pocket watch;
 ## the cataloger figure has none, only a notebook and a letter on its lap.

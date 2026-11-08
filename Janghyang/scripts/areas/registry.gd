@@ -13,6 +13,7 @@ const AREAS := [
 	preload("res://scripts/areas/mecanismo.gd"),
 	preload("res://scripts/areas/sotao.gd"),
 	preload("res://scripts/areas/gaveta.gd"),
+	preload("res://scripts/areas/tampo.gd"),
 ]
 
 ## The helpers of main.gd an area may call, with their argument count
@@ -22,6 +23,7 @@ const HELPERS := {
 	&"_wall_x": 7, &"_wall_z": 7, &"_hinge": 12, &"_cyl": 7, &"_breakable": 7,
 	&"_rungs": 4, &"_ladder_area": 4, &"_hideout": 4, &"_piece": 3,
 	&"_chalk": 4, &"_chalk_frame": 5, &"_catalog_target": 4,
+	&"_slab_with_holes": 9,
 }
 
 const _EMPTY := {
