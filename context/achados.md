@@ -140,6 +140,46 @@ relacionado:
 - **Estado:** aberto — diagnóstico instalado na U12 (`[reload] R via <evento>` em `player.gd`). Fecha quando o log aparecer numa rodada real de `--tour` ou numa sessão de Pedro.
 - [2026-11-07] (e) ← `Janghyang/scripts/player.gd` (ramo do `R`): com um evento de `R` injetado num selftest de cópia descartável, o log `[reload] R via InputEventKey: keycode=82 (R) ... pressed=true, echo=false` aparece antes do reload.
 
+### [A-026] Os Gastos ficam parados enquanto o caderno está aberto {#a-026}
+
+- [2026-11-08] (i) ← `Janghyang/scripts/gastos.gd` (`_process` volta cedo com `main.player.input_locked`) e `scripts/notebook_ui.gd` (`_set_locked(true)` ao abrir). Visto ao ligar a captura na Tarefa 15.
+- **Severidade:** médio — o caderno vira um esconderijo: com ele aberto nenhum Gasto anda, olha ou agarra, e a captura só começa com o caderno fechado.
+- **Onde:** `gastos.gd`, `_process`; `notebook_ui.gd`, `open`/`close`.
+- **Reprodução:** com um Gasto em jogo, abrir o caderno (`Tab`) e esperar: ninguém se move.
+- **Por que importa:** o §8 quer o caderno sem pausa, e o check "a captura fecha o caderno" da Tarefa 15 só passa hoje chamando `_grab` direto.
+- **Fix recomendado:** na Tarefa 18 (planta sem pausa), separar "trava o corpo" de "trava o mundo": o caderno trava a câmera e o andar, mas `gastos.gd` passa a olhar um sinal próprio (ex.: `main.world_frozen()`) em vez de `input_locked`. Custo pequeno.
+- **Estado:** aberto. (i)
+
+### [A-025] A lanterna e o item da mão esquerda dividem a mesma mão {#a-025}
+
+- [2026-11-08] (i) ← `Janghyang/scripts/hands.gd` (`_lantern` e `HeldItem` filhos de `_left`) e o §6 do documento de direção ("a lanterna fica na mão direita"). Visto ao fechar a Tarefa 14.
+- **Severidade:** baixo — só a leitura visual: com a lanterna acesa e o relógio aberto, os dois blocos aparecem juntos na mão esquerda e a vareta segue na direita.
+- **Onde:** `hands.gd`, `_build_rig`; o feixe sai de `_left.position + LENS`.
+- **Reprodução:** acender a lanterna (`F`) e abrir o relógio (`T`): lanterna e relógio na mesma mão.
+- **Por que importa:** o §6 põe a lanterna na direita para a esquerda ficar com uma coisa por vez; o relógio é o asset mais visto do jogo (§13).
+- **Fix recomendado:** passar a lanterna para a mão direita (e a vareta para a esquerda, como item) junto dos assets das mãos (Tarefas 35 e 39); ajustar os checks "the lantern beam comes from the left hand" e "the right hand holds a stick". Custo pequeno.
+- **Estado:** aberto. (i)
+
+### [A-023] A luz da oficina faz qualquer canto da casa contar como iluminado para os Gastos {#a-023}
+
+- [2026-11-08] (i) ← `Janghyang/scripts/gastos.gd` (`_lamp_lit`, usado por `seen`/`blind`). Visto na revisão da Tarefa 13.
+- **Severidade:** médio — um Gasto que devia ficar parado no escuro pode ser tratado como "na luz" (e o contrário) longe de qualquer lâmpada, e o medo da espreita fica imprevisível.
+- **Onde:** `_lamp_lit(p)` aceita todo `OmniLight3D` visível com energia acima de 0,25 a menos de 60% do alcance; a luz da oficina tem alcance 45, então cobre uns 27 m.
+- **Reprodução:** estática. Com Elias na casa, `_lamp_lit` de um ponto do corredor dá verdadeiro só pela luz da oficina.
+- **Por que importa:** a regra de segurança da noite 3 já usa só as `HouseLight` por cômodo; a percepção dos Gastos devia seguir a mesma leitura de luz.
+- **Fix recomendado:** limitar `_lamp_lit` às luzes da mesma área (ou ao grupo `HouseLight` dentro de casa) e com alcance efetivo menor; custo pequeno, mais um check no selftest.
+- **Estado:** aberto. (i)
+
+### [A-024] A noite 3 ainda não tem interruptor e o relógio da entrada não usa `entry_clock_scale` {#a-024}
+
+- [2026-11-08] (i) ← `Janghyang/scripts/story/noites.gd` (`entry_clock_scale` 0,5 na noite 3) e `Janghyang/scripts/gastos.gd` (`lit_rooms`). Visto ao fechar a Tarefa 13.
+- **Severidade:** baixo — só afeta o equilíbrio das noites 2 e 3, que ainda são rascunho.
+- **Onde:** nenhum código lê `entry_clock_scale`; e nenhuma `HouseLight` é desligada pelo jogador, então na noite 3 todo cômodo com lâmpada é seguro.
+- **Reprodução:** estática. `rg entry_clock_scale scripts` só acha `noites.gd`; na noite 3, `lit_rooms()` sempre devolve os nove cômodos com lâmpada.
+- **Por que importa:** o §11 faz da noite 3 a noite em que a luz é escolha, e o relógio da entrada devia durar metade; sem isso a noite 3 fica mais fácil que a 2.
+- **Fix recomendado:** aplicar `entry_clock_scale` na corda do `WindClockModel` em `begin_night` e dar interruptores às `HouseLight` (ou apagar algumas por noite) quando a tarefa de luz chegar; custo pequeno cada.
+- **Estado:** aberto. (i)
+
 ### [A-022] Entre noites o mundo não volta ao começo, mas as marcas dele no catálogo vão para o save {#a-022}
 
 - [2026-11-08] (i) ← `Janghyang/scripts/main.gd` (`begin_night`, `end_night`) e `Janghyang/scripts/catalog.gd` (`to_dict` leva `flags`). Visto ao fechar a Tarefa 12.

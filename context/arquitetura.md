@@ -137,3 +137,21 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `night_card_ui.gd` (novo, `CanvasLayer` 6): papel no estilo do caderno; `static func night_text(night, last)`, `DEMO_END`, `show_night`, `close`, `is_open`, `text`, `signal closed`. Trava o jogador e mostra o mouse.
   - `hour_event.gd`: `begin(short := false)` e `reset()` (libera os ecos). `piece.gd`: `put_away()`. `quest_model.gd`: `_init(phases, carried)`. `wind_clock_model.gd`: `reset()`. `gastos.gd`: `var night`, `on_night`, `static func night_stalkers`.
   - Contagens: unit 2039/0, selftest 324/0 (20 checks `noites:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/safety_model.gd`, `scripts/stalker_model.gd`, `scripts/gastos.gd`, `scripts/areas/registry.gd`, `scripts/areas/casa.gd` Tarefa 13, segurança por ponto:
+  - `safety_model.gd` (novo, `RefCounted`): `ANCHOR_RADIUS := 4.0`, `static func is_safe(point, rule, world)`; `world = {level, lit, entry_wound, anchors}`.
+  - `stalker_model.gd`: `update(..., safe := [], elias_safe := false)`; `next_toward`, `_farthest_from` e `_distances(goal, blocked)` não entram em ponto seguro.
+  - `gastos.gd`: sem `REFUGE`; `MAX := 3`, `KEEP_CLEAR`, `PORTAL`; `entry_wound` (null segue a mola), `anchors`, `rule()`, `world_at(p)`, `lit_rooms()`, `is_safe(p)`, `safe_points()`, `static func door_center(d)`, `_door_sides`; o grafo liga cômodos pelos portais das portas e passa por cima dos pontos de `keep_clear`.
+  - `registry.gd`: chave nova `keep_clear` no `DEF` (padrão `[]`); `casa.gd` põe `DoorFront`. `main.gd` não liga mais `entry_wound`.
+  - Contagens: unit 2071/0, selftest 349/0 (checks `safety:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/hands_model.gd`, `scripts/player.gd`, `scripts/hands.gd`, `scripts/notebook_ui.gd`, `scripts/main.gd` Tarefa 14, mãos e bolsos:
+  - `hands_model.gd` (novo, `RefCounted`): `LEFT_ITEMS`, `WATCH`, `left`, `pockets`, `take`, `count`, `has`, `hold`, `cycle`, `can_swing`, `use_one`, `toggle_watch`.
+  - `player.gd`: `var hands_model`, sinais `left_used(item)` e `left_changed(item)`; roda do mouse, clique esquerdo e `T` (respeitam `input_locked`); `_knock` pede `can_swing()`.
+  - `hands.gd`: `ITEM_COLORS`, bloco `HeldItem` na mão esquerda, `held_item()`. `notebook_ui.gd`: `POCKET_NAMES`, `static func pockets_text(pockets)`, `pockets_shown()`. `main.gd`: `hands_model` novo por noite.
+  - Contagens: unit 2106/0, selftest 356/0 (checks `hands:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/capture_model.gd`, `scripts/capture_fx.gd`, `scripts/gastos.gd`, `scripts/main.gd`, `scripts/player.gd`, `scripts/settings_model.gd`, `scripts/settings_ui.gd`, `scripts/sfx_bank.gd` Tarefa 15, captura com fuga:
+  - `capture_model.gd` (novo, `RefCounted`): `State {FREE, GRABBED, BROKE_FREE, HUG}`, `WINDOW 4.0`, `STAGGER 2.0`, `HOLD_TIME 2.5`, `grab`, `push`, `update(dt, held)`, `progress`, `is_grabbed`.
+  - `capture_fx.gd` (novo, `CanvasLayer`): `start(head)`, `stop()`, `push()`, `static flicker_color(t, reduced)`, `flicker_hz`, `flicker_depth`.
+  - `gastos.gd`: sinais `grabbed(i)` e `broke_free(i)`; `var capture`; `_grab`, `_tick_capture` (no topo do `_process`), `push()`, `is_grabbed()`; `caught` só sai no abraço.
+  - `main.gd`: `capture_fx`, `_on_grabbed`, `_on_broke_free`; `Tab`/`M` ignorados na luta. `player.gd`: sinal `pushed`. Settings: `reduce_flash` e `hold_to_escape`. `sfx_bank.gd`: tipo `crack`.
+  - Contagens: unit 2155/0, selftest 373/0 (checks `capture:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/compass_model.gd`, `tests/test_compass_model.gd` Tarefa 16, o modelo da bússola: statics `route(from, to, links) -> Array` (BFS nos dois sentidos), `aim(pos, area, goal, links) -> Dictionary` (`point` com `at` e `tilt`, ou `spin`), `tick_period(d)` (0,25 s a 2 m, 1,0 s a 25 m), `trembles(d)`; `TREMBLE_RADIUS` 6, `HEARD_RADIUS` 3, `TILT_STEP` 0,75. Ainda sem nó no jogo (Tarefa 17). Contagens: unit 2183/0.
