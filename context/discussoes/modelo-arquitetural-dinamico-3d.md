@@ -21,8 +21,8 @@ relacionado:
 - [2026-10-20] (d) Brief original: **“modelo arquitetural dinâmico 3D, jogável por apenas uma pessoa.”**
 - [2026-10-20] (d) Refinamento: **“é jogo contemplativo de tensão, mas não de competição ou vitória, apenas jogável e explorável, precisamos de um pensamento bem lúdico.”**
 - [2026-10-20] (d) Resposta sobre a possessividade da casa: **“horror”**.
-- [2026-10-20] (i) O jogo é **horror**, e a casa pode ser possessiva até o fim. Mas o horror é
-  **doméstico e psicológico**, não de perseguição, combate ou survival horror.
+- [2026-10-20 ~superseded 2026-11-08] (i) O jogo é **horror**, e a casa pode ser possessiva até o fim. Mas o horror é
+  **doméstico e psicológico**, ~~não de perseguição, combate ou survival horror~~. → Pedro escolheu horror de sobrevivência com incursões, sem matança; ver [[decisoes#rumo-2026-11-08]].
 - [2026-10-20] (i) O horror não substitui o lúdico: **ele nasce dele**. O mesmo verbo que era
   brinquedo vira ameaça quando a casa o usa de volta.
 - [2026-10-27] (d) Sobre o blockout: **“não tem nada que me incomoda, gostei”**, mas

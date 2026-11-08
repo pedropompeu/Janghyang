@@ -30,6 +30,7 @@ Cada linha diz o que o arquivo tem e quando ele importa.
 ## Discussões em aberto
 
 - [[modelo-arquitetural-dinamico-3d]] — FAZ DE CONTA: horror doméstico contemplativo num modelo arquitetural vivo; slice de três cômodos, dobras, som, a casa que aprende e o blockout jogável em Godot 4.7.
+- [[rumo-2026-11]] — o que as escolhas de rumo deixaram em aberto: limite do escopo, captura e refúgio, sustos, origem e custo dos assets, ações candidatas.
 
 *Para iniciar um novo tópico, use [`discussoes/_template.md`](discussoes/_template.md).*
 

@@ -57,3 +57,4 @@ nada.
 | Arquivo | Recebido | De quem | O que é | Fato que saiu |
 |---|---|---|---|---|
 | `2026-10-27-pedro-conto-relojoeiro.md` | 2026-10-27 | Pedro Pompeu (colado no chat) | Conto de horror: Elias cataloga o espólio do relojoeiro Inácio Varela; relógios como âncoras do tempo, o relógio do saguão para às 03:33, surge um duplo. Pedido: "crie a partir dessa história" | [[modelo-arquitetural-dinamico-3d#brief]] |
+| `2026-11-08-pedro-escolhas-rumo.md` | 2026-11-08 | Pedro Pompeu (resumo copiado da página "Rumo do Janghyang", colado no chat) | As nove escolhas de rumo (escopo, demo, foco, história, bússola, mapa, planta, ações, visual), com notas | [[decisoes#rumo-2026-11-08]], [[rumo-2026-11]] |

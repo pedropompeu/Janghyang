@@ -254,3 +254,20 @@ cd /home/usuario/Dev/Jogo && python lint.py
 - [2026-10-29] (e) ← `faz-de-conta/scripts/settings_ui.gd` O jogo não tinha opções; agora `Esc` pausa e abre a folha de opções (ver [[decisoes#jogo]]). Captura `blockout-opcoes.png` revisada a olho.
 - [2026-10-29] (e) ← `cp.sh` `UNIT RESULT: 1059 checks, 0 failures`; `SELFTEST RESULT: 241 checks, 0 failures`; lint limpo.
 - [2026-10-29] (i) Em aberto: testar no jogo de verdade o `Esc` com o caderno aberto e a tela cheia no monitor do Pedro (o selftest roda headless e não cobre janela nem mouse).
+
+## [2026-11-08] Rumo do jogo: diagnóstico e escolhas de Pedro {#sessao-2026-11-08-rumo}
+
+- [2026-11-08] (d) Pedro: "falta uma história, um foco, um direcionamento, o mapa é limitado (tambem mostrar um mapa), falta coisas a serem feitas".
+- [2026-11-08] (e) ← `https://claude.ai/artifact/7oxdgaNJ7jCpB5CPPNxedb` Página "Rumo do Janghyang": diagnóstico, planta dos 15 cômodos a partir de `scripts/atlas.gd` e nove decisões com recomendação. Ela guarda as escolhas na coleção `escolhas`.
+- [2026-11-08] (e) ← `fontes/2026-11-08-pedro-escolhas-rumo.md` Pedro respondeu as nove; registradas como R1–R9 em [[decisoes#rumo-2026-11-08]].
+
+### Em aberto
+
+- [2026-11-08] (i) Perguntas que mudam o que se constrói: [[rumo-2026-11]].
+- [2026-11-08] (i) O plano de lançamento de 2026-11-07 ficou desatualizado em alvo (R2), escopo (R1) e restrição de assets (R9).
+- [2026-11-08] (i) Nenhum playtest humano até hoje.
+
+### Próximo passo
+
+1. [2026-11-08] (i) Pedro responde as perguntas de [[rumo-2026-11]].
+2. [2026-11-08] (i) Documento de direção: capítulos, maquetes e noites, ações, bússola, planta, pipeline de assets; depois, plano novo no lugar do de 2026-11-07.

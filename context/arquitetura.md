@@ -28,6 +28,7 @@ relacionado:
 - [2026-09-12] (e) ← `context/index.md` Documentação estruturada em Markdown puro com convenções tipadas.
 - [2026-10-20] (e) ← `godot --version` e `faz-de-conta/project.godot` **Godot 4.7.2.stable**, renderer GL Compatibility, viewport 1280×720, cena principal `main.tscn`.
 - [2026-10-20] (e) ← `faz-de-conta/` O blockout não usa assets externos: geometria, materiais, luz e UI são gerados por código GDScript.
+- [2026-11-08] (e) ← `blender --version` **Blender 4.5.15 LTS** instalado como ferramenta de produção de assets, fora do jogo exportado: pacote oficial de download.blender.org (sha256 conferido) em `~/.local/opt/blender-4.5.15-linux-x64`, com link em `~/.local/bin/blender`. Exporta `.glb` sem janela (`blender -b --python-expr ...`), testado com um cubo. Ver R14 em [[decisoes#rumo-2026-11-08]].
 
 ## O mapa {#mapa}
 
