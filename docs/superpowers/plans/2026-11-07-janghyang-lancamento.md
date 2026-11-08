@@ -1,5 +1,7 @@
 # Janghyang — Plano de Lançamento até 2027-04-15 (execução sequencial)
 
+> **Superado em 2026-11-08** por `docs/superpowers/plans/2026-11-08-janghyang-demo.md`. As unidades abertas daqui estão mapeadas no §0.3 do plano novo. Este arquivo fica como registro.
+
 > **For agentic workers:** execução **nativa** (superpowers:executing-plans), uma unidade por vez, na ordem deste arquivo. Não começar a unidade N+1 antes de a unidade N estar `complete` no ledger. Passos com `- [ ]` servem de acompanhamento.
 
 **Goal:** levar o protótipo Janghyang (antigo FAZ DE CONTA) a um jogo publicado em PC (Windows e Linux) em 2027-04-15, com os três finais validados por jogadores de fora da equipe.

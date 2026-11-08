@@ -281,5 +281,17 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 ### Próximo passo
 
-1. [2026-11-08] (i) Pedro lê e aprova o documento de direção, ou pede mudanças.
-2. [2026-11-08] (i) Depois da aprovação: plano novo (superpowers:writing-plans) no lugar de `docs/superpowers/plans/2026-11-07-janghyang-lancamento.md`.
+1. [2026-11-08 ~superseded 2026-11-08] (i) ~~Pedro lê e aprova o documento de direção, ou pede mudanças.~~ → aprovado; ver [[#sessao-2026-11-08-plano-demo]].
+2. [2026-11-08 ~superseded 2026-11-08] (i) ~~Depois da aprovação: plano novo (superpowers:writing-plans) no lugar de `docs/superpowers/plans/2026-11-07-janghyang-lancamento.md`.~~ → escrito; ver [[#sessao-2026-11-08-plano-demo]].
+
+## [2026-11-08] Plano da demo {#sessao-2026-11-08-plano-demo}
+
+- [2026-11-08] (d) Pedro: "aprovado, pode escrever o plano".
+- [2026-11-08] (e) ← `docs/superpowers/plans/2026-11-08-janghyang-demo.md` 47 tarefas em nove fases: preparação, registro de áreas, noites e campanha, noite 1 em blocos, playtest 1, noite 2, assets, playtests 2 e 3, lançamento. Marcos M1 2026-11-29 a M5 2027-04-15 (datas sugeridas pela IA).
+- [2026-11-08] (e) ← `ls ~/.local/share/godot/export_templates/` Os templates 4.7.2.stable já estão instalados; a U02 do plano antigo está resolvida.
+- [2026-11-08] (e) ← `docs/superpowers/plans/2026-11-07-janghyang-lancamento.md` Marcado como superado, com as unidades abertas mapeadas no §0.3 do plano novo.
+
+### Próximo passo
+
+1. [2026-11-08] (i) Pedro revisa o plano e escolhe o método de execução (subagent-driven ou nativo).
+2. [2026-11-08] (i) Tarefa 1 do plano: ledger e linha de base.
