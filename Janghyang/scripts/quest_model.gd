@@ -1,8 +1,9 @@
 extends RefCounted
 ## The thread of the visit as Elias writes it: phases of a few lots each.
 ## Each phase ends with a piece of Inácio's pocket watch; the phase is the
-## first one whose piece is still missing, so lots done early show struck when
-## their phase opens. No totals anywhere.
+## first one whose last lot is still open, so lots done early show struck when
+## their phase opens. No totals anywhere. A night (scripts/story/noites.gd)
+## passes its own phases; without them, these are today's five.
 
 const PIECES: Array[StringName] = [&"coroa", &"ponteiros", &"mostrador", &"caixa"]
 
@@ -33,10 +34,19 @@ const TASKS := {
 	&"corda": "dar corda, ou não",
 	&"pagina": "ler o que ficou na cabana",
 	&"sair": "sair pela beira do tampo",
+	# The nights (D9: draft text, waits for Pedro's reading).
+	&"alcapao": "abrir o alçapão da torre",
+	&"voltar_terreo": "voltar ao térreo da casa",
+	&"dar_corda": "dar corda e acordar na oficina",
 }
+
+var phases: Array
 
 var phase := 0
 var done: Dictionary = {}
+
+func _init(night_phases: Array = PHASES) -> void:
+	phases = night_phases
 
 ## Strikes a lot. Returns &"phase" when a new phase opens, &"task" when only
 ## the lot is new, &"" when it was already struck.
@@ -65,20 +75,22 @@ func all_pieces() -> bool:
 	return pieces() == PIECES.size()
 
 func phase_id() -> StringName:
-	return PHASES[phase].id
+	return phases[phase].id
 
 func stalkers() -> int:
-	return PHASES[phase].stalkers
+	return phases[phase].get("stalkers", 0)
 
 ## The lots of phase i (the current one by default), as {id, text, done}.
 func current_tasks(i := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	for id in PHASES[phase if i < 0 else i].tasks:
+	for id in phases[phase if i < 0 else i].tasks:
 		out.append({"id": id, "text": TASKS[id], "done": done.has(id)})
 	return out
 
+## Each phase ends on its own lot (today's I to IV on their piece), so the
+## first phase whose last lot is open is the current one.
 func _first_open_phase() -> int:
-	for i in PIECES.size():
-		if not done.has(PIECES[i]):
+	for i in phases.size():
+		if not done.has(phases[i].tasks[-1]):
 			return i
-	return PHASES.size() - 1
+	return phases.size() - 1

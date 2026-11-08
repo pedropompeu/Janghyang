@@ -66,3 +66,20 @@ func add_double_entries(texts: Array[String]) -> void:
 
 static func format(entry: Dictionary) -> String:
 	return "Item %d — %s" % [entry.number, entry.text]
+
+## The catalogue as plain data, for the campaign save between nights.
+func to_dict() -> Dictionary:
+	return {"entries": entries.duplicate(true), "pages": pages.duplicate(), "flags": flags.duplicate()}
+
+## Replaces this catalogue with `d`. Takes what JSON gives back too (floats
+## for numbers, strings for ids).
+func from_dict(d: Dictionary) -> void:
+	entries.clear()
+	for e in d.get("entries", []):
+		entries.append({"number": int(e.number), "text": String(e.text), "author": StringName(e.author), "item": StringName(e.item)})
+	pages.clear()
+	for p in d.get("pages", []):
+		pages.append(StringName(p))
+	flags.clear()
+	for k in d.get("flags", {}):
+		flags[StringName(k)] = bool(d.flags[k])

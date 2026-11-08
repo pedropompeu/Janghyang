@@ -788,7 +788,7 @@ func _on_piece(id: StringName) -> void:
 func _complete(id: StringName) -> void:
 	var r: StringName = quest.complete(id)
 	if r == &"phase":
-		var title: String = quest.PHASES[quest.phase].title
+		var title: String = quest.phases[quest.phase].title
 		var tw := create_tween()
 		tw.tween_interval(3.6)
 		tw.tween_callback(func() -> void: notebook.peek_text("Lote " + title))

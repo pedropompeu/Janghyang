@@ -304,4 +304,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 9. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 8: migrar a casa e fechar a migração.~~ → feita: `casa.gd` com a casa, os móveis, o relógio, as peças da verdade e a redoma; `atlas.gd` e `main.gd` leem só o registro; unidade 1368/0, selftest 282/0.
 10. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 9: maquetes e rota genérica no selftest.~~ → feita: `scripts/maquetes/registry.gd` e `_routes_by_links()`; unidade 1397/0, selftest 304/0.
 11. [2026-11-08 ~superseded 2026-11-08] (i) ~~Revisão do OpenCode sobre a migração (T4–T8), depois a Tarefa 10: as noites como dados e a campanha com save.~~ → revisão aplicada: contrato inverso dos helpers (`_loop_3d`), `Registry.HOME`, `PANEL` na casa, `in_bedroom` pelo atlas ([[achados#a-020]]), materiais mortos fora; unidade 1778/0, selftest 304/0.
-12. [2026-11-08] (i) Tarefa 10: as noites como dados e a campanha com save.
+12. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 10: as noites como dados e a campanha com save.~~ → feita: `scripts/story/noites.gd` e `scripts/campaign_model.gd`; unidade 1961/0, selftest 304/0.
+13. [2026-11-08] (i) Tarefa 11: o estado de uma noite e o 03:33 curto.

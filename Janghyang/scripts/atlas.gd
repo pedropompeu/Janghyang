@@ -58,6 +58,16 @@ func visit(pos: Vector3) -> StringName:
 	visited[id] = true
 	return id
 
+## The rooms seen, as plain data, for the campaign save between nights.
+func to_dict() -> Dictionary:
+	return {"visited": visited.keys()}
+
+## Replaces the rooms seen with those in `d`.
+func from_dict(d: Dictionary) -> void:
+	visited.clear()
+	for id in d.get("visited", []):
+		visited[StringName(id)] = true
+
 func level_of(id: StringName) -> StringName:
 	for r in rooms():
 		if r.id == id:

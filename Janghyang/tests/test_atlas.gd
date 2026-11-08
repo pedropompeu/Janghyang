@@ -36,3 +36,14 @@ func test_every_room_says_where_in_portuguese(t) -> void:
 	t.eq(Atlas.where(&"passagem"), "na passagem", "feminine")
 	t.eq(Atlas.where(&"corredor"), "no corredor", "masculine")
 	t.eq(Atlas.where(&""), "na casa", "nowhere known: the house")
+
+func test_to_dict_round_trip(t) -> void:
+	var a := Atlas.new()
+	a.visit(Vector3(4.0, 0.0, 3.0))
+	a.visit(Vector3(5.0, 0.0, -0.7))
+	var b := Atlas.new()
+	b.from_dict(a.to_dict())
+	t.eq(b.visited, a.visited, "os mesmos cômodos vistos")
+	t.eq(b.visit(Vector3(4.0, 0.0, 3.0)), &"", "um cômodo visto não é novo de novo")
+	b.from_dict({"visited": ["corredor"]})
+	t.ok(b.visited.has(&"corredor") and not b.visited.has(&"brincar"), "from_dict troca, não soma")

@@ -55,3 +55,21 @@ func test_every_piece_has_a_note_and_a_page(t) -> void:
 	for id in [&"coroa", &"ponteiros", &"mostrador", &"caixa"]:
 		t.ok(Data.NOTES.has(id), "note for %s" % id)
 		t.ok(Data.PAGES.has(Data.NOTES[id].page), "page for %s" % id)
+
+func test_to_dict_round_trip(t) -> void:
+	var c = Catalog.new()
+	c.catalog(&"relogio_entrada")
+	c.set_flag(&"f1_folded", true)
+	c.catalog(&"cabana")
+	c.add_double_entries(["outra letra"])
+	var d = Catalog.new()
+	d.from_dict(c.to_dict())
+	t.eq(d.to_dict(), c.to_dict(), "o mesmo catálogo volta")
+	t.eq(d.next_number(), c.next_number(), "a numeração continua de onde parou")
+	t.ok(d.can_catalog(&"bola") and not d.can_catalog(&"cabana"), "o que já foi catalogado não repete")
+
+func test_from_dict_takes_json_types(t) -> void:
+	var d = Catalog.new()
+	d.from_dict({"entries": [{"number": 214.0, "text": "x", "author": "elias", "item": "maquete"}, {"number": 215.0, "text": "y", "author": "elias", "item": "bola"}], "pages": ["p1"], "flags": {"f1_folded": true}})
+	t.eq(d.next_number(), 216, "o número volta inteiro")
+	t.ok(d.has(&"bola") and d.pages.has(&"p1") and d.flags.get(&"f1_folded", false), "os ids voltam")

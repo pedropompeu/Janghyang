@@ -173,7 +173,7 @@ func plan_text() -> String:
 func _lots_bbcode() -> String:
 	var out: Array[String] = ["[font_size=21]Lotes[/font_size]", ""]
 	for i in quest.phase + 1:
-		out.append("[b]%s[/b]" % quest.PHASES[i].title)
+		out.append("[b]%s[/b]" % quest.phases[i].title)
 		for t in quest.current_tasks(i):
 			out.append(("   [s]%s[/s]" if t.done else "   %s") % t.text)
 		out.append("")

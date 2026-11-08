@@ -49,3 +49,16 @@ func test_every_task_has_text(t) -> void:
 		t.ok(ph.title != "", "phase title")
 		for id in ph.tasks:
 			t.ok(Quest.TASKS.has(id), "text for %s" % id)
+
+const Noites = preload("res://scripts/story/noites.gd")
+
+func test_a_night_passes_its_phases(t) -> void:
+	var q := Quest.new(Noites.get_night(1).phases)
+	t.eq(q.phase_id(), Noites.get_night(1).phases[0].id, "começa no primeiro capítulo da noite")
+	t.eq(q.complete(&"achar_passagem"), &"phase", "a meta do capítulo 1 abre o capítulo 2")
+	t.eq(q.complete(&"coroa"), &"phase", "a coroa abre o fim da noite")
+	t.eq(q.current_tasks().map(func(x): return x.id), [&"voltar_terreo", &"dar_corda"], "e o fim da noite é voltar para casa")
+	t.eq(q.stalkers(), 0, "uma fase sem número de Gastos não pede nenhum")
+
+func test_the_default_phases_are_todays(t) -> void:
+	t.eq(Quest.new().phases, Quest.PHASES, "sem argumento, as fases de hoje")
