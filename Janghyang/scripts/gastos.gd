@@ -430,6 +430,13 @@ func placed() -> Array:
 			out.append(i)
 	return out
 
+## Metres from `p` to the nearest Gasto out in the house (INF with none).
+func nearest(p: Vector3) -> float:
+	var best := INF
+	for i in placed():
+		best = minf(best, _bodies[i].global_position.distance_to(p))
+	return best
+
 func head_of(i: int) -> Vector3:
 	return _bodies[i].global_position + Vector3(0.0, HEAD, 0.0)
 

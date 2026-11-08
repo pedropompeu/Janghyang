@@ -181,7 +181,8 @@ static func _build_house(main: Node3D) -> void:
 	main._box(house, Vector3(0.08, 1.3, 0.08), Vector3(13.5, 1.65, 0.06), main.mat_wood, false)
 
 	# Lighting inside.
-	main._house_light(house, Vector3(4.2, 2.55, 3.5), Color(1.0, 0.78, 0.5), 1.4, 6.5, false)
+	# Night 1 leaves only this one lit (spec §7.3).
+	main._house_light(house, Vector3(4.2, 2.55, 3.5), Color(1.0, 0.78, 0.5), 1.4, 6.5, false).name = "PlayroomLamp"
 	main._house_light(house, Vector3(1.6, 2.2, 3.6), Color(1.0, 0.72, 0.42), 0.55, 4.0, false)
 	main._house_light(house, Vector3(1.2, 1.0, 4.0), Color(1.0, 0.65, 0.4), 0.45, 3.0, false)
 	main._house_light(house, Vector3(12.5, 2.2, 0.7), Color(0.55, 0.7, 0.95), 1.3, 5.5, false)

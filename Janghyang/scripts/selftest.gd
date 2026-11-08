@@ -621,6 +621,7 @@ func _nights() -> void:
 	_record(main.night.n == 1 and main.quest.phases == main.night.phases, "noites: night 1 plays its own lots", str(main.quest.phase_id()))
 	_record(main.visit.is_short() and not main.clock_model.can_stop, "noites: night 1 is short and its 03:33 is closed", "")
 	_record(main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: Elias wakes at the spawn", str(main.player.global_position))
+	await _watch()
 	main.player.global_position = main.night.goals[1].at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -649,6 +650,9 @@ func _nights() -> void:
 	main.gastos.level = lvl_before
 	main.night_card.close()
 	_record(main.night.n == 2 and not main.night_card.is_open(), "noites: closing the card starts night 2", "")
+	_record(is_equal_approx(main.pocket_watch.spring_scale, 1.0) and main.pocket_watch.goal.get("task") == &"alcapao" and not main.night_card.is_letter(), "bussola: night 2 winds the watch whole, sets it on the trapdoor, and brings no letter", str(main.pocket_watch.goal))
+	var lit2: int = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible).size()
+	_record(lit2 == 9, "bussola: night 2 wakes with the house lit", str(lit2))
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
 	_record(not main.hour_event.is_active() and main.hour_event.echoes.is_empty() and not main.clock_model.can_stop, "noites: night 2 starts with no echoes and a closed 03:33", "")
@@ -686,6 +690,9 @@ func _safety() -> void:
 	main._fresh_campaign_at(1)
 	main.begin_night(1)
 	await _frames(3)
+	_record(main.night_card.is_letter(), "safety: night 1 opens on the letter", "")
+	_record(g.wanted() == 0, "safety: while the letter is read, no Gasto is wanted", str(g.wanted()))
+	main.night_card.close()
 	_record(g.level == &"casa" and g.rule() == &"casa_toda", "safety: night 1 keeps the whole house", "%s %s" % [g.level, g.rule()])
 	_record(g.wanted() == 0, "safety: night 1, no Gasto in the house before the crown", str(g.wanted()))
 	main._complete(&"achar_passagem")
@@ -1002,7 +1009,12 @@ func _capture(g) -> void:
 	await _frames(3)
 	_record(not g.is_grabbed() and not g.placed().has(at[0]), "capture: ten clicks break free and the Gasto comes apart", str(g.placed()))
 	_record(not pl.input_locked and not main.capture_fx.is_active(), "capture: free again, Elias moves", "")
-	_record(not g.capture.grab(at[0]), "capture: staggering, he cannot be grabbed again at once", "")
+	var regrabs := [0]
+	var on_regrab := func(_k: int) -> void: regrabs[0] += 1
+	g.grabbed.connect(on_regrab)
+	g._grab(0)
+	g.grabbed.disconnect(on_regrab)
+	_record(regrabs[0] == 0 and g.capture.state == g.Capture.State.BROKE_FREE and not pl.input_locked, "capture: staggering, he cannot be grabbed again at once", str(g.capture.state))
 	await get_tree().create_timer(g.Capture.STAGGER + 0.1).timeout
 	_record(g.capture.state == g.Capture.State.FREE, "capture: after the stagger the fight is over", str(g.capture.state))
 	# The night sets how many clicks; the options sheet, whether holding works.
@@ -1043,3 +1055,65 @@ func _capture_near(g) -> int:
 			break
 	return i
 
+## Task 17 (spec §7.3): night 1 begins with the letter and the tick in his
+## pocket, then the house goes dark but for the playroom lamp; T opens the
+## watch and it points at the drawing, a link away for another area, and
+## turns outside every room. Nothing marks the goal on screen.
+func _watch() -> void:
+	var w = main.pocket_watch
+	var pl = main.player
+	_record(main.night_card.is_letter() and main.night_card.text() == main.CatalogData.LETTER, "bussola: night 1 begins with the letter in hand", main.night_card.text())
+	_record(not w.is_open and w.goal.get("task") == &"achar_passagem", "bussola: the watch starts shut, set on what the drawing hides", str(w.goal))
+	var ticks := [0, 0]
+	var on_tick := func(_at: Vector3, open: bool) -> void:
+		ticks[1 if open else 0] += 1
+	w.ticked.connect(on_tick)
+	await get_tree().create_timer(1.0).timeout
+	_record(ticks[0] >= 1 and ticks[1] == 0, "bussola: it ticks in his pocket while he reads", str(ticks))
+	_record(absf(w.tick_period() - main.clock_model.audio_tick_period()) > 0.2, "bussola: the pocket tick is off the entry clock's beat", "%.2f vs %.2f" % [w.tick_period(), main.clock_model.audio_tick_period()])
+	main.night_card.close()
+	await get_tree().create_timer(1.8).timeout
+	var lit: Array = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible)
+	_record(lit.size() == 1 and lit[0].name == "PlayroomLamp", "bussola: the lamps go out but the playroom's", str(lit.map(func(l): return l.name)))
+	_record(not main.night_card.is_open() and main.night.n == 1, "bussola: putting the letter down does not start another night", str(main.night.n))
+	var markers := func() -> int:
+		var n := 0
+		for type in ["Label3D", "Sprite3D", "Decal", "Control"]:
+			n += main.find_children("*", type, true, false).size()
+		return n
+	var before: int = markers.call()
+	pl.rotation.y = deg_to_rad(20.0)
+	var t_key := InputEventKey.new()
+	t_key.physical_keycode = KEY_T
+	t_key.pressed = true
+	pl._unhandled_input(t_key)
+	await get_tree().create_timer(0.8).timeout
+	var drawing: Vector3 = Vector3(6.7, 1.6, 0.1) - pl.global_position
+	drawing.y = 0.0
+	var off := rad_to_deg(w.pointing().angle_to(drawing)) if w.pointing() != Vector3.ZERO else 180.0
+	_record(w.is_open and w.visible and w.aim_now().mode == &"point", "bussola: T opens the watch and the hand points", str(w.aim_now()))
+	_record(off < 10.0, "bussola: from the entry it points at the drawing", "%.1f°" % off)
+	_record(ticks[1] >= 1, "bussola: open, the tick can be heard by the Gastos", str(ticks))
+	_record(markers.call() == before and w.find_children("*", "", true, false).all(func(c) -> bool: return not (c is VisualInstance3D) or c.layers == 1 << (main.Hands.HANDS_LAYER - 1)), "bussola: the open watch adds no marker to the scene", "%d -> %d" % [before, markers.call()])
+	var night_goal: Dictionary = w.goal
+	w.set_goal({"area": &"sotao", "at": Vector3(7.9, 3.14, 7.0)})
+	await get_tree().create_timer(0.8).timeout
+	var link: Vector3 = w.Compass.route(&"casa", &"sotao", main.Registry.links())[0].at
+	var to_link: Vector3 = link - pl.global_position
+	to_link.y = 0.0
+	var off_link := rad_to_deg(w.pointing().angle_to(to_link)) if w.pointing() != Vector3.ZERO else 180.0
+	_record(w.aim_now().get("at") == link and off_link < 10.0, "bussola: with the goal in the attic, it points at the first link on the way", "%s %.1f°" % [str(w.aim_now()), off_link])
+	pl.global_position = Vector3(-3.3, 0.2, 4.0)
+	await get_tree().create_timer(0.3).timeout
+	_record(w.get_node("Needle").get_child_count() == 1 and w.get_node("Needle").get_child(0) is MeshInstance3D, "bussola: the drawn hand turns with the needle", str(w.get_node("Needle").get_children()))
+	var yaw_a: float = w.get_node("Needle").rotation.y
+	await get_tree().create_timer(0.3).timeout
+	_record(w.aim_now().mode == &"spin" and absf(angle_difference(yaw_a, w.get_node("Needle").rotation.y)) > 0.3, "bussola: past the west edge, outside every room, the hand turns", str(w.aim_now()))
+	pl.global_position = main.SPAWN
+	w.set_goal(night_goal)
+	w.lose_spring()
+	_record(is_equal_approx(w.spring_scale, 1.3), "bussola: a fight leaves the tick 30% slower", str(w.spring_scale))
+	pl._unhandled_input(t_key)
+	await _frames(2)
+	_record(not w.is_open and not w.visible, "bussola: T again shuts the watch", "")
+	w.ticked.disconnect(on_tick)

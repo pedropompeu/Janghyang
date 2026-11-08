@@ -6,6 +6,9 @@ const FIRST_NUMBER := 215
 
 const OPENING := {"number": 214, "text": "maquete de casa sob redoma, relógio no telhado, parado. Dei corda para testar o mecanismo."}
 
+## The letter Elias holds when night 1 begins (spec §7.3), in Inácio's hand.
+const LETTER := "O relógio que segue com esta carta sabe onde estão as partes do outro. Abra-o quando não souber para onde ir."
+
 const ITEMS := {
 	&"relogio_entrada": {"text": "relógio de caixa, ébano tingido, pêndulo de latão. O mostrador só tem marcas entre 03:00 e 03:33.", "page": &"p1", "gate": &""},
 	&"bola": {"text": "bola de madeira, faia, gasta de um lado só.", "page": &"", "gate": &""},

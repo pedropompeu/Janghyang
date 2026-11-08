@@ -34,6 +34,7 @@ const Pretend = preload("res://scripts/pretend.gd")
 const Score = preload("res://scripts/score.gd")
 const SettingsUI = preload("res://scripts/settings_ui.gd")
 const CaptureFx = preload("res://scripts/capture_fx.gd")
+const PocketWatch = preload("res://scripts/pocket_watch.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Noites = preload("res://scripts/story/noites.gd")
 const NightCard = preload("res://scripts/night_card_ui.gd")
@@ -127,6 +128,8 @@ var level := &""
 var gastos
 ## How a grab looks (capture_fx.gd).
 var capture_fx
+var pocket_watch
+var _dark: Array[Tween] = []
 var pretend
 var score
 var _black: ColorRect
@@ -787,6 +790,15 @@ func _wire_story() -> void:
 		if gastos.is_grabbed():
 			gastos.push()
 			capture_fx.push())
+	pocket_watch = PocketWatch.new()
+	pocket_watch.name = "PocketWatch"
+	pocket_watch.main = self
+	player.hands.left_hand().add_child(pocket_watch)
+	player.left_changed.connect(func(item: StringName) -> void:
+		if item == player.HandsModel.WATCH:
+			pocket_watch.open()
+		else:
+			pocket_watch.close())
 	pretend = Pretend.new()
 	pretend.main = self
 	add_child(pretend)
@@ -822,6 +834,7 @@ func _wire_story() -> void:
 	night_card.player = player
 	add_child(night_card)
 	night_card.closed.connect(func() -> void: begin_night(campaign.night))
+	night_card.letter_closed.connect(_house_goes_dark)
 
 ## `--night N` or `--night=N`: 0 when absent, else clamped to the campaign.
 static func night_arg(args: PackedStringArray) -> int:
@@ -871,6 +884,37 @@ func begin_night(n: int) -> void:
 	player.respawn_point = SPAWN
 	level = &""
 	gastos.on_night(night)
+	pocket_watch.new_night()
+	pocket_watch.set_goal(watch_goal())
+	for tw in _dark:
+		tw.kill()
+	_dark.clear()
+	for l in get_tree().get_nodes_in_group(&"HouseLight"):
+		l.visible = true
+	if n == 1:
+		night_card.show_letter(CatalogData.LETTER)
+
+## Night 1 (spec §7.3), once the letter is down: the house's lamps flicker
+## and go out, all but the playroom's, where the drawing is.
+func _house_goes_dark() -> void:
+	for l in get_tree().get_nodes_in_group(&"HouseLight"):
+		if l.name == "PlayroomLamp":
+			continue
+		var tw := create_tween()
+		_dark.append(tw)
+		for i in 3:
+			tw.tween_callback(func() -> void: l.visible = false)
+			tw.tween_interval(0.12 + 0.05 * i)
+			tw.tween_callback(func() -> void: l.visible = true)
+			tw.tween_interval(0.18)
+		tw.tween_callback(func() -> void: l.visible = false)
+
+## The first of the night's goals not met yet: where the watch points.
+func watch_goal() -> Dictionary:
+	for g in night.get("goals", []):
+		if not quest.is_done(g.task):
+			return g
+	return {}
 
 ## One frame of the night: the acts, the 03:33, the end of a short night.
 func _tick_night(delta: float) -> void:
@@ -929,6 +973,8 @@ func _complete(id: StringName) -> void:
 		visit.on_pieces_ready()
 	if not night.is_empty() and not visit.goals_met and _goals_done():
 		visit.on_goals_met()
+	if pocket_watch != null:
+		pocket_watch.set_goal(watch_goal())
 	_home_stretch()
 
 func _goals_done() -> bool:
@@ -972,13 +1018,11 @@ func _on_grabbed(i: int) -> void:
 	capture_fx.start(gastos.head_of(i))
 
 ## He shoved it off: it comes apart as under the stick, and the watch in his
-## pocket loses some spring in the struggle (once there is one, task 17).
+## pocket loses some spring in the struggle (pocket_watch.gd).
 func _on_broke_free(i: int) -> void:
 	capture_fx.stop()
 	sfx.play_at(&"shatter", gastos.head_of(i), &"Mundo", -6.0)
-	var watch = get("pocket_watch")
-	if watch != null and watch.has_method("lose_spring"):
-		watch.lose_spring()
+	pocket_watch.lose_spring()
 	player.input_locked = notebook.is_open() or ended
 
 ## A Gasto reached Elias unseen. No death: black, cold, porcelain at the ear;
@@ -1356,6 +1400,15 @@ func _prepare_shot(mode: String) -> void:
 			for id in [&"achar_passagem", &"coroa", &"subir_sotao"]:
 				quest.complete(id)
 			notebook.open_plan(Vector3(6.0, 3.2, 3.0))
+		"watch":
+			# Night 1's lesson (D7): the watch open at the entry, pointing at the drawing.
+			night = Noites.get_night(1)
+			player.position = SPAWN
+			player.rotation.y = deg_to_rad(20.0)
+			camera.rotation.x = deg_to_rad(-22.0)
+			player.hands_model.hold(player.HandsModel.WATCH)
+			pocket_watch.set_goal(watch_goal())
+			pocket_watch.open()
 		"opcoes":
 			player.position = Vector3(4.0, 0.2, 3.5)
 			player.rotation.y = deg_to_rad(20.0)

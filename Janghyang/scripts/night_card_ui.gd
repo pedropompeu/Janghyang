@@ -10,6 +10,8 @@ const NotebookUI = preload("res://scripts/notebook_ui.gd")
 const DEMO_END := "Aqui termina a demonstração. Obrigado por jogar."
 
 signal closed
+## The letter (show_letter) was put down.
+signal letter_closed
 
 ## Set by main: the card holds this player still while it is up.
 var player: Node
@@ -18,6 +20,7 @@ var _root: Control
 var _label: Label
 var _open := false
 var _final := false
+var _letter := false
 var _shown_ms := 0
 
 ## The key that wound the clock must not also turn the card.
@@ -69,12 +72,28 @@ func _ready() -> void:
 func show_night(night: Dictionary, last := false) -> void:
 	_label.text = night_text(night, last)
 	_final = last
+	_letter = false
 	_shown_ms = Time.get_ticks_msec()
 	_open = true
 	_root.visible = true
 	if player != null:
 		player.input_locked = true
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+## A letter on the same paper (night 1's, spec §7.3): any key puts it down.
+func show_letter(text: String) -> void:
+	_label.text = text
+	_final = false
+	_letter = true
+	_shown_ms = Time.get_ticks_msec()
+	_open = true
+	_root.visible = true
+	if player != null:
+		player.input_locked = true
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func is_letter() -> bool:
+	return _open and _letter
 
 func is_open() -> bool:
 	return _open
@@ -90,7 +109,11 @@ func close() -> void:
 	if player != null:
 		player.input_locked = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	closed.emit()
+	if _letter:
+		_letter = false
+		letter_closed.emit()
+	else:
+		closed.emit()
 
 func _unhandled_input(event: InputEvent) -> void:
 	# The demo's last card leaves Esc to the settings (and their quit).

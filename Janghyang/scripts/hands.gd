@@ -173,6 +173,10 @@ func has_stick() -> bool:
 func lantern_shown() -> bool:
 	return _lantern.visible and _lift > 0.5
 
+## The left hand's node: the pocket watch sits on it (pocket_watch.gd).
+func left_hand() -> Node3D:
+	return _left
+
 ## What the left hand shows now (&"" for nothing).
 func held_item() -> StringName:
 	return _held_item
