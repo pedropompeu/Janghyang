@@ -15,6 +15,10 @@ const DEFAULTS := {
 	&"music": 1.0,
 	&"effects": 1.0,
 	&"fullscreen": false,
+	## Accessibility (capture_fx.gd, capture_model.gd): the dark flicker of a
+	## grab at 1 Hz and half as deep; a steady hold instead of clicks.
+	&"reduce_flash": false,
+	&"hold_to_escape": false,
 }
 
 ## Numeric options: (min, max).

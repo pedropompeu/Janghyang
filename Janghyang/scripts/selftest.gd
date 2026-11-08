@@ -423,6 +423,7 @@ func _run() -> void:
 	_record(quest.phase == phase_before and not main.ended, "the hug costs no progress", "")
 	_record(not main.player.input_locked and absf(main.player.camera.rotation.z) < 0.01, "Elias gets up again", "")
 	_record(gastos.placed().is_empty(), "the Gastos scatter after a hug", "")
+	await _capture(gastos)
 	main.player.set_pretending(true)
 	await get_tree().create_timer(0.9).timeout
 	var chalk := get_tree().get_nodes_in_group(&"Chalk")
@@ -953,3 +954,92 @@ func _left_hand(hands, knocks: Array) -> void:
 	pl.left_used.disconnect(on_used)
 	pl.hands_model = pl.HandsModel.new()
 	await get_tree().create_timer(0.4).timeout
+
+## Task 15: a Gasto reaching Elias holds him; clicks push it off, too few end
+## in the hug. Today's single visit: 10 clicks, the drawer's safe point.
+func _capture(g) -> void:
+	print("SELFTEST: capture")
+	var pl = main.player
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	var i: int = await _capture_near(g)
+	if i < 0:
+		_record(false, "capture: a Gasto stands somewhere to reach Elias", str(g.placed()))
+		return
+	_record(g.is_grabbed() and g.capture.gasto == i, "capture: a Gasto within reach and unseen grabs Elias", str(g.capture.state if g.capture != null else -1))
+	_record(pl.input_locked and main.capture_fx.is_active(), "capture: held, Elias is locked and the screen flickers", "")
+	var c: Color = main.capture_fx.color_now()
+	_record(c.r <= 0.75 and c.g <= 0.75 and c.b <= 0.75 and main.capture_fx.flicker_hz(false) <= 2.5, "capture: the flicker is never white nor faster than 2.5 Hz", str(c))
+	_record(main.capture_fx.flicker_hz(true) == 1.0 and main.capture_fx.flicker_depth(true) * 2.0 == main.capture_fx.flicker_depth(false), "capture: reduced flicker is 1 Hz at half the depth", "")
+	pl.notebook_requested.emit()
+	_record(not main.notebook.is_open(), "capture: Tab does not open the notebook while held", "")
+	get_tree().paused = true
+	for k in 300:
+		await get_tree().process_frame
+	get_tree().paused = false
+	_record(g.is_grabbed(), "capture: Esc pauses the fight (300 paused frames, still held)", str(g.capture.state))
+	for k in 9:
+		pl._unhandled_input(click)
+	_record(g.capture.clicks == 9, "capture: a left click pushes even while locked", str(g.capture.clicks))
+	await get_tree().create_timer(g.Capture.WINDOW + 0.3).timeout
+	_record(g.capture.state == g.Capture.State.HUG and not main.capture_fx.is_active(), "capture: nine clicks in the window end in the hug", str(g.capture.state))
+	await get_tree().create_timer(2.6).timeout
+	_record(pl.global_position.distance_to(pl.respawn_point) < 0.3 and not pl.input_locked, "capture: after the hug Elias wakes at today's safe point", str(pl.global_position))
+	await get_tree().create_timer(g.Capture.STAGGER).timeout
+	# With the notebook open the grab shuts it; ten clicks break free.
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		_record(false, "capture: a Gasto stands again for the second fight", "")
+		return
+	main.notebook.open()
+	g._grab(at[0])
+	_record(not main.notebook.is_open() and pl.input_locked and g.is_grabbed(), "capture: a grab shuts the open notebook and keeps Elias locked", "")
+	for k in 10:
+		pl._unhandled_input(click)
+	await _frames(3)
+	_record(not g.is_grabbed() and not g.placed().has(at[0]), "capture: ten clicks break free and the Gasto comes apart", str(g.placed()))
+	_record(not pl.input_locked and not main.capture_fx.is_active(), "capture: free again, Elias moves", "")
+	_record(not g.capture.grab(at[0]), "capture: staggering, he cannot be grabbed again at once", "")
+	await get_tree().create_timer(g.Capture.STAGGER + 0.1).timeout
+	_record(g.capture.state == g.Capture.State.FREE, "capture: after the stagger the fight is over", str(g.capture.state))
+	# The night sets how many clicks; the options sheet, whether holding works.
+	var night_before: Dictionary = g.night
+	g.night = {"capture_clicks": 16}
+	main.settings_ui.model.set_value(&"hold_to_escape", true)
+	g._grab(0)
+	g.night = night_before
+	_record(g.capture.clicks_needed == 16 and g.capture.hold_mode, "capture: the night's clicks and the hold option reach the fight", "%d %s" % [g.capture.clicks_needed, g.capture.hold_mode])
+	for k in 16:
+		pl._unhandled_input(click)
+	await _frames(3)
+	_record(not g.is_grabbed() and not pl.input_locked, "capture: sixteen clicks free him on that night", "")
+	main.settings_ui.model.set_value(&"hold_to_escape", false)
+	await get_tree().create_timer(g.Capture.STAGGER + 0.1).timeout
+	g.scatter()
+
+## Puts a Gasto at arm's length behind Elias, its next step due; returns which
+## (-1 if none stood) once it has grabbed him or a second has passed.
+func _capture_near(g) -> int:
+	var pl = main.player
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		return -1
+	var i: int = at[0]
+	var m = g._models[i]
+	var spot: Vector3 = m.points[m.at]
+	pl.global_position = spot + Vector3(1.0, 0.0, 0.0)
+	var to: Vector3 = spot - pl.global_position
+	pl.rotation.y = atan2(to.x, to.z)
+	pl.camera.rotation.x = 0.0
+	m._clock = 99.0
+	for k in 60:
+		await get_tree().physics_frame
+		if g.is_grabbed():
+			break
+	return i
+

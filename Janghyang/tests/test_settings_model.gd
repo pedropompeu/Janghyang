@@ -71,3 +71,7 @@ func test_a_partly_bad_file_keeps_the_good_values(t) -> void:
 	t.eq(s.get_value(&"invert_y"), false, "a wrong type falls back to the default")
 	t.eq(s.get_value(&"music"), 0.0, "a value under the range is clamped")
 	t.eq(s.get_value(&"effects"), 1.0, "a key not in the file keeps its default")
+
+func test_accessibility_defaults(t) -> void:
+	t.eq(Settings.new().get_value(&"reduce_flash"), false, "reduzir piscar começa desligado")
+	t.eq(Settings.new().get_value(&"hold_to_escape"), false, "segurar começa desligado")

@@ -33,6 +33,7 @@ const Gastos = preload("res://scripts/gastos.gd")
 const Pretend = preload("res://scripts/pretend.gd")
 const Score = preload("res://scripts/score.gd")
 const SettingsUI = preload("res://scripts/settings_ui.gd")
+const CaptureFx = preload("res://scripts/capture_fx.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Noites = preload("res://scripts/story/noites.gd")
 const NightCard = preload("res://scripts/night_card_ui.gd")
@@ -124,6 +125,8 @@ var quest
 var atlas
 var level := &""
 var gastos
+## How a grab looks (capture_fx.gd).
+var capture_fx
 var pretend
 var score
 var _black: ColorRect
@@ -771,7 +774,19 @@ func _wire_story() -> void:
 	gastos = Gastos.new()
 	gastos.main = self
 	add_child(gastos)
-	gastos.caught.connect(func(i: int) -> void: hug(gastos.head_of(i)))
+	capture_fx = CaptureFx.new()
+	capture_fx.name = "CaptureFx"
+	capture_fx.main = self
+	add_child(capture_fx)
+	gastos.grabbed.connect(_on_grabbed)
+	gastos.broke_free.connect(_on_broke_free)
+	gastos.caught.connect(func(i: int) -> void:
+		capture_fx.stop()
+		hug(gastos.head_of(i)))
+	player.pushed.connect(func() -> void:
+		if gastos.is_grabbed():
+			gastos.push()
+			capture_fx.push())
 	pretend = Pretend.new()
 	pretend.main = self
 	add_child(pretend)
@@ -781,7 +796,9 @@ func _wire_story() -> void:
 	add_child(score)
 	notebook.quest = quest
 	notebook.atlas = atlas
-	player.map_requested.connect(func() -> void: notebook.toggle_plan(player.global_position))
+	player.map_requested.connect(func() -> void:
+		if not gastos.is_grabbed():
+			notebook.toggle_plan(player.global_position))
 	for p in get_tree().get_nodes_in_group(&"Piece"):
 		p.taken.connect(_on_piece)
 	for n in BREAK_TASKS:
@@ -943,6 +960,26 @@ func _track_place() -> void:
 	_home_stretch()
 	if lvl == Registry.HOME and quest.all_pieces():
 		_complete(&"voltar")
+
+## A Gasto has Elias (gastos.gd, capture_model.gd): the notebook shuts, he
+## can only push, and the screen flickers dark until he breaks free or not.
+func _on_grabbed(i: int) -> void:
+	if notebook.is_open():
+		notebook.close()
+	player.input_locked = true
+	player.velocity = Vector3.ZERO
+	capture_fx.reduce_flash = settings_ui != null and bool(settings_ui.model.get_value(&"reduce_flash"))
+	capture_fx.start(gastos.head_of(i))
+
+## He shoved it off: it comes apart as under the stick, and the watch in his
+## pocket loses some spring in the struggle (once there is one, task 17).
+func _on_broke_free(i: int) -> void:
+	capture_fx.stop()
+	sfx.play_at(&"shatter", gastos.head_of(i), &"Mundo", -6.0)
+	var watch = get("pocket_watch")
+	if watch != null and watch.has_method("lose_spring"):
+		watch.lose_spring()
+	player.input_locked = notebook.is_open() or ended
 
 ## A Gasto reached Elias unseen. No death: black, cold, porcelain at the ear;
 ## he wakes lying where the floor begins, and the double writes it down.
@@ -1178,7 +1215,9 @@ func _build_ui() -> void:
 	notebook.player = player
 	add_child(notebook)
 	notebook.refresh(catalog)
-	player.notebook_requested.connect(notebook.toggle)
+	player.notebook_requested.connect(func() -> void:
+		if gastos == null or not gastos.is_grabbed():
+			notebook.toggle())
 	cataloged.connect(func(entry: Dictionary) -> void:
 		notebook.refresh(catalog)
 		notebook.peek(entry))

@@ -32,6 +32,8 @@ signal pretend_changed(on: bool)
 signal left_used(item: StringName)
 ## T opened or closed the watch, or the wheel changed the left hand.
 signal left_changed(item: StringName)
+## Any left click, even locked: a Gasto holding him is pushed (gastos.gd).
+signal pushed
 
 const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
 
@@ -103,6 +105,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		print("[reload] R via %s" % event)
 		get_tree().reload_current_scene()
 		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		pushed.emit()
 	if input_locked:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:

@@ -13,6 +13,7 @@ const Atlas = preload("res://scripts/atlas.gd")
 const Mannequin = preload("res://scripts/mannequin.gd")
 const Safety = preload("res://scripts/safety_model.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
+const Capture = preload("res://scripts/capture_model.gd")
 
 ## Night 5 asks for three.
 const MAX := 3
@@ -41,7 +42,14 @@ var entry_wound = null
 ## The wound anchor clocks: [{"at": Vector3, "left": float}] (none yet).
 var anchors: Array = []
 
+## A Gasto reached Elias and holds him (capture_model.gd): he fights it off
+## (broke_free) or it hugs him (caught).
+signal grabbed(gasto: int)
+signal broke_free(gasto: int)
 signal caught(gasto: int)
+
+## The fight going on or just over; null before the first grab.
+var capture = null
 
 ## Set by main before add_child.
 var main: Node
@@ -462,6 +470,11 @@ func threat() -> float:
 func _process(delta: float) -> void:
 	if main == null or main.player == null or _models.is_empty():
 		return
+	# The fight comes first: Elias is locked while held, and no Gasto moves.
+	if capture != null and capture.state != Capture.State.FREE:
+		_tick_capture(delta)
+		if capture.is_grabbed():
+			return
 	var n := wanted()
 	for i in range(n, _models.size()):
 		if _models[i] != null and _bodies[i].visible:
@@ -490,11 +503,13 @@ func _process(delta: float) -> void:
 			&"undone":
 				main.sfx.play_at(&"shatter", head_of(i), &"Mundo", -6.0)
 			&"caught":
-				caught.emit(i)
+				_grab(i)
 		if r != &"":
 			_show(i)
 		if not m.is_away():
 			_face(i, pp)
+		if capture != null and capture.is_grabbed():
+			return
 	_tick_in -= delta
 	if _tick_in <= 0.0:
 		_tick_in = _rng.randf_range(1.4, 2.6)
@@ -502,6 +517,38 @@ func _process(delta: float) -> void:
 			var d := _bodies[i].global_position.distance_to(pp)
 			if d < 9.0:
 				main.sfx.play_at(&"porcelain", head_of(i), &"Mundo", lerpf(-6.0, -20.0, d / 9.0))
+
+## Gasto `i` takes hold of Elias, unless he is still staggering from the
+## last fight.
+func _grab(i: int) -> void:
+	if capture != null and capture.state != Capture.State.FREE:
+		return
+	var hold := false
+	if main.get("settings_ui") != null:
+		hold = bool(main.settings_ui.model.get_value(&"hold_to_escape"))
+	capture = Capture.new(int(night.get("capture_clicks", 10)), hold)
+	capture.grab(i)
+	grabbed.emit(i)
+
+func _tick_capture(delta: float) -> void:
+	var g: int = capture.gasto
+	var r: StringName = capture.update(delta, Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
+	match r:
+		&"broke_free":
+			if g >= 0 and g < _models.size() and _models[g] != null:
+				_models[g].hit()
+				_show(g)
+			broke_free.emit(g)
+		&"hug":
+			caught.emit(g)
+
+## One click of Elias's while held.
+func push() -> void:
+	if capture != null:
+		capture.push()
+
+func is_grabbed() -> bool:
+	return capture != null and capture.is_grabbed()
 
 func _show(i: int) -> void:
 	var m = _models[i]

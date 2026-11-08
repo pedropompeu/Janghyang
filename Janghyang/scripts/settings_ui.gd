@@ -21,6 +21,8 @@ const ROWS := [
 	[&"music", "Música"],
 	[&"effects", "Sons da casa e do mundo"],
 	[&"fullscreen", "Tela cheia"],
+	[&"reduce_flash", "Reduzir o piscar"],
+	[&"hold_to_escape", "Segurar para se soltar"],
 ]
 
 ## Set by main before add_child. An empty path keeps the file untouched
