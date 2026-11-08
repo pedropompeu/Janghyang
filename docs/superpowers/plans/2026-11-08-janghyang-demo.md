@@ -53,7 +53,14 @@ São as cinco entradas que o spec implica, que nenhum teste de feature cobriria 
 4. **Duas tentativas falhas** na mesma tarefa param a tarefa. Registrar em `achados.md` com severidade, repro e o que foi descartado. Não afrouxar teste.
 5. **Decisão técnica** entra no ledger como `Ruling:` e em `context/decisoes.md` como `(i)`. Regra de jogo, arquitetura além do spec, dependência nova ou custo ficam pendentes para Pedro (`(d)`, §0.4).
 6. **Pasta nova ou serviço novo** (`scripts/story/`, `scripts/maquetes/`, `arte/`) entra em `context/arquitetura.md` na mesma tarefa.
-7. **Formato misto de execução** (aprovado por Pedro em 2026-11-08). Os modelos isolados (Tarefas 13–16, 18–20, 22–25 e 28–33) são feitos por um construtor novo, um por tarefa. As tarefas de integração (3–12, 17, 21 e 34) são feitas pela sessão principal. Arte, playtests e lançamento (35–47) ficam com a sessão principal e Pedro. O OpenCode revisa cada tarefa, e um revisor Claude novo revisa o conjunto no fim de cada marco. Quem constrói nunca revisa a própria tarefa. Os gates são sempre rodados de novo pela sessão principal, que também é quem faz o commit.
+7. **Formato misto de execução** (aprovado por Pedro em 2026-11-08). A sessão principal (Claude Code) é a gestora: escreve o pedido de cada tarefa, distribui o trabalho, lê o diff, roda de novo os três gates e faz o commit.
+   - **Construtores dos modelos isolados** (Tarefas 13–16, 18–20, 22–25 e 28–33): o OpenCode (`opencode run -m opencode/deepseek-v4.1-flash-free`, agente `build`) e o Gemini CLI (`gemini -p ... --approval-mode auto_edit`, cota gratuita). Só modelos gratuitos, sempre.
+   - **Revisão cruzada:** quem constrói nunca revisa a própria tarefa. O que o OpenCode constrói, o Gemini revisa (`--approval-mode plan`), e o contrário também. As tarefas da sessão principal são revisadas por um dos dois.
+   - **Integração** (3–12, 17, 21 e 34) e **arte, playtests e lançamento** (35–47) ficam com a sessão principal, com Pedro onde o plano pede.
+   - **Fim de cada marco:** um revisor Claude novo revisa o conjunto.
+   - **Os construtores não fazem commit.** O pedido leva a tarefa do plano, as Global Constraints e a frase "não faça commit nem push".
+   - **Teste inicial:** a Tarefa 13 com o OpenCode, a 14 com o Gemini e a 15 com a sessão principal. Depois delas, a distribuição do resto é registrada no ledger como `Ruling:`.
+   - **Falhas:** cota esgotada ou modelo indisponível passam a tarefa ao outro construtor. Duas tentativas falhas passam a tarefa à sessão principal (regra 4).
 8. **Texto de jogo novo** (capítulos, cartas, hipóteses) é escrito pela IA como rascunho e marcado `D9` no ledger até a leitura de Pedro.
 
 Formato do ledger:
