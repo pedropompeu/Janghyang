@@ -3,8 +3,9 @@ extends RefCounted
 ## frames, corners, the far end of corridors) and only ever moves while nobody
 ## looks: one point closer to Elias per hop, never onto a point he can see.
 ## Looked at, it freezes; looked at long enough in light, it comes apart and
-## stays away for a while. Near and unseen, it hugs him; if he hides, it waits
-## and then gives up.
+## stays away for a while. Near and unseen, it hugs him; if he hides, it finds
+## him in HIDE_FOUND seconds, unless he holds his breath: then it waits and
+## gives up.
 
 const STEP_TIME := 5.0
 ## Eyes closed or no light: it does not wait for long.
@@ -12,6 +13,8 @@ const STEP_TIME_BLIND := 1.2
 const STARE_TIME := 3.5
 const RETURN_TIME := 25.0
 const HIDE_GIVE_UP := 8.0
+## Hidden but breathing: found this many seconds after it comes near.
+const HIDE_FOUND := 3.0
 
 var points: Array[Vector3] = []
 var links: Array = []
@@ -23,6 +26,7 @@ var stare := 0.0
 var _clock := 0.0
 var _away := 0.0
 var _hidden_for := 0.0
+var _found_for := 0.0
 
 func _init(pts: Array[Vector3], lnk: Array) -> void:
 	points = pts
@@ -34,6 +38,7 @@ func place(i: int) -> void:
 	_clock = 0.0
 	stare = 0.0
 	_hidden_for = 0.0
+	_found_for = 0.0
 
 ## Struck by the stick: it comes apart at once.
 func hit() -> void:
@@ -52,8 +57,9 @@ func is_away() -> bool:
 ## `hidden`: crouched inside a hiding place. `in_view`: points he can see now.
 ## `safe`: points it must never step onto (safety_model.gd); `elias_safe`:
 ## Elias stands where it cannot reach him, so it never hugs him there.
+## `breath_held`: hidden Elias holds his breath (else it finds him).
 ## Returns &"moved", &"caught", &"undone", &"gave_up", &"returned" or &"".
-func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: bool, in_view: Array, safe: Array = [], elias_safe := false) -> StringName:
+func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: bool, in_view: Array, safe: Array = [], elias_safe := false, breath_held := true) -> StringName:
 	if at < 0:
 		_away -= dt
 		if _away > 0.0:
@@ -71,6 +77,13 @@ func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: b
 			return &"undone"
 		return &""
 	stare = maxf(0.0, stare - dt)
+	if near and hidden and not breath_held and not elias_safe:
+		_found_for += dt
+		if _found_for >= HIDE_FOUND - 0.0001:
+			_found_for = 0.0
+			return &"caught"
+	else:
+		_found_for = 0.0
 	_clock += dt
 	var interval := STEP_TIME_BLIND if blind else STEP_TIME
 	if _clock < interval - 0.0001:
@@ -115,6 +128,7 @@ func _undo() -> void:
 	stare = 0.0
 	_clock = 0.0
 	_hidden_for = 0.0
+	_found_for = 0.0
 	_away = RETURN_TIME
 
 func _farthest_from(goal: int, in_view: Array, safe: Array = []) -> int:

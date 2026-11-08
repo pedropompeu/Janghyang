@@ -189,3 +189,38 @@ func _run_safe(s: Stalker, seconds: float, goal: int, safe: Array) -> StringName
 			return ev
 		t += 0.1
 	return &""
+
+## Ticks with Elias hidden and near; `breath`: he holds it the whole time.
+func _run_hidden(s: Stalker, seconds: float, breath: bool) -> Array:
+	var evs: Array = []
+	var t := 0.0
+	while t < seconds - 0.0001:
+		var ev: StringName = s.update(0.1, false, false, 4, true, true, [], [], false, breath)
+		if ev != &"":
+			evs.append([ev, t + 0.1])
+		t += 0.1
+	return evs
+
+func test_hidden_without_breath_is_found(t) -> void:
+	var s := _line()
+	s.place(3)
+	t.eq(_run_hidden(s, Stalker.HIDE_FOUND - 0.2, false), [], "antes de HIDE_FOUND, nada")
+	var evs := _run_hidden(s, 0.4, false)
+	t.eq(evs.size(), 1, "um evento")
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"caught", "sem prender a respiração: achado")
+
+func test_hidden_with_breath_waits_and_gives_up(t) -> void:
+	var s := _line()
+	s.place(3)
+	var evs := _run_hidden(s, Stalker.HIDE_GIVE_UP + Stalker.STEP_TIME + 1.0, true)
+	t.eq(evs.size(), 1, "um evento só")
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"gave_up", "prendendo a respiração: desiste")
+	t.ok(evs.size() > 0 and evs[0][1] >= Stalker.HIDE_GIVE_UP, "não antes de HIDE_GIVE_UP")
+	t.eq(s.at, -1, "foi embora")
+
+func test_letting_breath_go_restarts_the_search(t) -> void:
+	var s := _line()
+	s.place(3)
+	t.eq(_run_hidden(s, 2.0, false), [], "2 s sem prender: ainda não")
+	t.eq(_run_hidden(s, 2.0, true), [], "prender a respiração zera a busca")
+	t.eq(_run_hidden(s, Stalker.HIDE_FOUND - 0.2, false), [], "soltar recomeça a conta do zero")

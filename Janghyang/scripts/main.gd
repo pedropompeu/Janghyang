@@ -37,6 +37,8 @@ const CaptureFx = preload("res://scripts/capture_fx.gd")
 const PocketWatch = preload("res://scripts/pocket_watch.gd")
 const PlanModel = preload("res://scripts/plan_model.gd")
 const LightModel = preload("res://scripts/light_model.gd")
+const NoiseModel = preload("res://scripts/noise_model.gd")
+const Compass = preload("res://scripts/compass_model.gd")
 const LightPickup = preload("res://scripts/light_pickup.gd")
 const PlanRevealer = preload("res://scripts/plan_revealer.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
@@ -189,6 +191,7 @@ func _ready() -> void:
 	_build_ui()
 	_wire_story()
 	_wire_light()
+	_wire_noise()
 
 	var args := OS.get_cmdline_user_args()
 	if args.has("--labels"):
@@ -986,6 +989,18 @@ func _build_light_pickups() -> void:
 
 ## The match's flame in the left hand, the lantern's own energy, and the
 ## Gastos fearing every flame.
+## Task 20: what Elias does makes noise, and the Gastos near enough hear it.
+func _wire_noise() -> void:
+	player.noised.connect(gastos.hear)
+	player.gasped.connect(func() -> void:
+		sfx.play_at(&"breath", player.camera.global_position, &"Mundo", -2.0))
+	var clock := get_node("EntryClock")
+	clock.wound.connect(func(_amount: float) -> void:
+		gastos.hear(clock.global_position, NoiseModel.Level.LOUD))
+	pocket_watch.ticked.connect(func(at: Vector3, open: bool) -> void:
+		if open:
+			gastos.hear(at, NoiseModel.Level.QUIET, Compass.HEARD_RADIUS))
+
 func _wire_light() -> void:
 	_lantern_energy = player.flashlight.light_energy
 	var hand: Node3D = player.hands.left_hand() if player.get("hands") != null else player.camera

@@ -173,3 +173,10 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - DEFs das áreas: chave `pickups` (`{id, kind, at, n?}`); `noites.gd`: `pickups` por noite (noite 1 casa e passagem; noite 2 sótão e mecanismo).
   - `main.gd`: `light`, `_build_light_pickups()`, `_wire_light()`, `_tick_light(delta)`, `strike_match()`, `light_candle(c)`, `take_light(p)`; `MatchGlow` na mão esquerda. `gastos.gd`: `add_lamp(l)`, `lit_rooms` conta `HouseLight` e `CandleLight`.
   - Contagens: unit 2363/0, selftest 408/0 (checks `luz:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/noise_model.gd`, `scripts/stalker_model.gd`, `scripts/gastos.gd`, `scripts/player.gd`, `scripts/main.gd` Tarefa 20, ruído e respiração:
+  - `noise_model.gd` (novo, `RefCounted`): `Level {QUIET, NORMAL, LOUD}`, `RADIUS [1.5, 5.0, 10.0]`, `NOISE_MEMORY` 10, `BREATH_MAX` 8, `BREATH_REST` 4; statics `radius(level)`, `heard(src, ear, level)`; `breath(dt, pressed)` (`gasp`), `holding`.
+  - `stalker_model.gd`: `HIDE_FOUND` 3,0; `update(..., breath_held := true)`.
+  - `gastos.gd`: `hear(at, level, radius := -1.0)`, `goal_of(i)` (o último ruído ouvido por Gasto, senão Elias), `_nearest_point(p)`; passa `player.breath.holding` ao modelo.
+  - `player.gd`: sinais `noised(at, level)` e `gasped`; `breath`, `step()`, `step_level()`; `H` prende a respiração; a batida da vareta é LOUD.
+  - `main.gd`: `_wire_noise()` (passos, batidas, ofego, corda do relógio da entrada LOUD, tique do relógio aberto QUIET a `Compass.HEARD_RADIUS`).
+  - Contagens: unit 2393/0, selftest 412/0 (checks `ruido:`).

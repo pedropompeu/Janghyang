@@ -1,8 +1,11 @@
 extends CharacterBody3D
 ## First-person controller: walk, run until the breath gives out, hop,
-## crouch, climb ladders, and close the eyes to pretend. No HUD.
+## crouch, climb ladders, close the eyes to pretend and hold the breath (H).
+## Every step, knock and gasp is a noise the Gastos may hear (noise_model.gd).
+## No HUD.
 
 const Mobility = preload("res://scripts/mobility_model.gd")
+const NoiseModel = preload("res://scripts/noise_model.gd")
 const HandsModel = preload("res://scripts/hands_model.gd")
 
 @export var mouse_sensitivity := 0.0022
@@ -34,6 +37,10 @@ signal left_used(item: StringName)
 signal left_changed(item: StringName)
 ## Any left click, even locked: a Gasto holding him is pushed (gastos.gd).
 signal pushed
+## A noise at `at`, of NoiseModel.Level `level` (steps, knocks, the gasp).
+signal noised(at: Vector3, level: int)
+## Held too long: the breath bursts out.
+signal gasped
 
 const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
 
@@ -55,6 +62,8 @@ var mobility = Mobility.new()
 ## What the left hand holds and the pockets; main gives a new one each night.
 var hands_model = HandsModel.new()
 var sprinting := false
+## The held breath (H); `breath.holding` keeps a hidden Elias unfound.
+var breath = NoiseModel.new()
 ## Eyes closed, remembering the house as it was (V or the right button held).
 var pretending := false
 ## Ladder volumes the body is inside; ladder.gd keeps the count.
@@ -153,6 +162,9 @@ func _physics_process(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_D):
 		input_dir.x += 1.0
 	input_dir = Vector2.ZERO if input_locked else input_dir.normalized()
+	if breath.breath(delta, not input_locked and Input.is_physical_key_pressed(KEY_H)) == &"gasp":
+		gasped.emit()
+		noised.emit(global_position, NoiseModel.Level.LOUD)
 
 	var held := not input_locked and (Input.is_physical_key_pressed(KEY_V) or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT))
 	if held != _pretend_held:
@@ -200,7 +212,7 @@ func _physics_process(delta: float) -> void:
 		var before := floori(_bob_time / PI)
 		_bob_time += delta * horizontal * 4.0
 		if floori(_bob_time / PI) != before:
-			stepped.emit()
+			step()
 		camera.position.y = _eye + sin(_bob_time) * 0.018
 	else:
 		camera.position.y = lerpf(camera.position.y, _eye, 8.0 * delta)
@@ -211,6 +223,19 @@ func _physics_process(delta: float) -> void:
 	if position.y < FALL_LIMIT:
 		position = respawn_point
 		velocity = Vector3.ZERO
+
+## One footfall: its sound, and its noise for the Gastos.
+func step() -> void:
+	stepped.emit()
+	noised.emit(global_position, step_level())
+
+## Crouched steps are QUIET, running ones LOUD, the rest NORMAL.
+func step_level() -> int:
+	if sprinting:
+		return NoiseModel.Level.LOUD
+	if crouched:
+		return NoiseModel.Level.QUIET
+	return NoiseModel.Level.NORMAL
 
 func _speed() -> float:
 	return Mobility.speed_for(sprinting, crouched, pretending)
@@ -296,6 +321,7 @@ func _land_knock() -> void:
 		return
 	if hands != null:
 		hands.recoil()
+	noised.emit(ray.get_collision_point(), NoiseModel.Level.LOUD)
 	acted.emit(&"bater", ray.get_collider())
 
 ## What the house calls this gesture: doors open, other hinges fold.

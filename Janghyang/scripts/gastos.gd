@@ -14,6 +14,7 @@ const Mannequin = preload("res://scripts/mannequin.gd")
 const Safety = preload("res://scripts/safety_model.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
 const Capture = preload("res://scripts/capture_model.gd")
+const NoiseModel = preload("res://scripts/noise_model.gd")
 
 ## Night 5 asks for three.
 const MAX := 3
@@ -72,6 +73,8 @@ var _elias_safe := false
 var _view_in := 0.0
 var _tick_in := 1.5
 var _rng := RandomNumberGenerator.new()
+## Gasto index -> {"at": Vector3, "left": seconds}: the last noise it heard.
+var _heard := {}
 
 func _ready() -> void:
 	name = "Gastos"
@@ -405,6 +408,7 @@ func on_level(lvl: StringName) -> void:
 	level = lvl
 	var g := graph(lvl)
 	_models.clear()
+	_heard.clear()
 	for i in MAX:
 		_bodies[i].visible = false
 		_set_hittable(i, false)
@@ -426,6 +430,20 @@ func spawn_now() -> void:
 		m.send_away(0.0)
 		m.update(0.01, false, false, goal, false, false, _in_view, _safe)
 		_show(i)
+
+## A noise at `at` (NoiseModel.Level): every Gasto standing within its
+## radius (or `radius`, when given) heads for it for NOISE_MEMORY seconds.
+func hear(at: Vector3, level: int, radius := -1.0) -> void:
+	var r: float = radius if radius > 0.0 else NoiseModel.radius(level)
+	for i in placed():
+		if _bodies[i].global_position.distance_to(at) < r:
+			_heard[i] = {"at": at, "left": NoiseModel.NOISE_MEMORY}
+
+## The point Gasto `i` heads for: the last noise it heard, else Elias.
+func goal_of(i: int) -> int:
+	if _heard.has(i):
+		return _nearest_point(_heard[i].at)
+	return _goal()
 
 ## Indices of the Gastos standing somewhere now.
 func placed() -> Array:
@@ -498,19 +516,24 @@ func _process(delta: float) -> void:
 	if _view_in <= 0.0:
 		_view_in = VIEW_EVERY
 		_refresh_view()
-	var goal := _goal()
 	var blind: bool = main.player.pretending or not _lit(main.player.camera.global_position)
 	var hidden := _hidden()
+	var held: bool = main.player.get("breath") != null and main.player.breath.holding
 	var pp: Vector3 = main.player.global_position
+	for i in _heard.keys():
+		_heard[i].left -= delta
+		if _heard[i].left <= 0.0:
+			_heard.erase(i)
 	for i in n:
 		var m = _models[i]
 		if m == null:
 			continue
+		var goal := goal_of(i)
 		var seen := false
 		if not m.is_away() and not veiled:
 			seen = main.is_seen(head_of(i)) and _lit(head_of(i))
 		var near: bool = not m.is_away() and m.points[m.at].distance_to(pp) < NEAR
-		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, _in_view, _safe, _elias_safe)
+		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, _in_view, _safe, _elias_safe, held)
 		match r:
 			&"undone":
 				main.sfx.play_at(&"shatter", head_of(i), &"Mundo", -6.0)
@@ -598,8 +621,10 @@ func _refresh_view() -> void:
 			_in_view.append(k)
 
 func _goal() -> int:
+	return _nearest_point(main.player.global_position)
+
+func _nearest_point(p: Vector3) -> int:
 	var g := graph(level)
-	var p: Vector3 = main.player.global_position
 	var best := -1
 	var best_d := INF
 	for k in g.points.size():

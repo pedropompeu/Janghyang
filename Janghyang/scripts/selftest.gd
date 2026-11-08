@@ -424,6 +424,7 @@ func _run() -> void:
 	_record(not main.player.input_locked and absf(main.player.camera.rotation.z) < 0.01, "Elias gets up again", "")
 	_record(gastos.placed().is_empty(), "the Gastos scatter after a hug", "")
 	await _capture(gastos)
+	await _noise(gastos)
 	main.player.set_pretending(true)
 	await get_tree().create_timer(0.9).timeout
 	var chalk := get_tree().get_nodes_in_group(&"Chalk")
@@ -1086,6 +1087,48 @@ func _capture(g) -> void:
 	main.settings_ui.model.set_value(&"hold_to_escape", false)
 	await get_tree().create_timer(g.Capture.STAGGER + 0.1).timeout
 	g.scatter()
+
+## Task 20: a walk 8 m away goes unheard; a run there turns the Gasto's goal
+## to the point nearest the noise, and it keeps going there after Elias moves.
+func _noise(g) -> void:
+	print("SELFTEST: noise")
+	var pl = main.player
+	var saved: Vector3 = pl.global_position
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		_record(false, "ruido: a Gasto stands somewhere to hear Elias", str(g.placed()))
+		return
+	var i: int = at[0]
+	var m = g._models[i]
+	var body: Vector3 = g._bodies[i].global_position
+	var pts: Array = g.graph(g.level).points
+	var k := -1
+	for j in pts.size():
+		var d: float = (pts[j] as Vector3).distance_to(body)
+		if d > 7.0 and d < 9.0:
+			k = j
+			break
+	if k < 0:
+		_record(false, "ruido: a lurk point 8 m from the Gasto", str(body))
+		g.scatter()
+		return
+	pl.global_position = pts[k]
+	pl.sprinting = false
+	pl.step()
+	_record(not g._heard.has(i), "ruido: a walk 8 m away goes unheard", "%.1f m" % pts[k].distance_to(body))
+	pl.sprinting = true
+	pl.step()
+	pl.sprinting = false
+	_record(g._heard.has(i) and g.goal_of(i) == k, "ruido: a run 8 m away turns the Gasto to the noise", "%s %d" % [g._heard.get(i), g.goal_of(i)])
+	pl.global_position = body
+	_record(g.goal_of(i) == k and g._goal() != k, "ruido: it heads for the noise, not for where Elias went", "%d %d" % [g.goal_of(i), g._goal()])
+	_record(m.at >= 0, "ruido: hearing is not a step", str(m.at))
+	pl.global_position = saved
+	g._heard.clear()
+	g.scatter()
+	await get_tree().physics_frame
 
 ## Puts a Gasto at arm's length behind Elias, its next step due; returns which
 ## (-1 if none stood) once it has grabbed him or a second has passed.
