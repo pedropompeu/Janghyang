@@ -23,6 +23,12 @@ const DEF := {
 		{"to": &"sotao", "at": Vector3(10.12, 0.2, -0.65), "path": [Vector3(6.7, 0.2, -0.6), Vector3(8.4, 0.2, -0.6)], "gate": &"HollowPanel"},
 	],
 	"tasks": {&"passagem": &"achar_passagem"},
+	## Light along the way (light_model.gd): batteries, boxes of matches, candles to light.
+	"pickups": [
+		{"id": &"pilha_passagem", "kind": &"pilha", "at": Vector3(3.0, 0.05, -1.0)},
+		{"id": &"vela_passagem", "kind": &"vela", "at": Vector3(5.0, 0.05, -1.1)},
+		{"id": &"fosforo_passagem", "kind": &"fosforo", "at": Vector3(8.0, 0.05, -1.0), "n": 4},
+	],
 	"breaks": {"HollowPanel": &"achar_passagem"},
 }
 

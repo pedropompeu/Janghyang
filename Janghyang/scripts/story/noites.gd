@@ -46,7 +46,7 @@ const NOITES := [
 		"safety": &"casa_toda",
 		"stalkers": [{"after": &"", "n": 0}, {"after": &"coroa", "n": 1}],
 		"anchor_time": 90.0, "entry_clock_scale": 1.0, "capture_clicks": 10,
-		"pickups": [], "final": false,
+		"pickups": [&"pilha_brincar", &"pilha_quarto", &"pilha_figuras", &"vela_brincar", &"vela_corredor", &"vela_quarto", &"fosforo_entrada", &"fosforo_corredor_sul", &"pilha_passagem", &"vela_passagem", &"fosforo_passagem"], "final": false,
 	},
 	{
 		"n": 2, "date": "13 de novembro",
@@ -67,7 +67,7 @@ const NOITES := [
 		"safety": &"relogio_entrada",
 		"stalkers": [{"after": &"", "n": 1}, {"after": &"alcapao", "n": 2}],
 		"anchor_time": 75.0, "entry_clock_scale": 1.0, "capture_clicks": 12,
-		"pickups": [], "final": false,
+		"pickups": [&"pilha_sotao_oeste", &"pilha_sotao_leste", &"pilha_sotao_sul", &"vela_sotao_oeste", &"vela_sotao_leste", &"vela_sotao_sul", &"fosforo_sotao_poco", &"fosforo_sotao_sul", &"pilha_torre", &"vela_torre", &"fosforo_torre"], "final": false,
 	},
 	{
 		"n": 3, "date": "14 de novembro",

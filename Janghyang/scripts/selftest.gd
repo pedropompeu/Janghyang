@@ -625,6 +625,7 @@ func _nights() -> void:
 	_record(main.night.n == 1 and main.quest.phases == main.night.phases, "noites: night 1 plays its own lots", str(main.quest.phase_id()))
 	_record(main.visit.is_short() and not main.clock_model.can_stop, "noites: night 1 is short and its 03:33 is closed", "")
 	_record(main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: Elias wakes at the spawn", str(main.player.global_position))
+	await _light()
 	await _watch()
 	main.player.global_position = main.night.goals[1].at
 	await _frames(2)
@@ -659,6 +660,10 @@ func _nights() -> void:
 	_record(lit2 == 9, "bussola: night 2 wakes with the house lit", str(lit2))
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
+	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
+	var vela1 = main.get_node("LightPickups/Pickup_vela_brincar")
+	_record(torre.active and not vela1.active and not vela1.lit, "luz: night 2 lays out its own light, none of night 1's", "")
+	_record(is_equal_approx(main.light.battery, main.light.BATTERY) and main.light.spare == 0 and main.player.hands_model.count(&"fosforo") == 0, "luz: night 2 starts on one battery and no matches", "%.1f %d" % [main.light.battery, main.light.spare])
 	_record(not main.hour_event.is_active() and main.hour_event.echoes.is_empty() and not main.clock_model.can_stop, "noites: night 2 starts with no echoes and a closed 03:33", "")
 	await _frames(2)
 	main._complete(&"alcapao")
@@ -675,6 +680,45 @@ func _nights() -> void:
 	main.begin_night(5)
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	await _frames(2)
+
+## Task 19 (spec §6, luz escassa): night 1 lays out its batteries, matches and
+## candles; a match lights the playroom candle, which the Gastos then count as
+## a lamp; the lantern takes a spare by itself and goes dark without one.
+func _light() -> void:
+	print("SELFTEST: luz")
+	var pl = main.player
+	var vela = main.get_node("LightPickups/Pickup_vela_brincar")
+	var pilha = main.get_node("LightPickups/Pickup_pilha_brincar")
+	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
+	_record(vela.active and pilha.active and not torre.active, "luz: night 1 lays out its own light only", "")
+	_record(vela.is_in_group(&"PlanItem") and not torre.is_in_group(&"PlanItem"), "luz: what lies out can go on the plan", "")
+	pl.hands_model.take(&"fosforo", 2)
+	pl.hands_model.hold(&"fosforo")
+	pl.global_position = vela.global_position + Vector3(0.8, 0.2, 0.0)
+	await get_tree().physics_frame
+	pl.left_used.emit(&"fosforo")
+	_record(main.light.burning() and pl.hands_model.count(&"fosforo") == 1, "luz: a click strikes one match", str(pl.hands_model.count(&"fosforo")))
+	_record(vela.lit and vela.glow.visible, "luz: the match lights the playroom candle within reach", "")
+	_record(main.gastos._lamps.has(vela.glow) and main.gastos._lamp_lit(vela.glow.global_position + Vector3(0.5, 0.0, 0.0)), "luz: the lit candle is a lamp the Gastos fear", "")
+	_record(main.gastos.lit_rooms().has(&"brincar"), "luz: the candle lights its room for the safety rule", str(main.gastos.lit_rooms().keys()))
+	vela._process(main.light.CANDLE + 0.1)
+	_record(not vela.lit and not vela.glow.visible, "luz: the candle burns out after its time", "")
+	pilha.interact()
+	_record(main.light.spare == 1 and pl.hands_model.count(&"pilha") == 1 and not pilha.active, "luz: a battery goes in the pockets", "%d %d" % [main.light.spare, pl.hands_model.count(&"pilha")])
+	var fl: SpotLight3D = pl.flashlight
+	var fl_was: bool = fl.visible
+	fl.visible = true
+	main.light.battery = 5.0
+	main._tick_light(6.0)
+	_record(fl.visible and main.light.battery > 238.0 and main.light.spare == 0 and pl.hands_model.count(&"pilha") == 0, "luz: the spare goes in by itself", "%.1f" % main.light.battery)
+	main.light.battery = 1.0
+	main._tick_light(2.0)
+	_record(not fl.visible and main.light.battery == 0.0, "luz: no battery, the lantern goes dark", "")
+	main.light.battery = main.light.BATTERY
+	fl.visible = fl_was
+	main._tick_light(0.01)
+	pl.global_position = main.SPAWN
+	await get_tree().physics_frame
 
 ## Spec §11: safety by point and by night, not a refuge floor. Ends on night 5,
 ## where the rest of the selftest plays.
@@ -955,7 +999,8 @@ func _left_hand(hands, knocks: Array) -> void:
 	await _frames(2)
 	_record(pl.hands_model.left == &"fosforo" and hands.held_item() == &"fosforo" and used == [&"fosforo"], "hands: the wheel takes a match out and the left click uses it", str(used))
 	main.notebook.open()
-	_record(main.notebook.pockets_shown().contains("fósforo ×2"), "hands: the pockets page lists two matches", main.notebook.pockets_shown())
+	var pockets: String = main.notebook.pockets_shown()
+	_record(pockets.contains("fósforo") and not pockets.contains("×2"), "hands: the struck match is spent, one is left in the pockets", pockets)
 	main.notebook.close()
 	pl.hands_model.hold(&"")
 	used.clear()

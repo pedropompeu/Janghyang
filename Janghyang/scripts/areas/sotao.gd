@@ -22,6 +22,17 @@ const DEF := {
 		{"to": &"mecanismo", "at": Vector3(7.9, 3.14, 5.0), "path": [Vector3(11.2, 3.14, 0.55), Vector3(11.2, 3.14, 7.4), Vector3(7.9, 3.14, 7.4)], "gate": &"DoorTower"},
 	],
 	"tasks": {&"sotao": &"subir_sotao"},
+	## Light along the way (light_model.gd): batteries, boxes of matches, candles to light.
+	"pickups": [
+		{"id": &"pilha_sotao_oeste", "kind": &"pilha", "at": Vector3(1.5, 2.99, 1.0)},
+		{"id": &"pilha_sotao_leste", "kind": &"pilha", "at": Vector3(14.2, 2.99, 7.8)},
+		{"id": &"pilha_sotao_sul", "kind": &"pilha", "at": Vector3(3.0, 2.99, 8.0)},
+		{"id": &"vela_sotao_oeste", "kind": &"vela", "at": Vector3(2.0, 2.99, 4.0)},
+		{"id": &"vela_sotao_leste", "kind": &"vela", "at": Vector3(13.0, 2.99, 1.5)},
+		{"id": &"vela_sotao_sul", "kind": &"vela", "at": Vector3(8.5, 2.99, 8.0)},
+		{"id": &"fosforo_sotao_poco", "kind": &"fosforo", "at": Vector3(11.0, 2.99, 0.9), "n": 4},
+		{"id": &"fosforo_sotao_sul", "kind": &"fosforo", "at": Vector3(4.5, 2.99, 7.6), "n": 4},
+	],
 }
 
 static func build(main: Node3D) -> void:

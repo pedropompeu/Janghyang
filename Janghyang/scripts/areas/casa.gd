@@ -30,6 +30,17 @@ const DEF := {
 	"safe": Vector3(1.8, 0.2, 8.3),
 	## Spec §11: no Gasto ever blocks the street door.
 	"keep_clear": [&"DoorFront"],
+	## Light along the way (light_model.gd): batteries, boxes of matches, candles to light.
+	"pickups": [
+		{"id": &"pilha_brincar", "kind": &"pilha", "at": Vector3(1.2, 0.05, 1.0)},
+		{"id": &"pilha_quarto", "kind": &"pilha", "at": Vector3(11.2, 0.05, 0.8)},
+		{"id": &"pilha_figuras", "kind": &"pilha", "at": Vector3(12.9, 0.05, 8.7)},
+		{"id": &"vela_brincar", "kind": &"vela", "at": Vector3(7.6, 0.05, 6.3)},
+		{"id": &"vela_corredor", "kind": &"vela", "at": Vector3(9.45, 0.05, 6.9)},
+		{"id": &"vela_quarto", "kind": &"vela", "at": Vector3(11.0, 0.05, 5.0)},
+		{"id": &"fosforo_entrada", "kind": &"fosforo", "at": Vector3(0.6, 0.05, 8.6), "n": 4},
+		{"id": &"fosforo_corredor_sul", "kind": &"fosforo", "at": Vector3(9.8, 0.05, 8.6), "n": 4},
+	],
 	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"},
 }
 

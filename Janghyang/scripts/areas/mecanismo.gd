@@ -27,6 +27,12 @@ const DEF := {
 		{"to": &"sotao", "at": Vector3(7.9, 3.14, 7.4), "path": [Vector3(11.2, 3.14, 0.55), Vector3(11.2, 3.14, 7.4)]},
 	],
 	"tasks": {&"mecanismo": &"entrar_mecanismo"},
+	## Light along the way (light_model.gd): batteries, boxes of matches, candles to light.
+	"pickups": [
+		{"id": &"pilha_torre", "kind": &"pilha", "at": Vector3(5.8, 5.46, 3.0)},
+		{"id": &"vela_torre", "kind": &"vela", "at": Vector3(8.5, 10.46, 4.5)},
+		{"id": &"fosforo_torre", "kind": &"fosforo", "at": Vector3(8.0, 10.46, 3.5), "n": 4},
+	],
 }
 
 static func build(main: Node3D) -> void:

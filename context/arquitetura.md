@@ -167,3 +167,9 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `notebook_ui.gd`: `plan`, `open_plan(pos, look)`, `toggle_plan(pos, look)`, `plan_sheet()`, `show_sheet(level)`; desenha névoa, anotações e seta; `plan_text()` inclui as anotações.
   - `main.gd`: `plan_model`, `plan_revealer`, `world_frozen()`; `gastos.gd` para só com `world_frozen()`.
   - Contagens: unit 2224/0, selftest 396/0 (checks `planta:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/light_model.gd`, `scripts/light_pickup.gd`, `scripts/main.gd`, `scripts/gastos.gd`, `scripts/story/noites.gd`, `scripts/areas/casa.gd`, `scripts/areas/passagem.gd`, `scripts/areas/sotao.gd`, `scripts/areas/mecanismo.gd` Tarefa 19, a luz escassa:
+  - `light_model.gd` (novo, `RefCounted`): `BATTERY` 240, `MATCH` 20, `CANDLE` 120, `LOW` 30; `battery`, `spare`, `hands`; `drain(dt, on)` (`swapped`/`low`/`dead`), `strike()`, `burning()`, `match_left()`, `flicker(t)`; statics `pickup(id)`, `worth(p)`, `route_seconds(night)`.
+  - `light_pickup.gd` (novo, `StaticBody3D`, grupo `LightPickup`): pilha, fósforos ou vela; `interact()`, `set_active(on)`, `light_up()`, `put_out()`, `burn_left()`; a vela acesa entra no grupo `CandleLight`.
+  - DEFs das áreas: chave `pickups` (`{id, kind, at, n?}`); `noites.gd`: `pickups` por noite (noite 1 casa e passagem; noite 2 sótão e mecanismo).
+  - `main.gd`: `light`, `_build_light_pickups()`, `_wire_light()`, `_tick_light(delta)`, `strike_match()`, `light_candle(c)`, `take_light(p)`; `MatchGlow` na mão esquerda. `gastos.gd`: `add_lamp(l)`, `lit_rooms` conta `HouseLight` e `CandleLight`.
+  - Contagens: unit 2363/0, selftest 408/0 (checks `luz:`).

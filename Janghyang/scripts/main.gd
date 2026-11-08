@@ -36,6 +36,8 @@ const SettingsUI = preload("res://scripts/settings_ui.gd")
 const CaptureFx = preload("res://scripts/capture_fx.gd")
 const PocketWatch = preload("res://scripts/pocket_watch.gd")
 const PlanModel = preload("res://scripts/plan_model.gd")
+const LightModel = preload("res://scripts/light_model.gd")
+const LightPickup = preload("res://scripts/light_pickup.gd")
 const PlanRevealer = preload("res://scripts/plan_revealer.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Noites = preload("res://scripts/story/noites.gd")
@@ -134,6 +136,11 @@ var pocket_watch
 ## The plan in the notebook: fog lifted and pencil notes (plan_model.gd).
 var plan_model = PlanModel.new()
 var plan_revealer
+## Scarce light (light_model.gd): the lantern's battery and the match.
+var light = LightModel.new()
+var _match_glow: OmniLight3D
+var _lantern_energy := 0.0
+var _light_time := 0.0
 var _dark: Array[Tween] = []
 var pretend
 var score
@@ -167,6 +174,7 @@ func _ready() -> void:
 	_make_environment()
 	for area in Registry.AREAS:
 		area.build(self)
+	_build_light_pickups()
 	_build_giant_elias()
 	_build_player()
 	# F1 never folds onto a player sitting in the cabana.
@@ -180,6 +188,7 @@ func _ready() -> void:
 	_wire_dread()
 	_build_ui()
 	_wire_story()
+	_wire_light()
 
 	var args := OS.get_cmdline_user_args()
 	if args.has("--labels"):
@@ -225,6 +234,7 @@ func _process(delta: float) -> void:
 		_track_place()
 	if autonomous and visit != null and player != null:
 		_tick_night(delta)
+		_tick_light(delta)
 		_update_mirror(delta)
 	if player == null or prompt_label == null:
 		return
@@ -885,6 +895,15 @@ func begin_night(n: int) -> void:
 	player.hands_model = player.HandsModel.new()
 	for it in pockets:
 		player.hands_model.take(it)
+	light = LightModel.new()
+	light.hands = player.hands_model
+	light.spare = player.hands_model.count(&"pilha")
+	if player.flashlight != null:
+		player.flashlight.light_energy = _lantern_energy
+	if _match_glow != null:
+		_match_glow.visible = false
+	for p in get_tree().get_nodes_in_group(&"LightPickup"):
+		p.set_active(night.get("pickups", []).has(p.pickup_id))
 	for p in get_tree().get_nodes_in_group(&"Piece"):
 		if campaign.pieces.has(p.piece_id):
 			p.put_away()
@@ -919,6 +938,117 @@ func _house_goes_dark() -> void:
 			tw.tween_callback(func() -> void: l.visible = true)
 			tw.tween_interval(0.18)
 		tw.tween_callback(func() -> void: l.visible = false)
+
+## Every DEF pickup (light_model.gd), hidden until a night lays it out.
+func _build_light_pickups() -> void:
+	var root := Node3D.new()
+	root.name = "LightPickups"
+	add_child(root)
+	var paper := _mat("#d8cfb4", 0.9)
+	var wax := _mat("#efe6cf", 0.7)
+	var brass := _mat("#8a6a3a", 0.5)
+	for d in Registry.defs():
+		for p in d.pickups:
+			var b := LightPickup.new()
+			b.name = "Pickup_%s" % p.id
+			b.main = self
+			b.pickup_id = p.id
+			b.kind = p.kind
+			b.n = int(p.get("n", 1))
+			b.position = p.at
+			b.add_to_group(&"LightPickup")
+			b.set_meta(&"item_id", p.id)
+			b.set_meta(&"label", LightPickup.NAMES.get(p.kind, String(p.kind)))
+			root.add_child(b)
+			var mesh := BoxMesh.new()
+			var m: Material = paper
+			match p.kind:
+				&"pilha":
+					mesh.size = Vector3(0.05, 0.11, 0.05)
+					m = brass
+				&"fosforo":
+					mesh.size = Vector3(0.1, 0.03, 0.06)
+				&"vela":
+					mesh.size = Vector3(0.06, 0.2, 0.06)
+					m = wax
+			_add_mesh(b, mesh, Vector3(0.0, mesh.size.y * 0.5, 0.0), m)
+			# A reachable target: bigger than the thing itself.
+			var cs := CollisionShape3D.new()
+			var shape := BoxShape3D.new()
+			shape.size = Vector3(0.3, 0.3, 0.3)
+			cs.shape = shape
+			cs.position = Vector3(0.0, 0.15, 0.0)
+			b.add_child(cs)
+			if p.kind == &"vela":
+				b.glow = _omni(b, Vector3(0.0, 0.3, 0.0), Color(1.0, 0.72, 0.4), 0.9, 3.5)
+				b.glow.add_to_group(&"CandleLight")
+			b.set_active(false)
+
+## The match's flame in the left hand, the lantern's own energy, and the
+## Gastos fearing every flame.
+func _wire_light() -> void:
+	_lantern_energy = player.flashlight.light_energy
+	var hand: Node3D = player.hands.left_hand() if player.get("hands") != null else player.camera
+	_match_glow = _omni(hand, Vector3(0.0, 0.08, -0.05), Color(1.0, 0.7, 0.38), 1.1, 3.0)
+	_match_glow.name = "MatchGlow"
+	_match_glow.add_to_group(&"CandleLight")
+	_match_glow.visible = false
+	gastos.add_lamp(_match_glow)
+	for p in get_tree().get_nodes_in_group(&"LightPickup"):
+		if p.glow != null:
+			gastos.add_lamp(p.glow)
+	player.left_used.connect(func(item: StringName) -> void:
+		if item == &"fosforo":
+			strike_match())
+
+## One frame of light: the battery spends while the lantern is on and it
+## flickers near the end; with none left the lantern stays dark.
+func _tick_light(delta: float) -> void:
+	var fl: SpotLight3D = player.flashlight
+	light.hands = player.hands_model
+	var ev: StringName = light.drain(delta, fl.visible)
+	_light_time += delta
+	if light.battery <= 0.0:
+		fl.visible = false
+	fl.light_energy = _lantern_energy * light.flicker(_light_time)
+	_match_glow.visible = light.burning()
+
+## A match from the pockets; it lights the nearest unlit candle within reach.
+func strike_match() -> bool:
+	light.hands = player.hands_model
+	if not light.strike():
+		return false
+	_match_glow.visible = true
+	player.left_changed.emit(player.hands_model.left)
+	var best = null
+	var best_d := 1.6
+	for p in get_tree().get_nodes_in_group(&"LightPickup"):
+		if p.active and p.kind == &"vela" and not p.lit:
+			var d: float = p.global_position.distance_to(player.global_position)
+			if d < best_d:
+				best = p
+				best_d = d
+	if best != null:
+		best.light_up()
+	return true
+
+## E on an unlit candle: a burning match lights it, or a new one is struck.
+func light_candle(c) -> void:
+	light.hands = player.hands_model
+	if light.burning() or strike_match():
+		c.light_up()
+
+## A battery goes in the pockets (the lantern takes it when its own runs
+## out); matches go in the pockets for the left hand.
+func take_light(p) -> void:
+	match p.kind:
+		&"pilha":
+			light.spare += 1
+			player.hands_model.take(&"pilha")
+		&"fosforo":
+			player.hands_model.take(&"fosforo", p.n)
+	p.set_active(false)
+	plan_model.forget_item(p.pickup_id)
 
 ## The first of the night's goals not met yet: where the watch points.
 func watch_goal() -> Dictionary:

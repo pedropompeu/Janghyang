@@ -313,4 +313,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 18. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 16: o modelo da bússola.~~ → feita na sessão principal: `compass_model.gd` (rota BFS, mira, tique, tremor); unidade 2183/0.
 19. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 17: o relógio de Elias na mão e a apresentação da noite 1.~~ → feita na sessão principal: `pocket_watch.gd`, carta e apagão da noite 1, mutantes da T15 fechados; unidade 2188/0, selftest 393/0. Captura `blockout-watch.png` para o checkpoint D7.
 20. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 18: a planta com névoa e o caderno sem pausa (fecha [[achados#a-026]]).~~ → feita na sessão principal: `fog_grid.gd`, `plan_model.gd`, `plan_revealer.gd`, abas clicáveis e o caderno sem pausa; unidade 2224/0, selftest 396/0.
-21. [2026-11-08] (i) Tarefa 19: luz escassa.
+21. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 19: luz escassa.~~ → feita na sessão principal: `light_model.gd`, `light_pickup.gd`, pilhas, fósforos e velas por noite; unidade 2363/0, selftest 408/0.
+22. [2026-11-08] (i) Tarefa 20: ruído, esconderijo e respiração.

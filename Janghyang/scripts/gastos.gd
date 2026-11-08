@@ -147,7 +147,7 @@ func _build_graphs_when_solid() -> void:
 func _build_graphs() -> void:
 	var atlas := Atlas.new()
 	for l in main.find_children("*", "OmniLight3D", true, false):
-		_lamps.append(l)
+		add_lamp(l)
 	for d in main.find_children("Door*", "AnimatableBody3D", true, false):
 		_doors.append(d)
 		_door_rids.append((d as CollisionObject3D).get_rid())
@@ -365,11 +365,16 @@ func world_at(p: Vector3, lit: Variant = null) -> Dictionary:
 		lit_here = rooms.has(main.atlas.room_at(p + Vector3(0.0, 0.3, 0.0)))
 	return {"level": level, "lit": lit_here, "entry_wound": _entry_has_spring(), "anchors": anchors}
 
-## Rooms of the house with a lamp switched on (a HouseLight shown), whatever
-## the dread does to its brightness.
+## A flame lit later (a candle, the match): counted as a lamp from now on.
+func add_lamp(l: OmniLight3D) -> void:
+	if not _lamps.has(l):
+		_lamps.append(l)
+
+## Rooms of the house with a lamp switched on (a HouseLight shown) or a flame
+## burning (CandleLight), whatever the dread does to its brightness.
 func lit_rooms() -> Dictionary:
 	var out := {}
-	for l in get_tree().get_nodes_in_group(&"HouseLight"):
+	for l in get_tree().get_nodes_in_group(&"HouseLight") + get_tree().get_nodes_in_group(&"CandleLight"):
 		if (l as Node3D).is_visible_in_tree():
 			out[main.atlas.room_at((l as Node3D).global_position)] = true
 	out.erase(&"")
