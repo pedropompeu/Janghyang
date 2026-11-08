@@ -192,3 +192,10 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `gastos.gd`: `positions()` (as cabeças dos Gastos de pé).
   - `main.gd`: `listen`, `_on_listen` (bus `Casa` cai 18 dB e volta), `_tick_listen(dt)` (estalo `porcelain_muffled` no bus `Mundo` onde cada Gasto audível está; sinal `listened(at)`).
   - Contagens: unit 2419/0, selftest 429/0 (checks `escuta:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/staging_model.gd`, `scripts/chapter_model.gd`, `scripts/main.gd`, `scripts/notebook_ui.gd`, `scripts/night_card_ui.gd`, `scripts/story/noites.gd`, `scripts/areas/casa.gd`, `scripts/areas/passagem.gd` Tarefa 23, capítulos:
+  - `staging_model.gd`: `UNSEEN` 1,5; `update(dt, seen)` avança uma pose a cada 1,5 s sem ser vista (olhar zera a conta); `done()`.
+  - `chapter_model.gd`: `clues`, `hypothesis` (3 frases), `right`, `on_cataloged(item)`, `update(dt, seen)` (só com o capítulo aberto), `ready_to_write()`, `choose(i)` (a errada fica riscada), `page()`.
+  - DEFs: chave `staging` (`{id, figures: [{style, scale, poses}]}`) na casa (pai e menino, termina no painel) e na passagem (menino, termina na coroa); `registry.gd` com `staging` vazio por padrão.
+  - `main.gd`: `chapters`, `_build_staging()` (nós `Staging/Staging_<id>/Figure_<k>`, manequins sem colisão), `_start_chapters()`, `_tick_staging(dt)`, `watch_goal()` aponta para a encenação aberta (`task` `encenacao`), `chapter_pages()` vai no carry do fim da noite.
+  - `notebook_ui.gd`: página da hipótese (`_hypothesis_page`, `choose_hypothesis`); `night_card_ui.gd`: o cartão traz a frase escolhida.
+  - Contagens: unit 2459/0, selftest 442/0 (checks `capitulo:`).

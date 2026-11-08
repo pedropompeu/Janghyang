@@ -31,7 +31,7 @@ const HELPERS := {
 const _EMPTY := {
 	"maquete": &"", "name": "", "rooms": [], "safe": Vector3.ZERO, "safe_room": &"", "links": [],
 	"tasks": {}, "breaks": {}, "catalog": {}, "anchors": [], "hideouts": [],
-	"pickups": [], "chalk": [], "mechanisms": [],
+	"pickups": [], "chalk": [], "mechanisms": [], "staging": [],
 	"keep_clear": [],
 }
 

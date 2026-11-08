@@ -6,7 +6,9 @@ extends RefCounted
 ## scripts/campaign_model.gd.
 ##
 ## Each night: n, date (the notebook's date for it), chapters (spec §6.2:
-## {id, area, title, clues, reward}), goals ({task, area, at}: what the compass
+## {id, area, title, clues, reward}; chapters 1 and 2 also poses, hypothesis
+## and right, for chapter_model.gd, and their figures in the areas' DEF
+## "staging"), goals ({task, area, at}: what the compass
 ## points to, in order), pieces (the watch pieces won that night), phases (the
 ## night's lots for quest_model.gd), safety (§11), stalkers (how many Gastos
 ## from the moment `after` is struck; &"" is the start of the night),
@@ -30,8 +32,18 @@ const NOITES := [
 	{
 		"n": 1, "date": "12 de novembro",
 		"chapters": [
-			{"id": 1, "area": &"casa", "title": "A casa da rua do Porto", "clues": [&"relogio_entrada", &"desenho", &"casinha"], "reward": &"achar_passagem"},
-			{"id": 2, "area": &"passagem", "title": "O menino que escutava", "clues": [&"caixa_musica", &"bola"], "reward": &"coroa"},
+			{"id": 1, "area": &"casa", "title": "A casa da rua do Porto", "clues": [&"desenho", &"relogio_entrada", &"casinha"], "reward": &"achar_passagem",
+				"poses": 4, "right": 1, "hypothesis": [
+					"Inácio fez a maquete de uma casa qualquer, tirada de um catálogo.",
+					"A maquete é a casa onde Inácio foi menino, na rua do Porto.",
+					"A casa de brinquedo foi feita para um filho que ele nunca teve.",
+				]},
+			{"id": 2, "area": &"passagem", "title": "O menino que escutava", "clues": [&"caixa_musica", &"bola"], "reward": &"coroa",
+				"poses": 4, "right": 2, "hypothesis": [
+					"O menino se escondia na passagem com medo do pai.",
+					"A passagem era o caminho do pai até a oficina.",
+					"Pela parede, o menino ouvia o pai consertar relógios e aprendeu que tudo que tem corda para.",
+				]},
 		],
 		"goals": [
 			{"task": &"achar_passagem", "area": &"casa", "at": Vector3(6.7, 0.6, 0.3)},

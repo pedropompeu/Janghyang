@@ -39,6 +39,7 @@ const PlanModel = preload("res://scripts/plan_model.gd")
 const LightModel = preload("res://scripts/light_model.gd")
 const NoiseModel = preload("res://scripts/noise_model.gd")
 const ListenModel = preload("res://scripts/listen_model.gd")
+const ChapterModel = preload("res://scripts/chapter_model.gd")
 const Compass = preload("res://scripts/compass_model.gd")
 const LightPickup = preload("res://scripts/light_pickup.gd")
 const PlanRevealer = preload("res://scripts/plan_revealer.gd")
@@ -146,6 +147,10 @@ var _match_glow: OmniLight3D
 var _chalk_marks: Array[MeshInstance3D] = []
 ## Task 22: the ear to the wall; the effects bus volume from before it.
 var listen = ListenModel.new()
+## Task 23: the night's chapters (chapter_model.gd), and each staged scene's
+## figures by chapter id: {"node": Node3D, "figures": [[Mannequin, poses]]}.
+var chapters: Array = []
+var _staging := {}
 var _listen_from_db := 0.0
 ## Each creak heard through the wall: where the Gasto stands.
 signal listened(at: Vector3)
@@ -186,6 +191,7 @@ func _ready() -> void:
 		area.build(self)
 	_build_light_pickups()
 	_build_chalk_trails()
+	_build_staging()
 	_build_giant_elias()
 	_build_player()
 	# F1 never folds onto a player sitting in the cabana.
@@ -248,6 +254,8 @@ func _process(delta: float) -> void:
 		_track_place()
 	if player != null and player.listening:
 		_tick_listen(delta)
+	if player != null and not chapters.is_empty():
+		_tick_staging(delta)
 	if autonomous and visit != null and player != null:
 		_tick_night(delta)
 		_tick_light(delta)
@@ -695,6 +703,7 @@ func _wire_catalog() -> void:
 			_night_over())
 	cataloged.connect(func(entry: Dictionary) -> void:
 		visit.on_cataloged(entry.item))
+	cataloged.connect(_chapters_on_cataloged)
 	hora_started.connect(func() -> void: print("03:33"))
 
 func _wire_sound() -> void:
@@ -906,6 +915,7 @@ func begin_night(n: int) -> void:
 	if not campaign.visited.is_empty():
 		atlas.from_dict(campaign.visited)
 	plan_model.from_dict(campaign.plan)
+	_start_chapters()
 	notebook.refresh(catalog)
 	pockets.assign(campaign.items)
 	player.hands_model = player.HandsModel.new()
@@ -1163,12 +1173,110 @@ func take_light(p) -> void:
 	p.set_active(false)
 	plan_model.forget_item(p.pickup_id)
 
-## The first of the night's goals not met yet: where the watch points.
+## The first of the night's goals not met yet: where the watch points. While
+## the chapter that leads to it has its scene open and not over, the watch
+## points at the figures instead ({"task": &"encenacao"}).
 func watch_goal() -> Dictionary:
 	for g in night.get("goals", []):
 		if not quest.is_done(g.task):
+			for ch in chapters:
+				if ch.reward == g.task and ch.opened and not ch.staging.done() and _staging.has(ch.id):
+					return {"task": &"encenacao", "area": ch.area, "at": staging_center(ch.id)}
 			return g
 	return {}
+
+## The figures of every area's staged scenes, in their first pose.
+func _build_staging() -> void:
+	var root := Node3D.new()
+	root.name = "Staging"
+	add_child(root)
+	for def in Registry.defs():
+		for st in def.staging:
+			var node := Node3D.new()
+			node.name = "Staging_%d" % st.chapter
+			root.add_child(node)
+			var figs: Array = []
+			for k in st.figures.size():
+				var f: Dictionary = st.figures[k]
+				var m := Mannequin.new()
+				m.name = "Figure_%d" % k
+				node.add_child(m)
+				m.build(f.style, f.scale)
+				figs.append([m, f.poses])
+			_staging[st.chapter] = {"node": node, "figures": figs}
+			_apply_pose(st.chapter, 0)
+
+## Every figure of chapter `id`'s scene in its pose `k`.
+func _apply_pose(id: int, k: int) -> void:
+	if not _staging.has(id):
+		return
+	for pair in _staging[id].figures:
+		var m = pair[0]
+		var p: Dictionary = pair[1][clampi(k, 0, pair[1].size() - 1)]
+		m.position = p.at
+		var to: Vector3 = p.face - p.at
+		m.set_pose(p.get("pose", &"em_pe"))
+		m.set_look(atan2(-to.x, -to.z), atan2(to.y - 1.2 * m.scale.y, Vector2(to.x, to.z).length()))
+		for side in [-1.0, 1.0]:
+			m.arm(side).rotation = Vector3(0.0, 0.0, deg_to_rad(side * 4.0))
+		if p.has("reach"):
+			m.reach(1.0, p.reach)
+
+## Where chapter `id`'s figures stand now (the middle of them, chest high).
+func staging_center(id: int) -> Vector3:
+	var figs: Array = _staging[id].figures
+	var c := Vector3.ZERO
+	for pair in figs:
+		c += pair[0].global_position + Vector3(0.0, 0.9 * pair[0].scale.y, 0.0)
+	return c / figs.size()
+
+## Some figure of chapter `id` in view.
+func _staging_seen(id: int) -> bool:
+	for pair in _staging[id].figures:
+		if is_seen(pair[0].global_position + Vector3(0.0, 0.9 * pair[0].scale.y, 0.0)):
+			return true
+	return false
+
+## The night's chapters, fed what the catalogue already holds; their scenes
+## back in the first pose.
+func _start_chapters() -> void:
+	chapters.clear()
+	for def in night.get("chapters", []):
+		var ch = ChapterModel.new(def)
+		for e in catalog.entries:
+			ch.on_cataloged(e.item)
+		chapters.append(ch)
+		_apply_pose(ch.id, 0)
+	notebook.chapters = chapters
+
+## The last clue of a chapter in: its scene opens and the watch turns to it.
+func _chapters_on_cataloged(entry: Dictionary) -> void:
+	for ch in chapters:
+		if ch.on_cataloged(entry.get("item", &"")) and pocket_watch != null:
+			pocket_watch.set_goal(watch_goal())
+
+## The open scenes take a pose each time they have been out of sight long
+## enough; at the last one the hypothesis page is in the notebook.
+func _tick_staging(delta: float) -> void:
+	for ch in chapters:
+		if not ch.opened or ch.staging.done() or not _staging.has(ch.id):
+			continue
+		if not ch.update(delta, _staging_seen(ch.id)):
+			continue
+		_apply_pose(ch.id, ch.staging.pose)
+		if ch.staging.done():
+			notebook.refresh(catalog)
+			notebook.peek_text("Uma página nova no caderno: " + ch.title)
+			if pocket_watch != null:
+				pocket_watch.set_goal(watch_goal())
+
+## The hypothesis pages of the night, by chapter id (as text), for the card
+## and the campaign.
+func chapter_pages() -> Dictionary:
+	var out := {}
+	for ch in chapters:
+		out[str(ch.id)] = ch.page()
+	return out
 
 ## One frame of the night: the acts, the 03:33, the end of a short night.
 func _tick_night(delta: float) -> void:
@@ -1198,13 +1306,13 @@ func end_night() -> void:
 	for it in player.hands_model.pockets:
 		if not items.has(it):
 			items.append(it)
-	campaign.carry({"pieces": held, "items": items, "catalog": catalog.to_dict(), "visited": atlas.to_dict(), "plan": plan_model.to_dict()})
+	campaign.carry({"pieces": held, "items": items, "catalog": catalog.to_dict(), "visited": atlas.to_dict(), "plan": plan_model.to_dict(), "chapters": chapter_pages()})
 	var last := n >= Noites.last()
 	if not last:
 		campaign.night = n + 1
 	if _save_path != "" and campaign.save(_save_path) != OK:
 		print("campanha: could not save to " + _save_path)
-	night_card.show_night(night, last)
+	night_card.show_night(night, last, chapter_pages())
 
 ## A piece of the pocket watch in Elias's hand: written down, the lot struck.
 func _on_piece(id: StringName) -> void:

@@ -28,6 +28,26 @@ const DEF := {
 	],
 	## Where the game starts (main.SPAWN).
 	"safe": Vector3(1.8, 0.2, 8.3),
+	## Chapter 1's staged scene (main._build_staging, staging_model.gd): the
+	## father and the boy by the playroom's north wall; it ends at the panel.
+	## Each figure: a style, a scale and one pose per step ({at, face, pose,
+	## reach}). Meshes only: nothing to bump into, no Gasto graph changes.
+	"staging": [
+		{"chapter": 1, "figures": [
+			{"style": {"coat": Color("#5a4636"), "skin": Color("#d1b195"), "hair": Color("#8a8378"), "trousers": Color("#2f2a26")}, "scale": 0.75, "poses": [
+				{"at": Vector3(6.1, 0.0, 2.4), "face": Vector3(7.5, 0.3, 1.0), "pose": &"sentado"},
+				{"at": Vector3(6.4, 0.0, 1.1), "face": Vector3(6.7, 0.7, 0.0), "pose": &"em_pe", "reach": Vector3(6.7, 0.9, 0.0)},
+				{"at": Vector3(5.4, 0.0, 1.4), "face": Vector3(6.7, 0.4, 0.4), "pose": &"em_pe"},
+				{"at": Vector3(5.2, 0.0, 1.9), "face": Vector3(6.7, 0.4, 0.4), "pose": &"sentado"},
+			]},
+			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "poses": [
+				{"at": Vector3(5.6, 0.0, 2.9), "face": Vector3(6.1, 0.5, 2.4), "pose": &"em_pe"},
+				{"at": Vector3(5.9, 0.0, 1.9), "face": Vector3(6.7, 0.6, 0.0), "pose": &"em_pe"},
+				{"at": Vector3(6.5, 0.0, 0.7), "face": Vector3(6.7, 0.4, 0.0), "pose": &"agachado"},
+				{"at": Vector3(6.7, 0.0, 0.35), "face": Vector3(6.7, 0.4, 0.0), "pose": &"agachado", "reach": Vector3(6.7, 0.5, 0.0)},
+			]},
+		]},
+	],
 	## Spec §11: no Gasto ever blocks the street door.
 	"keep_clear": [&"DoorFront"],
 	## Light along the way (light_model.gd): batteries, boxes of matches, candles to light.

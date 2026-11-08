@@ -51,6 +51,10 @@ var _redraw_in := 0.0
 var _tab_rects: Dictionary = {}
 ## Set by main: fog and pencil notes (plan_model.gd).
 var plan
+## The night's chapters (chapter_model.gd), set by main: each one done
+## staging gets its hypothesis page on the right.
+var chapters: Array = []
+var _catalog
 
 func _ready() -> void:
 	layer = 5
@@ -144,6 +148,7 @@ func is_open() -> bool:
 	return _open
 
 func refresh(catalog) -> void:
+	_catalog = catalog
 	for c in _entries_box.get_children():
 		_entries_box.remove_child(c)
 		c.queue_free()
@@ -162,6 +167,63 @@ func refresh(catalog) -> void:
 	for page_id in catalog.pages:
 		_pages_box.add_child(_glued_page(String(Data.PAGES.get(page_id, "")), tilt))
 		tilt = -tilt
+	for ch in chapters:
+		if ch.ready_to_write():
+			_pages_box.add_child(_hypothesis_page(ch))
+
+## Picks line `i` of the chapter's hypothesis page (the notebook's buttons);
+## true when it is the right one.
+func choose_hypothesis(ch, i: int) -> bool:
+	var r: bool = ch.choose(i)
+	if _catalog != null:
+		refresh(_catalog)
+	return r
+
+## Elias's three drafted lines, in pencil. A crossed one is struck through;
+## once the right one is found, it alone stays, in ink.
+func _hypothesis_page(ch) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	var head := _line(ch.title, INK)
+	box.add_child(head)
+	var text: Array[String] = [ch.title]
+	var page: Dictionary = ch.page()
+	for i in page.lines.size():
+		var line: String = page.lines[i]
+		if page.chosen >= 0:
+			if i == page.chosen:
+				box.add_child(_line(line, INK))
+				text.append(line)
+			continue
+		var b := Button.new()
+		b.flat = true
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.custom_minimum_size = Vector2(400.0, 0.0)
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_override("font", _font_pencil)
+		b.add_theme_font_size_override("font_size", 19)
+		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_disabled_color"]:
+			b.add_theme_color_override(state, PENCIL)
+		if page.crossed.has(i):
+			b.text = struck(line)
+			b.disabled = true
+			b.modulate.a = 0.55
+			text.append("~" + line)
+		else:
+			b.text = line
+			b.pressed.connect(choose_hypothesis.bind(ch, i))
+			text.append("? " + line)
+		box.add_child(b)
+	box.set_meta(&"text", "\n".join(text))
+	return box
+
+## `s` struck through (a long stroke over every letter).
+static func struck(s: String) -> String:
+	var out := ""
+	for c in s:
+		out += c + "\u0336"
+	return out
 
 ## A strip of paper with the newest line, briefly, at the bottom of the screen.
 func peek(entry: Dictionary) -> void:
@@ -194,6 +256,9 @@ func page_text() -> String:
 	for c in _entries_box.get_children():
 		parts.append((c as Label).text)
 	for c in _pages_box.get_children():
+		if c.has_meta(&"text"):
+			parts.append(String(c.get_meta(&"text")))
+			continue
 		var label := c.get_child(0) as Label
 		parts.append(label.text)
 	return "\n".join(parts)

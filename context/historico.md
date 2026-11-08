@@ -317,4 +317,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 22. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 20: ruído, esconderijo e respiração.~~ → feita na sessão principal: `noise_model.gd`, `HIDE_FOUND`, Gastos que ouvem e o `H`; unidade 2393/0, selftest 412/0.
 23. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 21: o giz.~~ → feita na sessão principal: marcas de Elias com G (limite de 20 na planta) e três trilhas do menino na noite 1; unidade 2402/0, selftest 421/0.
 24. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 22: escutar pela parede.~~ → feita na sessão principal: L junto à parede abafa a casa 18 dB, Elias para e cada Gasto audível estala onde está a cada 1,5 s; o estetoscópio na mão ouve através dos andares; unidade 2419/0, selftest 429/0.
-25. [2026-11-08] (i) Tarefa 23: capítulos 1 e 2 (pistas, encenação e hipótese).
+25. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 23: capítulos 1 e 2 (pistas, encenação e hipótese).~~ → feita na sessão principal: as pistas abrem a encenação, as figuras andam só sem ser vistas e terminam no painel/na coroa, e o caderno ganha a página com três hipóteses (a errada fica riscada); unidade 2459/0, selftest 442/0.
+26. [2026-11-08] (i) Tarefa 24: o diretor de sustos.

@@ -630,6 +630,7 @@ func _nights() -> void:
 	_record(main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: Elias wakes at the spawn", str(main.player.global_position))
 	await _light()
 	await _watch()
+	await _capitulo()
 	main.player.global_position = main.night.goals[1].at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -683,6 +684,57 @@ func _nights() -> void:
 	main.begin_night(5)
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	await _frames(2)
+
+## Task 23 (spec §6.1): night 1's first chapter. Its clues in, the scene
+## opens and the watch turns to the figures; watched they keep still, out of
+## sight they take a pose each time, to the panel; then the watch goes back to
+## the passage and the notebook has the hypothesis page.
+func _capitulo() -> void:
+	print("SELFTEST: capitulo")
+	var pl = main.player
+	var saved: Vector3 = pl.global_position
+	var saved_yaw: float = pl.rotation.y
+	var ch = main.ChapterModel.new(main.night.chapters[0])
+	main.chapters[0] = ch
+	main._apply_pose(ch.id, 0)
+	_record(main.night.chapters[0].clues.size() == 3 and main.night.chapters[1].clues.size() == 2, "capitulo: chapters 1 and 2 have their clues", "")
+	for id in ch.clues.slice(0, ch.clues.size() - 1):
+		main._chapters_on_cataloged({"item": id})
+	_record(not ch.opened and main.watch_goal().get("task") == &"achar_passagem", "capitulo: one clue short, the scene stays shut", str(main.watch_goal().get("task")))
+	main._chapters_on_cataloged({"item": ch.clues[-1]})
+	_record(ch.opened and main.watch_goal().get("task") == &"encenacao", "capitulo: the last clue opens the scene and the watch turns to the figures", str(main.watch_goal().get("task")))
+	var c: Vector3 = main.staging_center(ch.id)
+	pl.global_position = Vector3(3.6, 0.2, 4.2)
+	await get_tree().physics_frame
+	var to: Vector3 = c - pl.camera.global_position
+	pl.rotation.y = atan2(-to.x, -to.z)
+	pl.camera.rotation.x = atan2(to.y, Vector2(to.x, to.z).length())
+	await get_tree().physics_frame
+	var seen: bool = main._staging_seen(ch.id)
+	main._tick_staging(5.0)
+	_record(seen and ch.staging.pose == 0, "capitulo: watched, the figures keep still", "%s %d" % [seen, ch.staging.pose])
+	pl.rotation.y += PI
+	await get_tree().physics_frame
+	_record(not main._staging_seen(ch.id), "capitulo: looking away, they are out of sight", "")
+	for k in 4:
+		main._tick_staging(1.6)
+	var boy = main._staging[ch.id].figures[1][0]
+	var last: Dictionary = main._staging[ch.id].figures[1][1][-1]
+	_record(ch.staging.done() and ch.staging.pose == 3 and boy.position.distance_to(last.at) < 0.01, "capitulo: four looks away bring the scene to its end", "%d" % ch.staging.pose)
+	_record(boy.position.distance_to(main.night.goals[0].at) < 1.0, "capitulo: the scene ends at the panel", "%.2f m" % boy.position.distance_to(main.night.goals[0].at))
+	_record(main.watch_goal().get("task") == &"achar_passagem" and main.pocket_watch.goal.get("task") == &"achar_passagem", "capitulo: then the watch points at the passage", str(main.pocket_watch.goal.get("task")))
+	var nb = main.notebook
+	var wrong: int = (ch.right + 1) % 3
+	_record(nb.page_text().contains(ch.title) and nb.page_text().contains("? " + ch.hypothesis[wrong]), "capitulo: the hypothesis page has Elias's three lines", "")
+	_record(not nb.choose_hypothesis(ch, wrong) and nb.page_text().contains("~" + ch.hypothesis[wrong]), "capitulo: a wrong line is crossed out", "")
+	_record(nb.choose_hypothesis(ch, ch.right) and nb.page_text().contains(ch.hypothesis[ch.right]) and not nb.page_text().contains(ch.hypothesis[wrong]), "capitulo: the right line is written out clean, alone", "")
+	_record(main.chapter_pages().get("1", {}).get("chosen") == ch.right, "capitulo: the page goes with the night", str(main.chapter_pages()))
+	var crown: Dictionary = main._staging[2].figures[0][1][-1]
+	_record(crown.at.distance_to(main.night.goals[1].at) < 0.6, "capitulo: chapter 2's scene ends by the crown", "%.2f m" % crown.at.distance_to(main.night.goals[1].at))
+	pl.global_position = saved
+	pl.rotation.y = saved_yaw
+	pl.camera.rotation.x = 0.0
+	await get_tree().physics_frame
 
 ## Task 19 (spec §6, luz escassa): night 1 lays out its batteries, matches and
 ## candles; a match lights the playroom candle, which the Gastos then count as

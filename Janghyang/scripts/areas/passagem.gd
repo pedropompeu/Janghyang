@@ -34,6 +34,18 @@ const DEF := {
 		{"id": &"giz_passagem", "points": [Vector3(6.0, 0.006, -0.65), Vector3(4.8, 0.006, -0.65), Vector3(3.6, 0.006, -0.8)], "leads_to": &"pilha_passagem"},
 	],
 	"breaks": {"HollowPanel": &"achar_passagem"},
+	## Chapter 2's staged scene (main._build_staging): the boy, ear to the
+	## wall, crawls west and ends kneeling by the crown.
+	"staging": [
+		{"chapter": 2, "figures": [
+			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "poses": [
+				{"at": Vector3(8.4, 0.0, -1.0), "face": Vector3(8.4, 0.45, -1.4), "pose": &"agachado"},
+				{"at": Vector3(5.6, 0.0, -1.0), "face": Vector3(5.6, 0.45, -1.4), "pose": &"agachado"},
+				{"at": Vector3(3.0, 0.0, -0.55), "face": Vector3(0.75, 0.1, -0.65), "pose": &"sentado"},
+				{"at": Vector3(1.15, 0.0, -0.65), "face": Vector3(0.75, 0.1, -0.65), "pose": &"agachado", "reach": Vector3(0.75, 0.05, -0.65)},
+			]},
+		]},
+	],
 }
 
 static func build(main: Node3D) -> void:

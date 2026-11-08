@@ -26,10 +26,15 @@ var _shown_ms := 0
 ## The key that wound the clock must not also turn the card.
 const INPUT_GRACE_MS := 600
 
-static func night_text(night: Dictionary, last := false) -> String:
+## `pages` holds the night's hypothesis pages by chapter id (as text), each
+## {"chosen": i}: the line written out clean goes under its chapter's title.
+static func night_text(night: Dictionary, last := false, pages: Dictionary = {}) -> String:
 	var lines: Array[String] = [String(night.get("date", "")), ""]
 	for c in night.get("chapters", []):
 		lines.append(c.title)
+		var chosen: int = int(pages.get(str(c.id), {}).get("chosen", -1))
+		if chosen >= 0 and chosen < c.get("hypothesis", []).size():
+			lines.append("    " + String(c.hypothesis[chosen]))
 	lines.append("")
 	lines.append(DEMO_END if last else "Elias acorda na bancada. Amanhã, de novo.")
 	return "\n".join(lines)
@@ -69,8 +74,8 @@ func _ready() -> void:
 
 ## Shows the card for the night that just ended. On the demo's last night the
 ## card stays: there is no next night to go on to.
-func show_night(night: Dictionary, last := false) -> void:
-	_label.text = night_text(night, last)
+func show_night(night: Dictionary, last := false, pages: Dictionary = {}) -> void:
+	_label.text = night_text(night, last, pages)
 	_final = last
 	_letter = false
 	_shown_ms = Time.get_ticks_msec()
