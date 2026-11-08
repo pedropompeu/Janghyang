@@ -142,6 +142,16 @@ relacionado:
 
 ## Fechados
 
+### [A-020] Elias no sótão sobre o quarto contava como "no quarto" para a visita {#a-020}
+
+- [2026-11-08] (e) ← `Janghyang/scripts/main.gd` (`in_bedroom`, antes `BEDROOM_X/BEDROOM_Z` só em x e z) contra `Janghyang/scripts/areas/casa.gd` (cômodo `quarto`, y −0,4..2,8). Achado da revisão do OpenCode sobre a migração (T4–T9).
+- **Severidade:** baixo — a hora pode começar com Elias no sótão, em cima do quarto, sem ele ter voltado ao quarto; o mapa do quarto também existia duas vezes e podia divergir do registro.
+- **Onde:** `Janghyang/scripts/main.gd` (`in_bedroom`), usado em `_process` (visita) e em `scripts/mirror_reflection.gd:63`.
+- **Reprodução:** estática. `in_bedroom(Vector3(12, 3.4, 2))` dava `true` (x e z dentro do retângulo, sem checar a altura), mas o ponto fica no sótão.
+- **Por que importa:** a regra da hora é "Elias no quarto"; o sótão é outro andar. E uma área mudada no registro deixava o retângulo velho para trás.
+- **Fix recomendado:** `in_bedroom(pos)` → `atlas.room_at(pos) == &"quarto"`, apagando `BEDROOM_X/BEDROOM_Z`. Custo: minutos.
+- **Estado:** corrigido. Unidade 1778/0, selftest 304/0. (e)
+
 ### [A-019] A decisão de 2026-10-28 dava o 03:33 aos 1200 s e com 5 itens; o código e o spec dizem outra coisa {#a-019}
 
 - [2026-11-07] (e) ← `context/decisoes.md:70` contra `Janghyang/scripts/visit_state.gd:9-10` (`MAX_PRE_HORA = 3600.0`, `HARD_LIMIT = 3780.0`) e spec de expansão §5 ("03:33 só começa na fase V", limite de 60 min).

@@ -24,7 +24,7 @@ const HELPERS := {
 	&"_wall_x": 7, &"_wall_z": 7, &"_hinge": 12, &"_cyl": 7, &"_breakable": 7,
 	&"_rungs": 4, &"_ladder_area": 4, &"_hideout": 4, &"_piece": 3,
 	&"_chalk": 4, &"_chalk_frame": 5, &"_catalog_target": 4,
-	&"_slab_with_holes": 9,
+	&"_slab_with_holes": 9, &"_loop_3d": 3,
 	&"_ceiling": 5, &"_house_light": 6, &"_style_mat": 1,
 }
 
@@ -33,6 +33,9 @@ const _EMPTY := {
 	"tasks": {}, "breaks": {}, "catalog": {}, "anchors": [], "hideouts": [],
 	"pickups": [], "chalk": [], "mechanisms": [],
 }
+
+## The area every night starts in and Elias comes back to ("voltar").
+const HOME := &"casa"
 
 ## safe_room is empty when the safe point lies in one of the area's own rooms;
 ## otherwise it names the room it lies in (the crawlspace is too low to stand).

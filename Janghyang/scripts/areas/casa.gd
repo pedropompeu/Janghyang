@@ -6,6 +6,9 @@ extends RefCounted
 
 const AreaGaveta = preload("res://scripts/areas/gaveta.gd")
 
+## The hollow part of the playroom's north wall, under the drawing (x, y).
+const PANEL := Rect2(6.15, 0.0, 1.1, 1.25)
+
 ## The cracked pane of the dome's east wall, out onto the bench (z range).
 const CRACKED_Z := Vector2(9.1, 12.5)
 
@@ -62,10 +65,10 @@ static func _build_house(main: Node3D) -> void:
 	main._ceiling(house, 3.5, 7.7, 10.5, 9.1)
 
 	# North wall: playroom, corridor, bedroom.
-	main._wall_z(house, 0.0, 0.0, main.PANEL.position.x, 0.0, main.WALL_H, main.mat_wall)
-	main._wall_z(house, 0.0, main.PANEL.end.x, 8.4, 0.0, main.WALL_H, main.mat_wall)
-	main._wall_z(house, 0.0, main.PANEL.position.x, main.PANEL.end.x, main.PANEL.end.y, main.WALL_H, main.mat_wall)
-	main._breakable(house, "HollowPanel", &"oco", Vector3(main.PANEL.size.x, main.PANEL.size.y, main.WALL_T), Vector3(main.PANEL.get_center().x, main.PANEL.get_center().y, 0.0), main.mat_wall)
+	main._wall_z(house, 0.0, 0.0, PANEL.position.x, 0.0, main.WALL_H, main.mat_wall)
+	main._wall_z(house, 0.0, PANEL.end.x, 8.4, 0.0, main.WALL_H, main.mat_wall)
+	main._wall_z(house, 0.0, PANEL.position.x, PANEL.end.x, PANEL.end.y, main.WALL_H, main.mat_wall)
+	main._breakable(house, "HollowPanel", &"oco", Vector3(PANEL.size.x, PANEL.size.y, main.WALL_T), Vector3(PANEL.get_center().x, PANEL.get_center().y, 0.0), main.mat_wall)
 	main._wall_z(house, 0.0, 8.4, 10.5, 0.0, main.WALL_H, main.mat_wall_corridor)
 	main._wall_z(house, 0.0, 10.5, 15.4, 0.0, main.WALL_H, main.mat_wall_bed)
 

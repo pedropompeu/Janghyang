@@ -27,8 +27,6 @@ const DreadModel = preload("res://scripts/dread_model.gd")
 const Dread = preload("res://scripts/dread.gd")
 const Breakable = preload("res://scripts/breakable.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
-## Only for the drawer's hole in the floors above it, until the house and the
-## tabletop move into their own areas (Tasks 7 and 8).
 const QuestModel = preload("res://scripts/quest_model.gd")
 const Atlas = preload("res://scripts/atlas.gd")
 const Gastos = preload("res://scripts/gastos.gd")
@@ -42,10 +40,6 @@ const GIANT_HAND := Vector3(2.2, 3.65, 12.75)
 const ELIAS_STYLE := {"coat": Color("#4a5866"), "skin": Color("#d9b99b"), "hair": Color("#4a3a2c"), "trousers": Color("#2b2b30")}
 ## Verbs the house can give back; opening doors and winding are not mirrored.
 const MIRRORED_VERBS := [&"dobrar", &"rolar", &"boneco", &"bater"]
-const BEDROOM_X := Vector2(10.5, 15.4)
-const BEDROOM_Z := Vector2(0.0, 5.6)
-## The hollow part of the playroom's north wall, under the drawing (x, y).
-const PANEL := Rect2(6.15, 0.0, 1.1, 1.25)
 ## The maps main reads, from the area registry: where Elias wakes after a hug
 ## or a fall, by the floor he is on, and the lots struck by setting foot
 ## somewhere, breaking something, or cataloguing.
@@ -66,14 +60,12 @@ var mat_floor_corridor: StandardMaterial3D
 var mat_floor_bed: StandardMaterial3D
 var mat_floor_figure: StandardMaterial3D
 var mat_floor_entry: StandardMaterial3D
-var mat_floor_atelier: StandardMaterial3D
 var mat_wall: StandardMaterial3D
 var mat_wall_corridor: StandardMaterial3D
 var mat_wall_bed: StandardMaterial3D
 var mat_wall_figure: StandardMaterial3D
 var mat_wall_entry: StandardMaterial3D
 var mat_wall_exterior: StandardMaterial3D
-var mat_wall_atelier: StandardMaterial3D
 var mat_ceiling: StandardMaterial3D
 var mat_wood: StandardMaterial3D
 var mat_wood_dark: StandardMaterial3D
@@ -84,7 +76,6 @@ var mat_rug_play: StandardMaterial3D
 var mat_rug_bed: StandardMaterial3D
 var mat_rug_corridor: StandardMaterial3D
 var mat_ball: StandardMaterial3D
-var mat_doll_skin: StandardMaterial3D
 var mat_doll_cloth: StandardMaterial3D
 var mat_mirror: StandardMaterial3D
 var mat_window: StandardMaterial3D
@@ -240,14 +231,12 @@ func _make_materials() -> void:
 	mat_floor_bed = _mat("#5b4434", 0.85)
 	mat_floor_figure = _mat("#3f3026", 0.95)
 	mat_floor_entry = _mat("#6a5140", 0.8)
-	mat_floor_atelier = _mat("#5c3f2c", 0.75)
 	mat_wall = _mat("#c7b69c", 0.9)
 	mat_wall_corridor = _mat("#a48f75", 0.95)
 	mat_wall_bed = _mat("#9f9a86", 0.95)
 	mat_wall_figure = _mat("#6e5b49", 0.95)
 	mat_wall_entry = _mat("#b8a58c", 0.9)
 	mat_wall_exterior = _mat("#5a4a3c", 0.95)
-	mat_wall_atelier = _mat("#4d4038", 0.95)
 	mat_ceiling = _mat("#2b2620", 1.0)
 	mat_wood = _mat("#6b4a35", 0.8)
 	mat_wood_dark = _mat("#4b3224", 0.85)
@@ -258,7 +247,6 @@ func _make_materials() -> void:
 	mat_rug_bed = _mat("#4f3a4a", 0.95)
 	mat_rug_corridor = _mat("#6d3a3a", 0.95)
 	mat_ball = _mat("#a8763f", 0.6)
-	mat_doll_skin = _mat("#d9b98a", 0.9)
 	mat_doll_cloth = _mat("#7d3a3f", 0.95)
 	mat_mirror = _mat("#6f8790", 0.08, 1.0)
 	mat_rain = _mat("#8fc3cf", 0.2)
@@ -822,7 +810,7 @@ func _track_place() -> void:
 	level = lvl
 	player.respawn_point = LEVEL_SAFE.get(lvl, SPAWN)
 	gastos.on_level(lvl)
-	if lvl == &"casa" and quest.all_pieces():
+	if lvl == Registry.HOME and quest.all_pieces():
 		_complete(&"voltar")
 
 ## A Gasto reached Elias unseen. No death: black, cold, porcelain at the ear;
@@ -927,7 +915,7 @@ func is_seen(point: Vector3) -> bool:
 	return hit.is_empty() or hit.position.distance_to(point) < 0.35
 
 func in_bedroom(pos: Vector3) -> bool:
-	return pos.x >= BEDROOM_X.x and pos.x <= BEDROOM_X.y and pos.z >= BEDROOM_Z.x and pos.z <= BEDROOM_Z.y
+	return atlas.room_at(pos) == &"quarto"
 
 func _on_catalog_requested(target: Area3D) -> void:
 	var entry: Dictionary = catalog.catalog(target.item_id)

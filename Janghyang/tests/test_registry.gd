@@ -32,10 +32,26 @@ func test_defs_are_valid(t) -> void:
 			t.ok(Atlas.levels().has(l.to), "link of %s goes to a known level (%s)" % [d.id, l.to])
 			t.eq(l.from, d.id, "link of %s knows where it starts" % d.id)
 			t.ok(l.path is Array, "link of %s has a path" % d.id)
+			t.ok(l.get("at") is Vector3, "link of %s→%s says where it arrives" % [d.id, l.to])
 
 func test_atlas_rooms_are_unchanged_by_the_merge(t) -> void:
 	t.eq(Atlas.rooms().map(func(r): return r.id), TODAY, "same rooms, same order as today")
 	t.eq(Atlas.levels().keys(), [&"casa", &"passagem", &"mecanismo", &"sotao", &"gaveta", &"tampo"], "the plan's levels follow the registry")
+	t.eq(Atlas.rooms().map(func(r): return r.id), Registry.rooms().map(func(r): return r.id), "the atlas reads its rooms from the registry")
+	t.eq(Atlas.levels(), Registry.levels(), "the atlas reads its levels from the registry")
+	t.eq(Registry.HOME, Registry.defs()[0].id, "the house is built first")
+	t.eq(Registry.def(Registry.HOME).safe, load("res://scripts/main.gd").get_script_constant_map()["SPAWN"], "the house's safe point is where a new night starts")
+
+## The inverse of test_area_helpers_exist_with_their_arity: every main._x( an
+## area script calls is in HELPERS, so main.gd cannot drop it unnoticed.
+func test_every_helper_an_area_calls_is_declared(t) -> void:
+	var re := RegEx.create_from_string("main\\.(_\\w+)\\(")
+	for f in DirAccess.get_files_at("res://scripts/areas/"):
+		if not f.ends_with(".gd"):
+			continue
+		var src := FileAccess.get_file_as_string("res://scripts/areas/" + f)
+		for m in re.search_all(src):
+			t.ok(Registry.HELPERS.has(StringName(m.get_string(1))), "%s calls main.%s, declared in HELPERS" % [f, m.get_string(1)])
 
 ## Every pair of rooms whose boxes overlap, the room tried first on the left.
 ## A new area that lands inside another, or a reordering, shows up here.
@@ -208,9 +224,11 @@ func test_casa_def_matches_today(t) -> void:
 
 func test_main_knows_no_area_by_name(t) -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/main.gd")
-	t.ok(not src.contains("res://scripts/areas/") or src.count("res://scripts/areas/") == 1, "main só carrega o registry")
-	for id in [&"passagem", &"sotao", &"gaveta", &"tampo"]:
-		t.ok(not src.contains("Area%s" % String(id).capitalize()), "main não chama %s direto" % id)
+	t.ok(src.contains("res://scripts/areas/registry.gd"), "main carrega o registry")
+	t.eq(src.count("res://scripts/areas/"), 1, "main só carrega o registry")
+	t.ok(not src.contains('&"casa"'), "main chama a casa de Registry.HOME")
+	for d in Registry.defs():
+		t.ok(not src.contains("Area%s" % String(d.id).capitalize()), "main não chama %s direto" % d.id)
 	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
 	for name in ["_LEGACY_SAFE", "_LEGACY_ROOM_TASKS", "_LEGACY_BREAK_TASKS", "_LEGACY_CATALOG_TASKS"]:
 		t.ok(not consts.has(name), "main keeps no %s" % name)
