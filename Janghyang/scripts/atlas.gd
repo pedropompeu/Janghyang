@@ -37,8 +37,6 @@ const LEGACY_ROOMS := [
 	{"id": &"corredor_sul", "name": "corredor da frente", "level": &"casa", "rect": Rect2(3.5, 7.7, 7.0, 1.4), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_oeste", "name": "beira oeste", "level": &"casa", "rect": Rect2(-3.2, 0.0, 3.2, 9.1), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_sul", "name": "beira sul", "level": &"casa", "rect": Rect2(0.0, 9.1, 15.4, 3.4), "y": Vector2(-0.4, 2.8)},
-	{"id": &"mecanismo", "name": "torre", "level": &"mecanismo", "rect": Rect2(5.2, 1.0, 5.4, 5.5), "y": Vector2(2.8, 13.0)},
-	{"id": &"sotao", "name": "sótão", "level": &"sotao", "rect": Rect2(0.3, -1.3, 14.8, 10.1), "y": Vector2(2.8, 5.3)},
 	{"id": &"gaveta", "name": "gaveta", "level": &"gaveta", "rect": Rect2(-1.0, -1.0, 18.0, 14.0), "y": Vector2(-3.6, -0.5)},
 	{"id": &"loja_varela", "name": "Relojoaria Varela", "level": &"tampo", "rect": Rect2(20.0, -7.0, 10.0, 5.0), "y": Vector2(-0.4, 3.0)},
 	{"id": &"oficina_varela", "name": "oficina dos fundos", "level": &"tampo", "rect": Rect2(20.0, -12.0, 10.0, 5.0), "y": Vector2(-0.4, 3.0)},

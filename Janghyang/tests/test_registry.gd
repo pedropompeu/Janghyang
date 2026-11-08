@@ -90,3 +90,39 @@ func test_atlas_keeps_the_crawlspace_before_the_attic(t) -> void:
 	# The passage and the attic share the band y 2.8–2.9 over x 0.3–10.4:
 	# the passage came first, and still does after the move.
 	t.eq(Atlas.new().room_at(Vector3(5.0, 2.85, -0.6)), &"passagem", "the overlap goes to the passage")
+
+func _links_by_target(d: Dictionary) -> Dictionary:
+	var to := {}
+	for l in d.links:
+		to[l.to] = l
+	return to
+
+func test_sotao_def_matches_today(t) -> void:
+	var d := Registry.def(&"sotao")
+	t.ok(not d.is_empty(), "the attic is registered")
+	if d.is_empty():
+		return
+	t.near(d.safe.distance_to(Vector3(9.8, 3.14, 0.55)), 0.0, 0.01, "safe point of the attic")
+	t.eq(d.rooms.map(func(r): return r.id), [&"sotao"], "one room")
+	t.eq(d.rooms[0].rect, Rect2(0.3, -1.3, 14.8, 10.1), "rect of the attic")
+	t.eq(d.rooms[0].y, Vector2(2.8, 5.3), "height band of the attic")
+	t.eq(d.tasks, {&"sotao": &"subir_sotao"}, "setting foot there climbs it")
+	var to := _links_by_target(d)
+	t.eq(to.keys(), [&"passagem", &"mecanismo"], "links down the shaft and into the tower")
+	t.eq(to.get(&"mecanismo", {}).get("gate"), &"DoorTower", "the tower door gates the tower")
+
+func test_mecanismo_def_matches_today(t) -> void:
+	var d := Registry.def(&"mecanismo")
+	t.ok(not d.is_empty(), "the tower is registered")
+	if d.is_empty():
+		return
+	t.near(d.safe.distance_to(Vector3(9.8, 3.14, 0.55)), 0.0, 0.01, "safe point of the tower is the attic's")
+	t.eq(d.safe_room, &"sotao", "Elias wakes on the attic floor")
+	t.eq(d.rooms.map(func(r): return r.id), [&"mecanismo"], "one room")
+	t.eq(d.rooms[0].rect, Rect2(5.2, 1.0, 5.4, 5.5), "rect of the tower")
+	t.eq(d.rooms[0].y, Vector2(2.8, 13.0), "height band of the tower")
+	t.eq(d.tasks, {&"mecanismo": &"entrar_mecanismo"}, "setting foot there enters it")
+	t.eq(_links_by_target(d).keys(), [&"sotao"], "a link back to the attic")
+	var ids: Array = Registry.defs().map(func(x): return x.id)
+	t.ok(ids.find(&"mecanismo") < ids.find(&"sotao"), "the tower is built and tried before the attic")
+	t.eq(Atlas.new().room_at(Vector3(7.9, 4.0, 3.75)), &"mecanismo", "inside the tower is the tower, not the attic")

@@ -10,6 +10,8 @@ extends RefCounted
 
 const AREAS := [
 	preload("res://scripts/areas/passagem.gd"),
+	preload("res://scripts/areas/mecanismo.gd"),
+	preload("res://scripts/areas/sotao.gd"),
 ]
 
 ## The helpers of main.gd an area may call, with their argument count
