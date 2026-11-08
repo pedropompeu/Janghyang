@@ -439,7 +439,11 @@ func _run() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_record(gastos.wanted() == 0, "back in the house, no Gasto", "%s %s %s %s" % [main.level, main.player.global_position, main.atlas.room_at(main.player.global_position), main.ended])
-	main.notebook.open_plan(main.player.global_position)
+	main.notebook.open_plan(main.player.global_position, -main.player.camera.global_basis.z)
+	var here: StringName = main.atlas.level_of(main.atlas.room_at(main.player.global_position))
+	_record(main.notebook.plan_sheet() == here, "planta: the plan opens on the area Elias is in", "%s %s" % [main.notebook.plan_sheet(), here])
+	var fog = main.plan_model.fog(here)
+	_record(fog != null and fog.count() > 0, "planta: the fog lifts where Elias has looked", str(fog.count() if fog != null else -1))
 	var plan: String = main.notebook.plan_text()
 	_record(plan.contains("II. O sótão") and plan.contains("[s]a coroa do relógio de bolso[/s]"), "the lots page strikes what is done", plan)
 	_record(plan.contains("gaveta") and plan.contains("quarto de brincar") and not plan.contains("Relojoaria Varela"), "the map shows only what Elias has seen", plan)
@@ -970,7 +974,13 @@ func _capture(g) -> void:
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
+	# Spec §8: the plan is a live notebook; the world does not stop for it.
+	# (The selftest is not autonomous, so the night's clock is not running here:
+	# the proof is a Gasto acting on Elias while the plan is up.)
+	main.notebook.open_plan(pl.global_position)
+	var plan_up: bool = main.notebook.is_open() and not get_tree().paused
 	var i: int = await _capture_near(g)
+	_record(plan_up and g.is_grabbed(), "planta: the world goes on with the notebook open", "%s %s" % [plan_up, g.is_grabbed()])
 	if i < 0:
 		_record(false, "capture: a Gasto stands somewhere to reach Elias", str(g.placed()))
 		return

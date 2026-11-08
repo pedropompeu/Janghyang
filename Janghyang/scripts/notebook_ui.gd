@@ -46,6 +46,11 @@ var _lots: RichTextLabel
 var _map: Control
 var _plan_pos := Vector3.ZERO
 var _plan_level := &""
+var _plan_look := Vector3.ZERO
+var _redraw_in := 0.0
+var _tab_rects: Dictionary = {}
+## Set by main: fog and pencil notes (plan_model.gd).
+var plan
 
 func _ready() -> void:
 	layer = 5
@@ -86,7 +91,7 @@ func toggle() -> void:
 
 ## The other spread: the lots of the visit, and the plan Elias drew as he
 ## went, on the sheet of the floor he is on.
-func open_plan(pos: Vector3) -> void:
+func open_plan(pos: Vector3, look := Vector3.ZERO) -> void:
 	if _final.visible or quest == null or atlas == null:
 		return
 	_open = true
@@ -95,16 +100,18 @@ func open_plan(pos: Vector3) -> void:
 	_plan.visible = true
 	_peek.visible = false
 	_plan_pos = pos
+	_plan_look = look
 	_plan_level = atlas.level_of(atlas.room_at(pos))
+	_redraw_in = MAP_REDRAW
 	_lots.text = _lots_bbcode()
 	_map.queue_redraw()
 	_set_locked(true)
 
-func toggle_plan(pos: Vector3) -> void:
+func toggle_plan(pos: Vector3, look := Vector3.ZERO) -> void:
 	if _open and _plan.visible:
 		close()
 	else:
-		open_plan(pos)
+		open_plan(pos, look)
 
 ## A line of paper at the bottom of the screen, for what is not an entry.
 func peek_text(text: String) -> void:
@@ -198,6 +205,9 @@ func plan_text() -> String:
 		parts.append(String(atlas.levels()[lvl]))
 	for id in _rooms_drawn():
 		parts.append(String(atlas.room(id).name))
+	if plan != null:
+		for n in plan.notes_on(_plan_level):
+			parts.append(n.label)
 	return "\n".join(parts)
 
 func _lots_bbcode() -> String:
@@ -209,13 +219,21 @@ func _lots_bbcode() -> String:
 		out.append("")
 	return "\n".join(out)
 
+## The sheets with something on them, in registry order: a room set foot in,
+## fog lifted or a note; the sheet he is on always.
 func _levels_seen() -> Array[StringName]:
+	var drawn: Array[StringName] = []
+	if plan != null:
+		drawn = plan.levels_drawn()
 	var out: Array[StringName] = []
 	for lvl in atlas.levels():
+		var seen: bool = lvl == _plan_level or drawn.has(lvl)
 		for id in atlas.rooms_on(lvl):
-			if atlas.visited.has(id):
-				out.append(lvl)
+			if seen:
 				break
+			seen = atlas.visited.has(id)
+		if seen:
+			out.append(lvl)
 	return out
 
 func _rooms_drawn() -> Array[StringName]:
@@ -225,47 +243,99 @@ func _rooms_drawn() -> Array[StringName]:
 			out.append(id)
 	return out
 
-## Visited rooms of the sheet, in pencil, fitted to the page; an x for Elias.
+## The sheet shown (a tab per area; it opens on the one Elias is in).
+func plan_sheet() -> StringName:
+	return _plan_level
+
+func show_sheet(level: StringName) -> void:
+	_plan_level = level
+	_map.queue_redraw()
+
 ## Pixels per metre on the plan page.
 const MAP_SCALE := 20.0
+## How often the open plan is redrawn: the world goes on (spec §8).
+const MAP_REDRAW := 0.25
+const NOTE_MARKS := {&"gasto": "G", &"item": "o", &"barricada": "#", &"ancora": "+", &"giz": ">"}
 
+func _process(delta: float) -> void:
+	if not _open or not _plan.visible:
+		return
+	_redraw_in -= delta
+	if _redraw_in <= 0.0:
+		_redraw_in = MAP_REDRAW
+		_map.queue_redraw()
+
+func _on_map_input(event: InputEvent) -> void:
+	var mb := event as InputEventMouseButton
+	if mb == null or not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	for lvl in _tab_rects:
+		if (_tab_rects[lvl] as Rect2).has_point(mb.position):
+			show_sheet(lvl)
+			return
+
+## The sheet: a tab per area, the fog lifted in light pencil, the rooms set
+## foot in outlined, the notes, and an arrow where Elias stands and looks.
 func _draw_map() -> void:
 	var tabs_y := 30.0
 	var x := 26.0
+	_tab_rects.clear()
 	for lvl in _levels_seen():
 		var name := String(atlas.levels()[lvl])
 		var col := INK if lvl == _plan_level else RULE.darkened(0.3)
 		_map.draw_string(_font, Vector2(x, tabs_y), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, col)
 		var w := _font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+		_tab_rects[lvl] = Rect2(x - 4.0, tabs_y - 18.0, w + 8.0, 26.0)
 		if lvl == _plan_level:
 			_map.draw_line(Vector2(x, tabs_y + 4.0), Vector2(x + w, tabs_y + 4.0), INK, 1.5)
 		x += w + 18.0
-	var ids := _rooms_drawn()
-	if ids.is_empty():
-		return
 	var all := Rect2()
 	var first := true
 	for id in atlas.rooms_on(_plan_level):
 		var r: Rect2 = atlas.room(id).rect
 		all = r if first else all.merge(r)
 		first = false
+	if first:
+		return
 	var area := Rect2(30.0, 60.0, _map.size.x - 60.0, _map.size.y - 90.0)
 	# One scale for every floor (a small tower stays small), unless the floor is too big for the page.
 	var k := minf(MAP_SCALE, minf(area.size.x / all.size.x, area.size.y / all.size.y))
 	var origin := area.position + (area.size - all.size * k) * 0.5
 	var to_page := func(p: Vector2) -> Vector2: return origin + (p - all.position) * k
-	for id in ids:
+	var fog = plan.fog(_plan_level) if plan != null else null
+	if fog != null:
+		var cell: float = fog.CELL * k
+		for row in fog.rows:
+			for col in fog.cols:
+				if fog.seen_cell(col, row):
+					var c: Vector2 = to_page.call(fog.cell_center(col, row))
+					_map.draw_rect(Rect2(c - Vector2(cell, cell) * 0.5, Vector2(cell, cell)), Color(PENCIL, 0.12), true)
+	for id in _rooms_drawn():
 		var r: Rect2 = atlas.room(id).rect
 		var a: Vector2 = to_page.call(r.position)
 		var page_rect := Rect2(a, r.size * k)
-		_map.draw_rect(page_rect, Color(PENCIL, 0.08), true)
 		_map.draw_rect(page_rect, PENCIL, false, 1.4)
 		var label := String(atlas.room(id).name)
 		var fs := 13 if page_rect.size.x > 70.0 else 11
 		_map.draw_string(_font, page_rect.position + Vector2(5.0, 16.0), label, HORIZONTAL_ALIGNMENT_LEFT, page_rect.size.x - 8.0, fs, PENCIL)
+	if plan != null:
+		for n in plan.notes_on(_plan_level):
+			var at: Vector2 = to_page.call(Vector2(n.at.x, n.at.z))
+			_map.draw_string(_font_pencil, at + Vector2(-4.0, 5.0), NOTE_MARKS.get(n.kind, "?"), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, INK)
+			_map.draw_string(_font_pencil, at + Vector2(8.0, 4.0), n.label, HORIZONTAL_ALIGNMENT_LEFT, 120.0, 11, PENCIL)
+	if atlas.level_of(atlas.room_at(_plan_pos)) != _plan_level:
+		return
 	var me: Vector2 = to_page.call(Vector2(_plan_pos.x, _plan_pos.z))
-	_map.draw_line(me + Vector2(-6, -6), me + Vector2(6, 6), INK, 2.0)
-	_map.draw_line(me + Vector2(-6, 6), me + Vector2(6, -6), INK, 2.0)
+	var look := Vector2(_plan_look.x, _plan_look.z)
+	if look.length() < 0.01:
+		_map.draw_line(me + Vector2(-6, -6), me + Vector2(6, 6), INK, 2.0)
+		_map.draw_line(me + Vector2(-6, 6), me + Vector2(6, -6), INK, 2.0)
+		return
+	look = look.normalized()
+	var tip := me + look * 12.0
+	_map.draw_line(me - look * 6.0, tip, INK, 2.0)
+	_map.draw_line(tip, tip - look.rotated(0.5) * 6.0, INK, 2.0)
+	_map.draw_line(tip, tip - look.rotated(-0.5) * 6.0, INK, 2.0)
 
 func _set_locked(on: bool) -> void:
 	if player != null:
@@ -405,7 +475,8 @@ func _build_plan() -> void:
 	_map = Control.new()
 	_map.position = Vector2.ZERO
 	_map.size = Vector2(465.0, 580.0)
-	_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map.mouse_filter = Control.MOUSE_FILTER_STOP
+	_map.gui_input.connect(_on_map_input)
 	_map.draw.connect(_draw_map)
 	right.add_child(_map)
 

@@ -148,7 +148,8 @@ relacionado:
 - **Reprodução:** com um Gasto em jogo, abrir o caderno (`Tab`) e esperar: ninguém se move.
 - **Por que importa:** o §8 quer o caderno sem pausa, e o check "a captura fecha o caderno" da Tarefa 15 só passa hoje chamando `_grab` direto.
 - **Fix recomendado:** na Tarefa 18 (planta sem pausa), separar "trava o corpo" de "trava o mundo": o caderno trava a câmera e o andar, mas `gastos.gd` passa a olhar um sinal próprio (ex.: `main.world_frozen()`) em vez de `input_locked`. Custo pequeno.
-- **Estado:** aberto. (i)
+- **Estado:** ~~aberto~~ ~superseded 2026-11-08 → corrigido na Tarefa 18. (i)
+- [2026-11-08] (e) ← `scripts/main.gd` `world_frozen()` (`_hugging or ended`) e `scripts/gastos.gd` (`_process` volta cedo só com `main.world_frozen()`): com o caderno aberto Elias fica travado, mas os Gastos andam, olham e agarram; check de selftest "planta: the world goes on with the notebook open".
 
 ### [A-025] A lanterna e o item da mão esquerda dividem a mesma mão {#a-025}
 

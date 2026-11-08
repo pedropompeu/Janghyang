@@ -487,7 +487,7 @@ func _process(delta: float) -> void:
 		if _models[i] != null and _bodies[i].visible:
 			_bodies[i].visible = false
 			_set_hittable(i, false)
-	if n == 0 or main.player.input_locked:
+	if n == 0 or main.world_frozen():
 		return
 	_view_in -= delta
 	if _view_in <= 0.0:

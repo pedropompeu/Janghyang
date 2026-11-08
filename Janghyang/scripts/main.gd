@@ -35,6 +35,8 @@ const Score = preload("res://scripts/score.gd")
 const SettingsUI = preload("res://scripts/settings_ui.gd")
 const CaptureFx = preload("res://scripts/capture_fx.gd")
 const PocketWatch = preload("res://scripts/pocket_watch.gd")
+const PlanModel = preload("res://scripts/plan_model.gd")
+const PlanRevealer = preload("res://scripts/plan_revealer.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Noites = preload("res://scripts/story/noites.gd")
 const NightCard = preload("res://scripts/night_card_ui.gd")
@@ -129,6 +131,9 @@ var gastos
 ## How a grab looks (capture_fx.gd).
 var capture_fx
 var pocket_watch
+## The plan in the notebook: fog lifted and pencil notes (plan_model.gd).
+var plan_model = PlanModel.new()
+var plan_revealer
 var _dark: Array[Tween] = []
 var pretend
 var score
@@ -808,9 +813,14 @@ func _wire_story() -> void:
 	add_child(score)
 	notebook.quest = quest
 	notebook.atlas = atlas
+	notebook.plan = plan_model
+	plan_revealer = PlanRevealer.new()
+	plan_revealer.name = "PlanRevealer"
+	plan_revealer.main = self
+	add_child(plan_revealer)
 	player.map_requested.connect(func() -> void:
 		if not gastos.is_grabbed():
-			notebook.toggle_plan(player.global_position))
+			notebook.toggle_plan(player.global_position, -player.camera.global_basis.z))
 	for p in get_tree().get_nodes_in_group(&"Piece"):
 		p.taken.connect(_on_piece)
 	for n in BREAK_TASKS:
@@ -869,6 +879,7 @@ func begin_night(n: int) -> void:
 		catalog.from_dict(campaign.catalog)
 	if not campaign.visited.is_empty():
 		atlas.from_dict(campaign.visited)
+	plan_model.from_dict(campaign.plan)
 	notebook.refresh(catalog)
 	pockets.assign(campaign.items)
 	player.hands_model = player.HandsModel.new()
@@ -944,7 +955,7 @@ func end_night() -> void:
 	for it in player.hands_model.pockets:
 		if not items.has(it):
 			items.append(it)
-	campaign.carry({"pieces": held, "items": items, "catalog": catalog.to_dict(), "visited": atlas.to_dict()})
+	campaign.carry({"pieces": held, "items": items, "catalog": catalog.to_dict(), "visited": atlas.to_dict(), "plan": plan_model.to_dict()})
 	var last := n >= Noites.last()
 	if not last:
 		campaign.night = n + 1
@@ -988,6 +999,11 @@ func _goals_done() -> bool:
 func _home_stretch() -> void:
 	if visit.is_short() and visit.goals_met and visit.on_ground and not quest.is_done(&"voltar_terreo"):
 		_complete(&"voltar_terreo")
+
+## Whether the world stands still: only the hug's black and the end. The
+## notebook does not stop it (spec §8): Elias is locked, the Gastos are not.
+func world_frozen() -> bool:
+	return _hugging or ended
 
 ## Which room and floor Elias is in: the plan fills in, lots get struck,
 ## the safe point follows him and so do the Gastos.

@@ -160,3 +160,10 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `main.gd`: `pocket_watch`, `watch_goal()` (primeira meta da noite não cumprida), carta na noite 1 e `_house_goes_dark` (só a `PlayroomLamp` fica acesa); `_complete` atualiza a meta; `_on_broke_free` gasta a corda; shot `--shot-watch` (`res://blockout-watch.png`).
   - `night_card_ui.gd`: `show_letter`, `is_letter`, sinal `letter_closed`. `catalog_data.gd`: `LETTER`. `gastos.gd`: `nearest(p)`. `hands.gd`: `left_hand()`. `casa.gd`: a primeira luz do quarto de brincar se chama `PlayroomLamp`.
   - Contagens: unit 2188/0, selftest 393/0 (checks `bussola:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/fog_grid.gd`, `scripts/plan_model.gd`, `scripts/plan_revealer.gd`, `scripts/notebook_ui.gd`, `scripts/main.gd`, `scripts/gastos.gd` Tarefa 18, a planta viva:
+  - `fog_grid.gd` (novo, `RefCounted`): `CELL` 0,5, `reveal(p)`, `seen`, `count`, `cell_center`, `seen_cell`, `to_bytes`/`from_bytes`.
+  - `plan_model.gd` (novo): `fog(level)`, `note(level, at, kind, label, time, id)`, `notes_on`, `forget_item`, `levels_drawn`, `to_dict`/`from_dict` (no `campaign.plan`).
+  - `plan_revealer.gd` (novo, nó `PlanRevealer` filho do `main`): `scan()`, `reach()`, `half_width()`.
+  - `notebook_ui.gd`: `plan`, `open_plan(pos, look)`, `toggle_plan(pos, look)`, `plan_sheet()`, `show_sheet(level)`; desenha névoa, anotações e seta; `plan_text()` inclui as anotações.
+  - `main.gd`: `plan_model`, `plan_revealer`, `world_frozen()`; `gastos.gd` para só com `world_frozen()`.
+  - Contagens: unit 2224/0, selftest 396/0 (checks `planta:`).
