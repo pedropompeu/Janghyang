@@ -502,6 +502,11 @@ func _run() -> void:
 		var creak = dread.creak_now()
 		_record(creak is Vector3 and Vector2(creak.x - p.x, creak.z - p.z).length() >= 4.0, "creaks come from far rooms", str(creak))
 		dread.set_tension(main.DreadModel.tension(main.visit.act, main.visit.clock.display_minutes()))
+		var director = dread.director
+		_record(director != null and director.QUIET_BEFORE == 8.0, "sustos: the dread asks a director", "")
+		director.update(director.QUIET_BEFORE + 1.0, false)
+		_record(director.request(&"lampada", false, 0.5), "sustos: a quiet house may flicker a lamp", "")
+		_record(not director.request(&"lampada", false, 0.5), "sustos: and not again at once", "")
 
 	print("SELFTEST: house mirror")
 	var f1_before: bool = _node("F1").is_at_b()
@@ -536,6 +541,9 @@ func _run() -> void:
 	await get_tree().create_timer(0.5).timeout
 	_record(main.hour_event.echoes.size() > 0, "echoes appear at 03:33", "")
 	_record(main.get_node("Echoes").find_children("*", "CollisionObject3D", true, false).is_empty(), "echoes have no collision", "")
+	var director = main.dread.director
+	director.update(100.0, false)
+	_record(not director.request(&"lampada", false, 0.5), "sustos: no scare during 03:33", "")
 	_expect_at("DoorFront", true, "front door stays open during 03:33")
 	_record(main.find_children("CrackThing*", "", true, false).size() == 3, "three things come out of the cracks", "")
 	_record(main.find_children("CrackThing*", "", true, false).all(func(n): return n.find_children("*", "CollisionObject3D", true, false).is_empty()), "crack things have no collision", "")

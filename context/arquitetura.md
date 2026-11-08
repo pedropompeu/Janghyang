@@ -199,3 +199,8 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `main.gd`: `chapters`, `_build_staging()` (nós `Staging/Staging_<id>/Figure_<k>`, manequins sem colisão), `_start_chapters()`, `_tick_staging(dt)`, `watch_goal()` aponta para a encenação aberta (`task` `encenacao`), `chapter_pages()` vai no carry do fim da noite.
   - `notebook_ui.gd`: página da hipótese (`_hypothesis_page`, `choose_hypothesis`); `night_card_ui.gd`: o cartão traz a frase escolhida.
   - Contagens: unit 2459/0, selftest 442/0 (checks `capitulo:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/scare_director.gd`, `scripts/dread.gd`, `scripts/main.gd` Tarefa 24, o diretor de sustos:
+  - `scare_director.gd`: `STRONG_GAP` 60, `WEAK_GAP` 20, `QUIET_BEFORE` 8, `STRONG_TENSION` 0,6, `PEAK` 0,5, `MAX_DB` 0; `KINDS` (os sete tipos da spec §13); `update(dt, loud_now)`, `request(kind, strong, tension)`, `set_hour(active)`, `new_night()`.
+  - `dread.gd`: `director`; a cada frame segue a hora (`hour_event.is_active()`) e o barulho (`loud_now()`: captura ou fôlego acima de 0,5); a lâmpada (`lampada`, fraco) e a lanterna (`lanterna_pisca`, forte) pedem licença; o rangido continua ambiente.
+  - `main.gd`: `dread.director.new_night()` no começo de cada noite.
+  - Contagens: unit 2486/0, selftest 446/0 (checks `sustos:`).

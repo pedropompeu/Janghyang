@@ -935,6 +935,8 @@ func begin_night(n: int) -> void:
 			p.put_away()
 	recorder = EchoRecorder.new()
 	hour_event.reset()
+	if dread != null:
+		dread.director.new_night()
 	player.global_position = SPAWN
 	player.velocity = Vector3.ZERO
 	player.respawn_point = SPAWN

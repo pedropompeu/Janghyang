@@ -2,9 +2,12 @@ extends Node
 ## The house's mood in the scene: dims the house lights, thickens the fog,
 ## raises a low hum and Elias's breath, closes in the edges of the view, and
 ## now and then a far room creaks or a lamp falters. dread_model.gd gives the
-## numbers; nothing here comes closer to Elias or makes a loud sound.
+## numbers; nothing here comes closer to Elias or makes a loud sound. The
+## lamp and the flashlight flickers ask the scare director first; the creaks
+## are the house breathing, not scares.
 
 const DreadModel = preload("res://scripts/dread_model.gd")
+const ScareDirector = preload("res://scripts/scare_director.gd")
 
 ## How fast the mood follows the visit, in tension per second.
 const FOLLOW := 0.05
@@ -35,6 +38,8 @@ var hum: AudioStreamPlayer
 var tension := 0.0
 ## A fright on top of where the visit is (a hug); it fades on its own.
 var shock := 0.0
+## Says when a scare may come (scare_director.gd).
+var director = ScareDirector.new()
 
 var _lights: Array[OmniLight3D] = []
 var _base: Array[float] = []
@@ -96,6 +101,8 @@ func scare(amount: float) -> void:
 	shock = minf(0.6, shock + amount)
 
 func _process(delta: float) -> void:
+	director.set_hour(main.hour_event != null and main.hour_event.is_active())
+	director.update(delta, loud_now())
 	if main.autonomous:
 		shock = move_toward(shock, 0.0, 0.004 * delta)
 		tension = move_toward(tension, _target(), FOLLOW * delta)
@@ -107,9 +114,11 @@ func _process(delta: float) -> void:
 			_flicker_in = DreadModel.flicker_delay(tension, _rng.randf())
 		_flicker_in -= delta
 		if _flicker_in <= 0.0:
-			flicker_now(_nearest_light())
-			if tension > 0.8 and _rng.randf() < 0.4:
+			if tension > 0.8 and _rng.randf() < 0.4 and director.request(&"lanterna_pisca", true, tension):
+				flicker_now(_nearest_light())
 				_flicker_flashlight()
+			elif director.request(&"lampada", false, tension):
+				flicker_now(_nearest_light())
 			_flicker_in = DreadModel.flicker_delay(tension, _rng.randf())
 	_apply()
 
@@ -131,6 +140,12 @@ func _apply() -> void:
 	var hands = main.player.get("hands") if main.player != null else null
 	if hands != null:
 		hands.tremor = DreadModel.hand_tremor(t)
+
+## Something loud is going on: a grab, or Elias out of breath from a run.
+func loud_now() -> bool:
+	if main.capture_fx != null and main.capture_fx.is_active():
+		return true
+	return main.player != null and main.player.strain() > 0.5
 
 ## A creak in a room at least four metres from Elias. Returns where, or null.
 func creak_now() -> Variant:
