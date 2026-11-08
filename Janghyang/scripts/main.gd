@@ -841,6 +841,9 @@ func begin_night(n: int) -> void:
 		atlas.from_dict(campaign.visited)
 	notebook.refresh(catalog)
 	pockets.assign(campaign.items)
+	player.hands_model = player.HandsModel.new()
+	for it in pockets:
+		player.hands_model.take(it)
 	for p in get_tree().get_nodes_in_group(&"Piece"):
 		if campaign.pieces.has(p.piece_id):
 			p.put_away()
@@ -876,7 +879,11 @@ func end_night() -> void:
 	for p in QuestModel.PIECES:
 		if quest.has_piece(p):
 			held.append(p)
-	campaign.carry({"pieces": held, "items": pockets, "catalog": catalog.to_dict(), "visited": atlas.to_dict()})
+	var items: Array[StringName] = pockets.duplicate()
+	for it in player.hands_model.pockets:
+		if not items.has(it):
+			items.append(it)
+	campaign.carry({"pieces": held, "items": items, "catalog": catalog.to_dict(), "visited": atlas.to_dict()})
 	var last := n >= Noites.last()
 	if not last:
 		campaign.night = n + 1

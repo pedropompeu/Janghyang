@@ -3,6 +3,7 @@ extends CharacterBody3D
 ## crouch, climb ladders, and close the eyes to pretend. No HUD.
 
 const Mobility = preload("res://scripts/mobility_model.gd")
+const HandsModel = preload("res://scripts/hands_model.gd")
 
 @export var mouse_sensitivity := 0.0022
 ## Options (settings_ui.gd): mouse up looks down.
@@ -27,6 +28,10 @@ signal landed(impact: float)
 signal climbed
 ## Eyes closed (pretending) or open again.
 signal pretend_changed(on: bool)
+## Left click with something in the left hand (hands_model.gd).
+signal left_used(item: StringName)
+## T opened or closed the watch, or the wheel changed the left hand.
+signal left_changed(item: StringName)
 
 const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
 
@@ -45,6 +50,8 @@ var flashlight: SpotLight3D
 var hands: Node
 var crouched := false
 var mobility = Mobility.new()
+## What the left hand holds and the pockets; main gives a new one each night.
+var hands_model = HandsModel.new()
 var sprinting := false
 ## Eyes closed, remembering the house as it was (V or the right button held).
 var pretending := false
@@ -104,6 +111,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotation.x = clampf(camera.rotation.x - pitch_sign * event.relative.y * mouse_sensitivity, -1.45, 1.45)
 	if event is InputEventMouseButton and event.pressed:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		match event.button_index:
+			MOUSE_BUTTON_WHEEL_UP:
+				left_changed.emit(hands_model.cycle(-1))
+			MOUSE_BUTTON_WHEEL_DOWN:
+				left_changed.emit(hands_model.cycle(1))
+			MOUSE_BUTTON_LEFT:
+				if hands_model.left != &"":
+					left_used.emit(hands_model.left)
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_E:
@@ -114,6 +129,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					catalog_requested.emit(target)
 			KEY_B:
 				_knock()
+			KEY_T:
+				left_changed.emit(hands_model.toggle_watch())
 			KEY_C, KEY_CTRL:
 				set_crouched(not crouched)
 			KEY_SPACE:
@@ -254,8 +271,11 @@ func _interact() -> void:
 
 ## The stick on whatever is right in front: a wall, a door, a piece of
 ## furniture. With hands the knock lands at the end of the swing; a swing in
-## the air is only a swish.
+## the air is only a swish. Nothing with the left hand full (the watch, the
+## mirror...), unless it holds the stick.
 func _knock() -> void:
+	if not hands_model.can_swing():
+		return
 	if hands == null:
 		_land_knock()
 		return

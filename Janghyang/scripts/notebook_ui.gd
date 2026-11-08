@@ -14,6 +14,12 @@ const PENCIL := Color("#4a4440")
 const BLANK_LINES := 3
 const RULE_STEP := 30.0
 const PEEK_TIME := 2.5
+## How the pockets page names what Elias carries (hands_model.gd).
+const POCKET_NAMES := {
+	&"vareta": "vareta", &"espelho": "espelho", &"fosforo": "fósforo",
+	&"lupa": "lupa", &"estetoscopio": "estetoscópio", &"brinquedo": "brinquedo",
+	&"pilha": "pilha",
+}
 
 ## Set by main: the notebook locks this player's input while open.
 var player: Node
@@ -25,6 +31,7 @@ var _root: Control
 var _entries_box: VBoxContainer
 var _entries_scroll: ScrollContainer
 var _pages_box: VBoxContainer
+var _pockets: Label
 var _peek: PanelContainer
 var _peek_label: Label
 var _peek_tween: Tween
@@ -62,6 +69,7 @@ func open() -> void:
 	_book.visible = true
 	_plan.visible = false
 	_peek.visible = false
+	_pockets.text = pockets_text(player.hands_model.pockets if player != null and player.get("hands_model") != null else {})
 	_set_locked(true)
 	_scroll_to_end.call_deferred()
 
@@ -102,6 +110,28 @@ func toggle_plan(pos: Vector3) -> void:
 func peek_text(text: String) -> void:
 	peek({"number": 0, "text": text})
 	_peek_label.text = text
+
+## The pockets page, in pencil: the watch first (always his), then the rest
+## in the order of the wheel, with a count when there is more than one.
+static func pockets_text(pockets: Dictionary) -> String:
+	var parts: Array[String] = ["relógio"]
+	var keys: Array = pockets.keys()
+	keys.sort_custom(func(a, b) -> bool: return _pocket_rank(a) < _pocket_rank(b))
+	for k in keys:
+		var n := int(pockets[k])
+		if n <= 0:
+			continue
+		var name: String = POCKET_NAMES.get(k, String(k))
+		parts.append(name if n == 1 else "%s ×%d" % [name, n])
+	return "bolsos — " + " · ".join(parts)
+
+static func _pocket_rank(item: StringName) -> int:
+	var order: Array = POCKET_NAMES.keys()
+	var i := order.find(item)
+	return i if i >= 0 else order.size()
+
+func pockets_shown() -> String:
+	return _pockets.text
 
 func is_open() -> bool:
 	return _open
@@ -326,9 +356,15 @@ func _build_book() -> void:
 	_entries_box.add_theme_constant_override("separation", 12)
 	_entries_scroll.add_child(_entries_box)
 
+	_pockets = _line("", PENCIL)
+	_pockets.add_theme_font_override("font", _font_pencil)
+	_pockets.position = Vector2(30.0, 24.0)
+	_pockets.size = Vector2(415.0, 60.0)
+	right.add_child(_pockets)
+
 	var pages_scroll := ScrollContainer.new()
-	pages_scroll.position = Vector2(30.0, 40.0)
-	pages_scroll.size = Vector2(415.0, 520.0)
+	pages_scroll.position = Vector2(30.0, 90.0)
+	pages_scroll.size = Vector2(415.0, 470.0)
 	pages_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	pages_scroll.focus_mode = Control.FOCUS_NONE
 	right.add_child(pages_scroll)

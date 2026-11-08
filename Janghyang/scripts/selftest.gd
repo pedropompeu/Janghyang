@@ -215,6 +215,7 @@ func _run() -> void:
 		main.player._knock()
 		await get_tree().create_timer(0.7).timeout
 		_record(open_air and knocks.is_empty(), "a swing at nothing knocks nothing", str(knocks))
+		await _left_hand(hands, knocks)
 		main.player.acted.disconnect(on_act)
 		main.player.global_position = saved_k
 		main.player.rotation.y = 0.0
@@ -901,3 +902,54 @@ func _record(ok: bool, label: String, detail: String) -> void:
 	else:
 		failures += 1
 		print("  FAIL  " + label + (" — " + detail if detail != "" else ""))
+
+## T, the wheel and the left click (hands_model.gd), facing the wall of the
+## knock checks; leaves Elias with a fresh, empty left hand.
+func _left_hand(hands, knocks: Array) -> void:
+	var pl = main.player
+	pl.rotation.y = 0.0
+	await get_tree().physics_frame
+	var swings := [0]
+	var on_swing := func() -> void: swings[0] += 1
+	pl.swung.connect(on_swing)
+	var used: Array = []
+	var on_used := func(item: StringName) -> void: used.append(item)
+	pl.left_used.connect(on_used)
+	var t_key := InputEventKey.new()
+	t_key.physical_keycode = KEY_T
+	t_key.pressed = true
+	pl._unhandled_input(t_key)
+	await _frames(2)
+	_record(pl.hands_model.left == &"relogio" and hands.held_item() == &"relogio", "hands: T puts the watch in the left hand", str(pl.hands_model.left))
+	knocks.clear()
+	pl._knock()
+	await get_tree().create_timer(0.7).timeout
+	_record(swings[0] == 0 and knocks.is_empty(), "hands: with the watch in hand, B does not swing", str(swings[0]))
+	pl._unhandled_input(t_key)
+	await _frames(2)
+	_record(pl.hands_model.left == &"" and hands.held_item() == &"", "hands: T again puts the watch away", str(pl.hands_model.left))
+	pl._knock()
+	await get_tree().create_timer(0.7).timeout
+	_record(swings[0] == 1, "hands: the empty left hand swings again", str(swings[0]))
+	pl.hands_model.take(&"fosforo", 2)
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel.pressed = true
+	pl._unhandled_input(wheel)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	pl._unhandled_input(click)
+	await _frames(2)
+	_record(pl.hands_model.left == &"fosforo" and hands.held_item() == &"fosforo" and used == [&"fosforo"], "hands: the wheel takes a match out and the left click uses it", str(used))
+	main.notebook.open()
+	_record(main.notebook.pockets_shown().contains("fósforo ×2"), "hands: the pockets page lists two matches", main.notebook.pockets_shown())
+	main.notebook.close()
+	pl.hands_model.hold(&"")
+	used.clear()
+	pl._unhandled_input(click)
+	_record(used.is_empty(), "hands: a left click with an empty hand uses nothing", str(used))
+	pl.swung.disconnect(on_swing)
+	pl.left_used.disconnect(on_used)
+	pl.hands_model = pl.HandsModel.new()
+	await get_tree().create_timer(0.4).timeout

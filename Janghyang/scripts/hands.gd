@@ -22,6 +22,12 @@ const SKIN := Color("#d9b99b")
 const COAT := Color("#4a5866")
 const BASSWOOD := Color("#cdb48a")
 const BRASS := Color("#9a7b3c")
+## Blocks for what the left hand holds (hands_model.gd) until the assets.
+const ITEM_COLORS := {
+	&"relogio": BRASS, &"vareta": BASSWOOD, &"espelho": Color("#b9c4c9"),
+	&"fosforo": Color("#c8a76a"), &"lupa": Color("#6f5a2e"),
+	&"estetoscopio": Color("#3a3a3a"), &"brinquedo": Color("#a8553f"),
+}
 ## Draw order among the parts, since depth is not tested: sleeves behind, the
 ## stick into the fist, the lantern in front of the left hand.
 const SLEEVE_ORDER := 0
@@ -38,6 +44,9 @@ var _right: Node3D
 var _left: Node3D
 var _stick: MeshInstance3D
 var _lantern: Node3D
+var _held: MeshInstance3D
+var _held_item := &""
+var _item_mats := {}
 var _swing: Tween
 var _reach: Tween
 var _lower := 0.0
@@ -78,6 +87,11 @@ func _build_rig(eye: Camera3D) -> void:
 	lens.emission = Color(1.0, 0.9, 0.7)
 	lens.emission_energy_multiplier = 1.5
 	_part(_lantern, Vector3(0.05, 0.05, 0.01), LENS, lens)
+	for it in ITEM_COLORS:
+		_item_mats[it] = _mat(ITEM_COLORS[it], LANTERN_ORDER, 0.6, 0.3 if it == &"relogio" else 0.0)
+	_held = _part(_left, Vector3(0.07, 0.025, 0.07), Vector3(0.0, 0.07, -0.1), _item_mats[&"relogio"])
+	_held.name = "HeldItem"
+	_held.visible = false
 
 ## A fist and a sleeve running back out of view; side -1 left, +1 right.
 func _hand(parent: Node3D, skin: Material, coat: Material, side: float) -> void:
@@ -159,6 +173,18 @@ func has_stick() -> bool:
 func lantern_shown() -> bool:
 	return _lantern.visible and _lift > 0.5
 
+## What the left hand shows now (&"" for nothing).
+func held_item() -> StringName:
+	return _held_item
+
+func _show_held(item: StringName) -> void:
+	if item == _held_item:
+		return
+	_held_item = item
+	_held.visible = _item_mats.has(item)
+	if _held.visible:
+		_held.material_override = _item_mats[item]
+
 func _process(delta: float) -> void:
 	var eye: Camera3D = player.camera
 	if eye == null:
@@ -170,7 +196,8 @@ func _process(delta: float) -> void:
 	_lower = move_toward(_lower, want_lower, delta / LOWER_TIME)
 	_rig.visible = _lower < 1.0
 	var lamp_on: bool = player.flashlight.visible
-	_lift = move_toward(_lift, 1.0 if lamp_on else 0.0, delta / LOWER_TIME)
+	_show_held(player.hands_model.left if player.get("hands_model") != null else &"")
+	_lift = move_toward(_lift, 1.0 if lamp_on or _held_item != &"" else 0.0, delta / LOWER_TIME)
 	_lantern.visible = _lift > 0.0
 
 	# Walking bob, a slow breath, the lag of a turning head, and fear.
