@@ -152,6 +152,16 @@ relacionado:
 - **Fix recomendado:** `in_bedroom(pos)` → `atlas.room_at(pos) == &"quarto"`, apagando `BEDROOM_X/BEDROOM_Z`. Custo: minutos.
 - **Estado:** corrigido. Unidade 1778/0, selftest 304/0. (e)
 
+### [A-021] O save da campanha podia trocar um save bom por um ruim, ou perder um arquivo ruim {#a-021}
+
+- [2026-11-08] (e) ← `Janghyang/scripts/campaign_model.gd` (`save`, `from_dict`, `load_or_fresh`) e `Janghyang/scripts/catalog.gd` (`from_dict`). Achado da revisão do OpenCode sobre a T10.
+- **Severidade:** médio — o save só passa a ser usado na Tarefa 12, então nenhum jogador foi afetado; mas cada caso perde progresso ou derruba o jogo ao carregar.
+- **Onde:** `save()` não conferia o erro da escrita antes de renomear o `.tmp`; `from_dict` validava só os contêineres (uma peça `{}` dava erro de script) e aceitava `night` acima de 5; um segundo save ruim sobrescrevia o primeiro `*.bad.json`; `Catalog.from_dict` com `entries` vazio deixava `next_number()` estourar; e o teste guardava `visited` no formato cru do atlas, enquanto `Atlas.from_dict` lê `{"visited": [...]}`.
+- **Reprodução:** unitária. `from_dict({... "pieces": [{}]})` levantava erro; `from_dict({... "night": 6})` devolvia `true`; dois `load_or_fresh` com arquivos ruins deixavam só o segundo; `Catalog.new().from_dict({})` e depois `next_number()` falhava.
+- **Por que importa:** o save é a única coisa que passa entre noites (§5.1); "nunca apagado" é promessa do plano.
+- **Fix recomendado:** checar `f.get_error()` e apagar o `.tmp` numa falha; validar cada elemento e o teto da noite; `*.bad-2.json` e seguintes; catálogo vazio volta à entrada da maquete; `visited` guarda `Atlas.to_dict()`. Custo: minutos.
+- **Estado:** corrigido. Unidade 2016/0, selftest 304/0. (e)
+
 ### [A-019] A decisão de 2026-10-28 dava o 03:33 aos 1200 s e com 5 itens; o código e o spec dizem outra coisa {#a-019}
 
 - [2026-11-07] (e) ← `context/decisoes.md:70` contra `Janghyang/scripts/visit_state.gd:9-10` (`MAX_PRE_HORA = 3600.0`, `HARD_LIMIT = 3780.0`) e spec de expansão §5 ("03:33 só começa na fase V", limite de 60 min).

@@ -62,3 +62,7 @@ func test_a_night_passes_its_phases(t) -> void:
 
 func test_the_default_phases_are_todays(t) -> void:
 	t.eq(Quest.new().phases, Quest.PHASES, "sem argumento, as fases de hoje")
+
+func test_no_phases_falls_back_to_todays(t) -> void:
+	var q = Quest.new([])
+	t.eq(q.phase_id(), Quest.PHASES[0].id, "sem fases, as de hoje")

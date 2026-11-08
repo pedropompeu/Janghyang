@@ -1,12 +1,14 @@
 extends RefCounted
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Catalog = preload("res://scripts/catalog.gd")
+const Atlas = preload("res://scripts/atlas.gd")
 
 const TEST_PATH := "user://test_campanha.json"
 const BAD_PATH := "user://test_campanha.bad.json"
+const BAD_PATH_2 := "user://test_campanha.bad-2.json"
 
 func _clean() -> void:
-	for p in [TEST_PATH, BAD_PATH, TEST_PATH + ".tmp"]:
+	for p in [TEST_PATH, BAD_PATH, BAD_PATH_2, TEST_PATH + ".tmp"]:
 		if FileAccess.file_exists(p):
 			DirAccess.remove_absolute(p)
 
@@ -39,11 +41,13 @@ func test_carry_takes_the_latest_plan_and_catalog(t) -> void:
 	var c = Campaign.new()
 	var cat = Catalog.new()
 	cat.catalog(&"bola")
-	c.carry({"plan": {"notes": [1]}, "catalog": cat.to_dict(), "visited": {&"brincar": true}, "chapters": {1: {"chosen": 2}}})
+	var atlas := Atlas.new()
+	atlas.visited[&"brincar"] = true
+	c.carry({"plan": {"notes": [1]}, "catalog": cat.to_dict(), "visited": atlas.to_dict(), "chapters": {1: {"chosen": 2}}})
 	c.carry({"pieces": [&"coroa"]})
 	t.eq(c.plan, {"notes": [1]}, "a planta fica")
 	t.eq(c.catalog, cat.to_dict(), "o catálogo fica")
-	t.eq(c.visited, {&"brincar": true}, "os cômodos vistos ficam")
+	t.eq(c.visited, atlas.to_dict(), "os cômodos vistos ficam")
 	t.eq(c.chapters, {1: {"chosen": 2}}, "os capítulos ficam")
 
 func test_save_round_trip(t) -> void:
@@ -52,9 +56,12 @@ func test_save_round_trip(t) -> void:
 	var cat = Catalog.new()
 	cat.catalog(&"relogio_entrada")
 	cat.set_flag(&"f1_folded", true)
-	c.carry({"pieces": [&"coroa"], "items": [&"espelho"], "shortcuts": ["Oco1"], "plan": {"chalk": [Vector3(1, 2, 3)]}, "catalog": cat.to_dict(), "visited": {&"entrada": true}, "chapters": {1: {"chosen": 0, "crossed": [1]}}})
+	var atlas := Atlas.new()
+	atlas.visited[&"entrada"] = true
+	c.carry({"pieces": [&"coroa"], "items": [&"espelho"], "shortcuts": ["Oco1"], "plan": {"chalk": [Vector3(1, 2, 3)]}, "catalog": cat.to_dict(), "visited": atlas.to_dict(), "chapters": {1: {"chosen": 0, "crossed": [1]}}})
 	c.night = 2
 	t.eq(c.save(TEST_PATH), OK, "salva")
+	t.ok(not FileAccess.file_exists(TEST_PATH + ".tmp"), "o arquivo temporário não sobra")
 	var d = Campaign.new()
 	t.eq(d.load_or_fresh(TEST_PATH), true, "carrega")
 	t.eq(d.to_dict(), c.to_dict(), "o mesmo estado volta")
@@ -63,6 +70,9 @@ func test_save_round_trip(t) -> void:
 	var back = Catalog.new()
 	back.from_dict(d.catalog)
 	t.ok(back.has(&"relogio_entrada") and back.flags.get(&"f1_folded", false), "o catálogo volta inteiro")
+	var seen := Atlas.new()
+	seen.from_dict(d.visited)
+	t.eq(seen.visited, {&"entrada": true}, "os cômodos vistos voltam ao atlas")
 	_clean()
 
 func test_missing_save_starts_fresh(t) -> void:
@@ -79,7 +89,7 @@ func test_corrupt_save_starts_fresh_and_keeps_the_file(t) -> void:
 	var c = Campaign.new()
 	t.eq(c.load_or_fresh(TEST_PATH), false, "corrompido não carrega")
 	t.eq(c.night, 1, "volta à noite 1")
-	t.ok(FileAccess.file_exists(BAD_PATH), "o arquivo ruim é guardado")
+	t.eq(FileAccess.get_file_as_string(BAD_PATH), "{nao é json", "o arquivo ruim é guardado como estava")
 	t.ok(not FileAccess.file_exists(TEST_PATH), "e sai do lugar do save")
 	_clean()
 
@@ -106,4 +116,31 @@ func test_wrong_shape_starts_fresh(t) -> void:
 	_write(JSON.stringify({"version": 1, "state": JSON.from_native({"version": 1, "night": "dois"})}))
 	t.eq(c.load_or_fresh(TEST_PATH), false, "um save com campos errados não carrega")
 	t.eq(c.night, 1, "volta à noite 1")
+	t.ok(FileAccess.file_exists(BAD_PATH) and not FileAccess.file_exists(TEST_PATH), "o save de forma errada também sai do lugar")
+	_clean()
+
+func _state(over: Dictionary) -> Dictionary:
+	return {"version": 1, "night": 1, "pieces": [], "items": [], "shortcuts": [], "plan": {}, "catalog": {}, "visited": {}, "chapters": {}}.merged(over, true)
+
+func test_bad_elements_do_not_load(t) -> void:
+	var c = Campaign.new()
+	t.eq(c.from_dict(_state({"pieces": [{}]})), false, "uma peça que não é nome não carrega")
+	t.eq(c.from_dict(_state({"items": [3]})), false, "um item que não é nome não carrega")
+	t.eq(c.from_dict(_state({"shortcuts": [[1]]})), false, "um atalho que não é texto não carrega")
+	t.eq(c.from_dict(_state({"pieces": ["coroa"]})), true, "texto vira nome")
+
+func test_a_night_past_the_campaign_does_not_load(t) -> void:
+	var c = Campaign.new()
+	t.eq(c.from_dict(_state({"night": 6})), false, "não há noite 6")
+	t.eq(c.from_dict(_state({"night": 5})), true, "a noite 5 carrega")
+
+func test_a_second_bad_save_keeps_the_first(t) -> void:
+	_clean()
+	var c = Campaign.new()
+	_write("primeiro")
+	c.load_or_fresh(TEST_PATH)
+	_write("segundo")
+	c.load_or_fresh(TEST_PATH)
+	t.eq(FileAccess.get_file_as_string(BAD_PATH), "primeiro", "o primeiro arquivo ruim fica")
+	t.eq(FileAccess.get_file_as_string(BAD_PATH_2), "segundo", "o segundo vai ao lado")
 	_clean()

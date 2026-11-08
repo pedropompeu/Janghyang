@@ -45,8 +45,9 @@ var phases: Array
 var phase := 0
 var done: Dictionary = {}
 
+## A night with no phases (there should be none) plays today's.
 func _init(night_phases: Array = PHASES) -> void:
-	phases = night_phases
+	phases = night_phases if not night_phases.is_empty() else PHASES
 
 ## Strikes a lot. Returns &"phase" when a new phase opens, &"task" when only
 ## the lot is new, &"" when it was already struck.

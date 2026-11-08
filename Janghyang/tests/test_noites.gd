@@ -35,7 +35,9 @@ func test_get_night_outside_the_range_is_empty(t) -> void:
 	t.eq(Noites.get_night(6), {}, "não há noite 6")
 
 func test_last_is_five_outside_the_demo(t) -> void:
-	t.eq(Noites.last(), 5, "fora da build da demo, as cinco noites")
+	t.eq(Noites.last(false), 5, "fora da build da demo, as cinco noites")
+	t.eq(Noites.last(true), 2, "a demo para depois da noite 2")
+	t.eq(Noites.last(), Noites.last(OS.has_feature("demo")), "sem argumento, vale a build")
 
 func test_night_tasks_and_goals_exist(t) -> void:
 	var atlas := Atlas.new()
@@ -81,7 +83,8 @@ func test_every_piece_is_won_on_exactly_one_night(t) -> void:
 		won.append_array(night.pieces)
 	t.eq(won, Quest.PIECES, "as quatro peças, uma por noite, em ordem")
 	t.eq(Noites.get_night(5).goals.map(func(g): return g.task), [&"voltar"], "a noite 5 tem o gatilho de hoje")
-	t.eq(Noites.get_night(5).phases, [Quest.PHASES[-1]], "a noite 5 é a fase V de hoje")
+	t.eq(Noites.get_night(5).phases.size(), 1, "a noite 5 tem uma fase só")
+	t.eq(Noites.get_night(5).phases[0].tasks, [&"voltar", &"hora", &"corda", &"pagina", &"sair"], "a noite 5 é a fase V de hoje")
 
 ## Outside the final night, the last phase is getting home and winding the
 ## clock; it is what the short 03:33 waits for.
@@ -89,3 +92,14 @@ func test_short_nights_end_at_home(t) -> void:
 	for night in Noites.NOITES:
 		if not night.final:
 			t.eq(night.phases[-1].tasks, [&"voltar_terreo", &"dar_corda"], "noite %d termina em casa" % night.n)
+
+func test_goals_follow_the_chapters(t) -> void:
+	for night in Noites.NOITES:
+		t.eq(night.goals.map(func(g): return g.task), night.chapters.map(func(c): return c.reward), "noite %d: uma meta por capítulo, na ordem" % night.n)
+
+func test_get_night_gives_a_copy(t) -> void:
+	var n1 := Noites.get_night(1)
+	n1.n = 99
+	n1.phases[-1].tasks.append(&"x")
+	t.eq(Noites.get_night(1).n, 1, "mexer na noite devolvida não muda a tabela")
+	t.eq(Noites.get_night(2).phases[-1].tasks, [&"voltar_terreo", &"dar_corda"], "nem a fase final das outras noites")

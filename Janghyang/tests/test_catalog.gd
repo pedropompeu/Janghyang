@@ -73,3 +73,12 @@ func test_from_dict_takes_json_types(t) -> void:
 	d.from_dict({"entries": [{"number": 214.0, "text": "x", "author": "elias", "item": "maquete"}, {"number": 215.0, "text": "y", "author": "elias", "item": "bola"}], "pages": ["p1"], "flags": {"f1_folded": true}})
 	t.eq(d.next_number(), 216, "o número volta inteiro")
 	t.ok(d.has(&"bola") and d.pages.has(&"p1") and d.flags.get(&"f1_folded", false), "os ids voltam")
+
+func test_from_dict_without_entries_keeps_the_opening(t) -> void:
+	var cat = Catalog.new()
+	cat.from_dict({})
+	t.eq(cat.entries.size(), 1, "o item da maquete fica")
+	t.eq(cat.entries[0].item, &"maquete", "é o da abertura")
+	t.ok(cat.next_number() > 0, "o próximo número existe")
+	cat.from_dict({"entries": [{"text": "sem número"}, {"number": 300.0, "text": "certo", "author": "elias", "item": "bola"}]})
+	t.eq(cat.entries.map(func(e): return e.number), [300], "uma entrada incompleta é deixada de fora")

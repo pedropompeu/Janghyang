@@ -72,11 +72,15 @@ func to_dict() -> Dictionary:
 	return {"entries": entries.duplicate(true), "pages": pages.duplicate(), "flags": flags.duplicate()}
 
 ## Replaces this catalogue with `d`. Takes what JSON gives back too (floats
-## for numbers, strings for ids).
+## for numbers, strings for ids). An entry without a number or a text is left
+## out; with no entries at all, the opening one stays, so numbering goes on.
 func from_dict(d: Dictionary) -> void:
 	entries.clear()
 	for e in d.get("entries", []):
-		entries.append({"number": int(e.number), "text": String(e.text), "author": StringName(e.author), "item": StringName(e.item)})
+		if e is Dictionary and (e.get("number") is int or e.get("number") is float) and e.get("text") is String:
+			entries.append({"number": int(e.number), "text": e.text, "author": StringName(str(e.get("author", ""))), "item": StringName(str(e.get("item", "")))})
+	if entries.is_empty():
+		_init()
 	pages.clear()
 	for p in d.get("pages", []):
 		pages.append(StringName(p))

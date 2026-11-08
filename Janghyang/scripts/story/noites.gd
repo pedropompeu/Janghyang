@@ -122,12 +122,15 @@ const NOITES := [
 	},
 ]
 
+## Night `n` as a copy (the table and the home stretch it shares stay
+## untouched), or {} outside the campaign.
 static func get_night(n: int) -> Dictionary:
 	for night in NOITES:
 		if night.n == n:
-			return night
+			return night.duplicate(true)
 	return {}
 
-## The last night this build plays: the demo stops at DEMO_LAST.
-static func last() -> int:
-	return DEMO_LAST if OS.has_feature("demo") else NOITES.size()
+## The last night this build plays: the demo (feature tag "demo", set by its
+## export preset) stops at DEMO_LAST.
+static func last(demo := OS.has_feature("demo")) -> int:
+	return DEMO_LAST if demo else NOITES.size()

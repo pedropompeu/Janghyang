@@ -8,7 +8,9 @@ extends RefCounted
 ## The file is JSON: {"version", "state"}, with the state written through
 ## JSON.from_native so ids come back as StringName and numbers as int. A file
 ## that does not read back is moved aside to *.bad.json, never deleted, and
-## the campaign starts on night 1.
+## the campaign starts on night 1. `visited` holds Atlas.to_dict().
+
+const Noites = preload("res://scripts/story/noites.gd")
 
 const PATH := "user://campanha.json"
 const VERSION := 1
@@ -54,11 +56,14 @@ func to_dict() -> Dictionary:
 func from_dict(d: Dictionary) -> bool:
 	if d.get("version") is not int or d.version != VERSION:
 		return false
-	if d.get("night") is not int or d.night < 1:
+	if d.get("night") is not int or d.night < 1 or d.night > Noites.NOITES.size():
 		return false
 	for key in ["pieces", "items", "shortcuts"]:
 		if d.get(key) is not Array:
 			return false
+		for x in d[key]:
+			if x is not String and x is not StringName:
+				return false
 	for key in ["plan", "catalog", "visited", "chapters"]:
 		if d.get(key) is not Dictionary:
 			return false
@@ -80,7 +85,12 @@ func save(path := PATH) -> Error:
 	if f == null:
 		return FileAccess.get_open_error()
 	f.store_string(JSON.stringify({"version": VERSION, "state": JSON.from_native(to_dict())}))
+	var err := f.get_error()
 	f.close()
+	if err != OK:
+		# A short write must never replace the save that is there.
+		DirAccess.remove_absolute(tmp)
+		return err
 	return DirAccess.rename_absolute(tmp, path)
 
 ## Loads `path`. Returns false and starts on night 1 when there is no save;
@@ -93,8 +103,19 @@ func load_or_fresh(path := PATH) -> bool:
 	if _read(FileAccess.get_file_as_string(path)):
 		return true
 	_fresh()
-	DirAccess.rename_absolute(path, path.get_basename() + ".bad.json")
+	DirAccess.rename_absolute(path, _bad_path(path))
 	return false
+
+## Where a save that did not read back goes: *.bad.json, or *.bad-2.json and
+## on when that is taken, so an earlier bad file is never overwritten.
+static func _bad_path(path: String) -> String:
+	var base := path.get_basename() + ".bad"
+	var out := base + ".json"
+	var n := 2
+	while FileAccess.file_exists(out):
+		out = "%s-%d.json" % [base, n]
+		n += 1
+	return out
 
 ## Checks the envelope before decoding, so a bad file never reaches the
 ## engine's decoder (which would only log errors).
