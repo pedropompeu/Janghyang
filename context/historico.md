@@ -302,4 +302,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 7. [2026-11-08 ~superseded 2026-11-08] (i) ~~Endurecer os testes do registro (revisão do OpenCode no T3) e seguir para a Tarefa 6, a gaveta.~~ → feito: `2ddc8c7` (sobreposições fixadas, chaves obrigatórias do `DEF`, mapas de lotes) e Tarefa 6 com a gaveta no registro; unidade 1250/0, selftest 282/0.
 8. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 7: migrar o tampo (relojoaria, oficina dos fundos e bancada).~~ → feita: `tampo.gd` com a oficina gigante e o `leste.gd`; a redoma e o vidro rachado ficam para `casa.gd` (maquete item_214); unidade 1285/0, selftest 282/0.
 9. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 8: migrar a casa e fechar a migração.~~ → feita: `casa.gd` com a casa, os móveis, o relógio, as peças da verdade e a redoma; `atlas.gd` e `main.gd` leem só o registro; unidade 1368/0, selftest 282/0.
-10. [2026-11-08] (i) Tarefa 9: maquetes e rota genérica no selftest.
+10. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 9: maquetes e rota genérica no selftest.~~ → feita: `scripts/maquetes/registry.gd` e `_routes_by_links()`; unidade 1397/0, selftest 304/0.
+11. [2026-11-08] (i) Revisão do OpenCode sobre a migração (T4–T8), depois a Tarefa 10: as noites como dados e a campanha com save.

@@ -4,6 +4,8 @@ extends Node
 ## It checks door/fold states and queries a player-sized capsule along the
 ## intended loop. It is diagnostic scaffolding, not part of the game.
 
+const Registry = preload("res://scripts/areas/registry.gd")
+
 var main: Node3D
 var failures := 0
 var checks := 0
@@ -353,6 +355,8 @@ func _run() -> void:
 	_check_segment(Vector3(25.2, 0.85, -1.0), Vector3(25.2, 0.85, -4.0), "the door opening takes Elias into the Varela shop")
 	_record(main.atlas.room_at(Vector3(25.2, 0.85, -4.0)) == &"loja_varela", "the far end of the route is the Varela shop", str(main.atlas.room_at(Vector3(25.2, 0.85, -4.0))))
 
+	await _routes_by_links()
+
 	print("SELFTEST: story")
 	var quest = main.get("quest")
 	var gastos = main.get("gastos")
@@ -602,6 +606,43 @@ func _run() -> void:
 	_record(_errors.count == 0, "no script errors during the selftest", "%d errors" % _errors.count)
 	print("SELFTEST RESULT: %d checks, %d failures" % [checks, failures])
 	get_tree().quit(0 if failures == 0 else 1)
+
+## Every link of the area registry, walked crouched (the smallest capsule
+## Elias has, and the one the crawlspace needs) from the safe point of its area
+## through its path to where it arrives. The gate is opened first, the way the
+## routes above open it: three knocks for a breakable, interaction for a door.
+## Points sit 0.2 above their floor. The crouched capsule (1.0 high) rides
+## 0.05 over the floor, as the standing checks above do: Elias steps over a
+## lip of a few centimetres (the iron plate of the tower floor is 3 cm up).
+func _routes_by_links() -> void:
+	print("SELFTEST: routes by links")
+	var lift := Vector3(0.0, 0.35, 0.0)
+	for l in Registry.links():
+		if l.gate != &"":
+			await _open_gate(l.gate)
+		var pts: Array = [Registry.def(l.from).safe] + l.path + [l.at]
+		for i in pts.size() - 1:
+			_check_segment_shape(pts[i] + lift, pts[i + 1] + lift, crouch_shape, "rota %s→%s #%d" % [l.from, l.to, i])
+
+func _open_gate(gate: StringName) -> void:
+	var node := main.find_child(String(gate), true, false)
+	if node == null:
+		_record(false, "gate %s exists" % gate, "")
+		return
+	if node.is_in_group(&"Breakable"):
+		for i in 3:
+			if not node.broken:
+				node.hit()
+		await _frames(2)
+		_record(node.broken, "gate %s is broken open" % gate, "")
+	elif node.has_method("is_at_b"):
+		if not node.is_at_b():
+			node.interact()
+			await get_tree().create_timer(1.3).timeout
+			await get_tree().physics_frame
+		_record(node.is_at_b(), "gate %s is open" % gate, "")
+	else:
+		_record(false, "gate %s can be opened" % gate, str(node))
 
 func _loop_segments(suffix: String) -> void:
 	for seg in LOOP:
