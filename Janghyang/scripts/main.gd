@@ -27,7 +27,6 @@ const DreadModel = preload("res://scripts/dread_model.gd")
 const Dread = preload("res://scripts/dread.gd")
 const Breakable = preload("res://scripts/breakable.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
-const AreaPassagem = preload("res://scripts/areas/passagem.gd")
 const AreaSotao = preload("res://scripts/areas/sotao.gd")
 const AreaGaveta = preload("res://scripts/areas/gaveta.gd")
 const AreaLeste = preload("res://scripts/areas/leste.gd")
@@ -54,15 +53,14 @@ const CRACKED_Z := Vector2(9.1, 12.5)
 ## floor begins. The crawlspace has no room to stand, so its point is outside.
 const _LEGACY_SAFE := {
 	&"casa": SPAWN,
-	&"passagem": Vector3(6.7, 0.2, 1.2),
 	&"sotao": Vector3(9.8, 3.14, 0.55),
 	&"mecanismo": Vector3(9.8, 3.14, 0.55),
 	&"gaveta": Vector3(14.9, -3.0, 1.9),
 	&"tampo": AreaLeste.SAFE,
 }
 ## Lots struck by setting foot somewhere, breaking something, or cataloguing.
-const _LEGACY_ROOM_TASKS := {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}
-const _LEGACY_BREAK_TASKS := {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}
+const _LEGACY_ROOM_TASKS := {&"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}
+const _LEGACY_BREAK_TASKS := {"Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}
 const _LEGACY_CATALOG_TASKS := {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}
 ## The maps main reads: the legacy ones above with every registered area's own
 ## entries over them (an area's word wins once it has moved to the registry).
@@ -172,7 +170,8 @@ func _ready() -> void:
 	_build_furniture()
 	_build_tampo()
 	_build_oficina()
-	AreaPassagem.build(self)
+	for area in Registry.AREAS:
+		area.build(self)
 	AreaSotao.build(self)
 	AreaGaveta.build(self)
 	AreaLeste.build(self)

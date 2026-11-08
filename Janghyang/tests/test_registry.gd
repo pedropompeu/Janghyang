@@ -22,7 +22,10 @@ func test_defs_are_valid(t) -> void:
 		ids[d.id] = true
 		t.ok(d.rooms.size() > 0, "%s has rooms" % d.id)
 		var own: Array = d.rooms.map(func(r): return r.id)
-		t.ok(own.has(atlas.room_at(d.safe)), "safe point of %s lies in one of its rooms" % d.id)
+		if d.safe_room == &"":
+			t.ok(own.has(atlas.room_at(d.safe)), "safe point of %s lies in one of its rooms" % d.id)
+		else:
+			t.eq(atlas.room_at(d.safe), d.safe_room, "safe point of %s lies where its DEF says" % d.id)
 		for r in d.rooms:
 			t.eq(r.level, d.id, "room %s carries its area as level" % r.id)
 		for l in d.links:
@@ -63,3 +66,27 @@ func test_merged_maps_keep_todays_entries(t) -> void:
 	t.ok(Registry.safe_points() is Dictionary, "safe points are a map")
 	for k in ["tasks", "breaks", "catalog"]:
 		t.ok(Registry.merged(k) is Dictionary, "%s is a map" % k)
+
+func test_passagem_def_matches_today(t) -> void:
+	var d := Registry.def(&"passagem")
+	t.ok(not d.is_empty(), "the passage is registered")
+	if d.is_empty():
+		return
+	t.near(d.safe.distance_to(Vector3(6.7, 0.2, 1.2)), 0.0, 0.01, "safe point of the passage")
+	t.eq(d.safe_room, &"brincar", "too low to stand in: Elias wakes in the playroom")
+	t.eq(d.rooms.size(), 1, "one room")
+	t.eq(d.rooms[0].id, &"passagem", "the crawlspace")
+	t.eq(d.rooms[0].rect, Rect2(0.3, -1.3, 10.1, 1.3), "rect of the crawlspace")
+	t.eq(d.rooms[0].y, Vector2(-0.4, 2.9), "height band of the crawlspace")
+	t.eq(d.tasks, {&"passagem": &"achar_passagem"}, "setting foot there finds it")
+	t.eq(d.breaks, {"HollowPanel": &"achar_passagem"}, "breaking the panel finds it too")
+	var to := {}
+	for l in d.links:
+		to[l.to] = l
+	t.eq(to.keys(), [&"casa", &"sotao"], "links to the house and the attic")
+	t.eq(to.get(&"casa", {}).get("gate"), &"HollowPanel", "the hollow panel gates the house")
+
+func test_atlas_keeps_the_crawlspace_before_the_attic(t) -> void:
+	# The passage and the attic share the band y 2.8–2.9 over x 0.3–10.4:
+	# the passage came first, and still does after the move.
+	t.eq(Atlas.new().room_at(Vector3(5.0, 2.85, -0.6)), &"passagem", "the overlap goes to the passage")

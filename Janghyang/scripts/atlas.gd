@@ -5,8 +5,9 @@ extends RefCounted
 ## first room that contains a point wins (the tower sits inside the attic).
 ##
 ## The rooms come from the area registry; the LEGACY_ lists hold the areas not
-## yet moved there. rooms() puts a registered area's rooms where its legacy
-## rooms stood, so the order never changes while the move is under way.
+## yet moved there. ROOM_ORDER and LEVEL_ORDER keep today's order while the
+## move is under way: a level's rooms come from the registry once it is there,
+## from LEGACY_ROOMS until then.
 
 const Registry = preload("res://scripts/areas/registry.gd")
 
@@ -14,9 +15,13 @@ const ATTIC_Y := 2.94
 const ATTIC_TOP := 5.24
 const DRAWER_Y := -3.2
 
+## Levels in the order their rooms are tried (the tower before the attic) and
+## in the order the plan shows them.
+const ROOM_ORDER := [&"casa", &"passagem", &"mecanismo", &"sotao", &"gaveta", &"tampo"]
+const LEVEL_ORDER := [&"casa", &"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]
+
 const LEGACY_LEVELS := {
 	&"casa": "A casa",
-	&"passagem": "A passagem",
 	&"sotao": "O sótão",
 	&"mecanismo": "O mecanismo",
 	&"gaveta": "A gaveta",
@@ -32,7 +37,6 @@ const LEGACY_ROOMS := [
 	{"id": &"corredor_sul", "name": "corredor da frente", "level": &"casa", "rect": Rect2(3.5, 7.7, 7.0, 1.4), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_oeste", "name": "beira oeste", "level": &"casa", "rect": Rect2(-3.2, 0.0, 3.2, 9.1), "y": Vector2(-0.4, 2.8)},
 	{"id": &"beira_sul", "name": "beira sul", "level": &"casa", "rect": Rect2(0.0, 9.1, 15.4, 3.4), "y": Vector2(-0.4, 2.8)},
-	{"id": &"passagem", "name": "passagem", "level": &"passagem", "rect": Rect2(0.3, -1.3, 10.1, 1.3), "y": Vector2(-0.4, 2.9)},
 	{"id": &"mecanismo", "name": "torre", "level": &"mecanismo", "rect": Rect2(5.2, 1.0, 5.4, 5.5), "y": Vector2(2.8, 13.0)},
 	{"id": &"sotao", "name": "sótão", "level": &"sotao", "rect": Rect2(0.3, -1.3, 14.8, 10.1), "y": Vector2(2.8, 5.3)},
 	{"id": &"gaveta", "name": "gaveta", "level": &"gaveta", "rect": Rect2(-1.0, -1.0, 18.0, 14.0), "y": Vector2(-3.6, -0.5)},
@@ -52,16 +56,13 @@ static var _levels: Dictionary = {}
 ## Every room of the bench, in order: legacy ones and registered areas merged.
 static func rooms() -> Array:
 	if _rooms.is_empty():
-		var done := {}
-		for r in LEGACY_ROOMS:
-			if Registry.has_area(r.level):
-				if not done.has(r.level):
-					done[r.level] = true
-					_rooms.append_array(Registry.def(r.level).rooms)
+		for lvl in ROOM_ORDER:
+			if Registry.has_area(lvl):
+				_rooms.append_array(Registry.def(lvl).rooms)
 			else:
-				_rooms.append(r)
+				_rooms.append_array(LEGACY_ROOMS.filter(func(r): return r.level == lvl))
 		for d in Registry.defs():
-			if not done.has(d.id):
+			if not ROOM_ORDER.has(d.id):
 				_rooms.append_array(d.rooms)
 	return _rooms
 
@@ -69,8 +70,8 @@ static func rooms() -> Array:
 static func levels() -> Dictionary:
 	if _levels.is_empty():
 		var reg := Registry.levels()
-		for lvl in LEGACY_LEVELS:
-			_levels[lvl] = reg.get(lvl, LEGACY_LEVELS[lvl])
+		for lvl in LEVEL_ORDER:
+			_levels[lvl] = reg.get(lvl, LEGACY_LEVELS.get(lvl, ""))
 		for lvl in reg:
 			if not _levels.has(lvl):
 				_levels[lvl] = reg[lvl]

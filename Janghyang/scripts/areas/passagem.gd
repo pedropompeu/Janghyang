@@ -7,6 +7,25 @@ extends RefCounted
 const ATTIC_Y := 2.94
 const CRAWL_TOP := 1.3
 
+## Links run from the safe point through `path` to `at`. Both cross the hollow
+## panel, so both are gated by it.
+const DEF := {
+	"id": &"passagem",
+	"maquete": &"item_214",
+	"name": "A passagem",
+	"rooms": [
+		{"id": &"passagem", "name": "passagem", "rect": Rect2(0.3, -1.3, 10.1, 1.3), "y": Vector2(-0.4, 2.9)},
+	],
+	"safe": Vector3(6.7, 0.2, 1.2),
+	"safe_room": &"brincar",
+	"links": [
+		{"to": &"casa", "at": Vector3(6.7, 0.2, 0.0), "gate": &"HollowPanel"},
+		{"to": &"sotao", "at": Vector3(10.12, 0.2, -0.65), "path": [Vector3(6.7, 0.2, -0.6), Vector3(8.4, 0.2, -0.6)], "gate": &"HollowPanel"},
+	],
+	"tasks": {&"passagem": &"achar_passagem"},
+	"breaks": {"HollowPanel": &"achar_passagem"},
+}
+
 static func build(main: Node3D) -> void:
 	var root := Node3D.new()
 	root.name = "Passagem"

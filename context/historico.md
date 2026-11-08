@@ -297,4 +297,5 @@ cd /home/usuario/Dev/Jogo && python lint.py
 2. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 1 do plano: ledger e linha de base.~~ → feita: unidade 1093/0, selftest 282/0, lint ok, templates 4.7.2.stable presentes.
 3. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 2: testes herdados U30 e U31.~~ → os testes já existiam desde 2026-11-07 (`e430d7b`, `af3a440`); a prova por mutante pegou os dois (24 caminhos presos; 4 falhas na quebrável).
 4. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 3: esqueleto do registro de áreas e contrato dos helpers.~~ → feita: `scripts/areas/registry.gd`, atlas e mapas de `main.gd` mesclados; unidade 1139/0, selftest 282/0; mutantes pegos (aridade de `_box`; torre trocada com o sótão).
-5. [2026-11-08] (i) Tarefa 4: migrar a passagem para o registro.
+5. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 4: migrar a passagem para o registro.~~ → feita: `passagem.gd` com `DEF` (safe fora dela, em `brincar`, via `safe_room`); `main._ready` constrói `Registry.AREAS` em laço; unidade 1161/0, selftest 282/0.
+6. [2026-11-08] (i) Tarefa 5: migrar o sótão e a torre.

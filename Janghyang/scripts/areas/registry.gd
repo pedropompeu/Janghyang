@@ -1,6 +1,6 @@
 extends RefCounted
 ## Every area of the bench, as data. Each area script carries a `const DEF`
-## (id, maquete, name, rooms, safe, links, tasks, breaks, catalog, anchors,
+## (id, maquete, name, rooms, safe, safe_room, links, tasks, breaks, catalog, anchors,
 ## hideouts, pickups, chalk, mechanisms) and a `static func build(main)`; main
 ## builds them in this order and reads its maps from here. The order matters:
 ## the first room that holds a point wins, so the tower stays before the attic.
@@ -8,7 +8,9 @@ extends RefCounted
 ## Areas are listed by preload, never by scanning a folder: an exported build
 ## packs only what is preloaded.
 
-const AREAS := []
+const AREAS := [
+	preload("res://scripts/areas/passagem.gd"),
+]
 
 ## The helpers of main.gd an area may call, with their argument count
 ## (defaults included). A test holds main.gd to this contract.
@@ -20,10 +22,13 @@ const HELPERS := {
 }
 
 const _EMPTY := {
-	"maquete": &"", "name": "", "rooms": [], "safe": Vector3.ZERO, "links": [],
+	"maquete": &"", "name": "", "rooms": [], "safe": Vector3.ZERO, "safe_room": &"", "links": [],
 	"tasks": {}, "breaks": {}, "catalog": {}, "anchors": [], "hideouts": [],
 	"pickups": [], "chalk": [], "mechanisms": [],
 }
+
+## safe_room is empty when the safe point lies in one of the area's own rooms;
+## otherwise it names the room it lies in (the crawlspace is too low to stand).
 
 static var _defs: Array[Dictionary] = []
 
