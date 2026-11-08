@@ -186,3 +186,9 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `main.gd`: `chalk_mark(at, normal)` (nó `EliasChalk`, grupo `EliasChalk`, visível de olhos abertos), `_build_chalk_trails()` (nó `ChalkTrails`, setas no grupo `Chalk`), `chalk_target(id)` (pickup ou `Catalog_<id>`).
   - DEFs: chave `chalk` (`{id, points, leads_to}`): `giz_figuras`, `giz_quarto` (casa), `giz_passagem`.
   - Contagens: unit 2402/0, selftest 421/0 (checks `giz:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/listen_model.gd`, `scripts/player.gd`, `scripts/gastos.gd`, `scripts/main.gd`, `scripts/sfx_bank.gd` Tarefa 22, escutar pela parede:
+  - `listen_model.gd`: `EAR_RANGE` 12, `SCOPE_RANGE` 25, `FLOOR_BAND` 2,5, `PERIOD` 1,5, `DUCK_DB` -18, `WALL_REACH` 0,9; `audible(gasto, ear, scope)` (ouvido: mesmo andar; estetoscópio: atravessa andares) e `beat(dt)`.
+  - `player.gd`: L segurado, sinal `listen_changed(on)`, `set_listening(on)` (só liga com parede a até 0,9 m à frente, `facing_wall`), Elias parado enquanto escuta; o raio de parede (`_wall_hit`) passou a ser o mesmo do giz.
+  - `gastos.gd`: `positions()` (as cabeças dos Gastos de pé).
+  - `main.gd`: `listen`, `_on_listen` (bus `Casa` cai 18 dB e volta), `_tick_listen(dt)` (estalo `porcelain_muffled` no bus `Mundo` onde cada Gasto audível está; sinal `listened(at)`).
+  - Contagens: unit 2419/0, selftest 429/0 (checks `escuta:`).

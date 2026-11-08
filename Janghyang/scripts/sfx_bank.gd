@@ -4,7 +4,7 @@ extends Node
 ## Two layers: "Mundo" (rain, breath; never muted) and "Casa" (the house).
 
 const KINDS := [&"tick", &"click", &"knock", &"step", &"pencil", &"fold", &"rain", &"hum", &"breath", &"creak", &"swish",
-	&"door", &"slam", &"porcelain", &"shatter", &"glass", &"tink", &"oco", &"crumble", &"land", &"step_metal", &"rung", &"ticks", &"crack"]
+	&"door", &"slam", &"porcelain", &"shatter", &"glass", &"tink", &"oco", &"crumble", &"land", &"step_metal", &"rung", &"ticks", &"crack", &"porcelain_muffled"]
 const LOOPED := [&"rain", &"hum", &"breath", &"ticks"]
 const RATE := 22050
 const POOL_SIZE := 12
@@ -101,6 +101,14 @@ static func make(kind: StringName, seed: int = 7) -> AudioStreamWAV:
 				var t2 := maxf(0.0, t - 0.07)
 				var b := sin(TAU * 2650.0 * t2) * exp(-t2 * 140.0) if t >= 0.07 else 0.0
 				return (a + b * 0.7 + rng.randf_range(-1.0, 1.0) * 0.1 * exp(-t * 60.0)) * 0.22)
+		&"porcelain_muffled":
+			# The same joint heard through a wall (listen_model.gd): low,
+			# blunt, the glass gone out of it.
+			samples = _render(0.3, func(t: float) -> float:
+				var a := sin(TAU * 620.0 * t) * exp(-t * 45.0)
+				var t2 := maxf(0.0, t - 0.08)
+				var b := sin(TAU * 540.0 * t2) * exp(-t2 * 50.0) if t >= 0.08 else 0.0
+				return (a + b * 0.7) * 0.3)
 		&"crack":
 			# Porcelain giving under a push (capture_fx.gd): a dry split and
 			# a few small ticks running along it.

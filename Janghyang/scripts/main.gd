@@ -38,6 +38,7 @@ const PocketWatch = preload("res://scripts/pocket_watch.gd")
 const PlanModel = preload("res://scripts/plan_model.gd")
 const LightModel = preload("res://scripts/light_model.gd")
 const NoiseModel = preload("res://scripts/noise_model.gd")
+const ListenModel = preload("res://scripts/listen_model.gd")
 const Compass = preload("res://scripts/compass_model.gd")
 const LightPickup = preload("res://scripts/light_pickup.gd")
 const PlanRevealer = preload("res://scripts/plan_revealer.gd")
@@ -143,6 +144,11 @@ var light = LightModel.new()
 var _match_glow: OmniLight3D
 ## Elias's own chalk marks (G), oldest first; the plan keeps the last MAX_MARKS.
 var _chalk_marks: Array[MeshInstance3D] = []
+## Task 22: the ear to the wall; the effects bus volume from before it.
+var listen = ListenModel.new()
+var _listen_from_db := 0.0
+## Each creak heard through the wall: where the Gasto stands.
+signal listened(at: Vector3)
 var _lantern_energy := 0.0
 var _light_time := 0.0
 var _dark: Array[Tween] = []
@@ -196,6 +202,7 @@ func _ready() -> void:
 	_wire_light()
 	_wire_noise()
 	player.chalked.connect(chalk_mark)
+	player.listen_changed.connect(_on_listen)
 
 	var args := OS.get_cmdline_user_args()
 	if args.has("--labels"):
@@ -239,6 +246,8 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
 	if player != null and atlas != null and not ended:
 		_track_place()
+	if player != null and player.listening:
+		_tick_listen(delta)
 	if autonomous and visit != null and player != null:
 		_tick_night(delta)
 		_tick_light(delta)
@@ -993,6 +1002,33 @@ func _build_light_pickups() -> void:
 
 ## The match's flame in the left hand, the lantern's own energy, and the
 ## Gastos fearing every flame.
+## Ear to the wall: the house (bus Casa) drops ListenModel.DUCK_DB, and back.
+func _on_listen(on: bool) -> void:
+	var bus := AudioServer.get_bus_index(&"Casa")
+	listen.reset()
+	if bus < 0:
+		return
+	if on:
+		_listen_from_db = AudioServer.get_bus_volume_db(bus)
+		AudioServer.set_bus_volume_db(bus, _listen_from_db + ListenModel.DUCK_DB)
+	else:
+		AudioServer.set_bus_volume_db(bus, _listen_from_db)
+
+## Every PERIOD while listening: a muffled creak (bus Mundo, not ducked) where
+## each Gasto he can hear stands; the stethoscope in hand hears through floors.
+func _tick_listen(delta: float) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	if gastos == null or not listen.beat(delta):
+		return out
+	var scope: bool = player.hands_model.left == &"estetoscopio"
+	var ear: Vector3 = player.camera.global_position
+	for at in gastos.positions():
+		if ListenModel.audible(at, ear, scope):
+			out.append(at)
+			sfx.play_at(&"porcelain_muffled", at, &"Mundo", -4.0)
+			listened.emit(at)
+	return out
+
 ## Task 21: Elias's chalk on a wall: a square seen with eyes open, a giz note
 ## on the plan; past PlanModel.MAX_MARKS the oldest mark goes from both.
 func chalk_mark(at: Vector3, normal: Vector3) -> MeshInstance3D:

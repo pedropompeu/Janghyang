@@ -6,6 +6,7 @@ extends CharacterBody3D
 
 const Mobility = preload("res://scripts/mobility_model.gd")
 const NoiseModel = preload("res://scripts/noise_model.gd")
+const ListenModel = preload("res://scripts/listen_model.gd")
 const HandsModel = preload("res://scripts/hands_model.gd")
 
 @export var mouse_sensitivity := 0.0022
@@ -43,6 +44,8 @@ signal noised(at: Vector3, level: int)
 signal gasped
 ## G on a wall within CHALK_REACH: a chalk mark at `at`, facing `normal`.
 signal chalked(at: Vector3, normal: Vector3)
+## L held by a wall: Elias stands still and listens (listen_model.gd).
+signal listen_changed(on: bool)
 
 const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
 
@@ -68,6 +71,9 @@ var hands_model = HandsModel.new()
 var sprinting := false
 ## The held breath (H); `breath.holding` keeps a hidden Elias unfound.
 var breath = NoiseModel.new()
+## Ear to the wall (L held within ListenModel.WALL_REACH of one).
+var listening := false
+var _listen_held := false
 ## Eyes closed, remembering the house as it was (V or the right button held).
 var pretending := false
 ## Ladder volumes the body is inside; ladder.gd keeps the count.
@@ -176,6 +182,12 @@ func _physics_process(delta: float) -> void:
 	if held != _pretend_held:
 		_pretend_held = held
 		set_pretending(held)
+	var listen_key := not input_locked and Input.is_physical_key_pressed(KEY_L)
+	if listen_key != _listen_held:
+		_listen_held = listen_key
+		set_listening(listen_key)
+	if listening:
+		input_dir = Vector2.ZERO
 	var wants_run := not input_locked and Input.is_physical_key_pressed(KEY_SHIFT) and input_dir.y < 0.0 and not crouched and not pretending
 	sprinting = mobility.update(delta, wants_run, input_dir.length() > 0.1)
 
@@ -230,16 +242,40 @@ func _physics_process(delta: float) -> void:
 		position = respawn_point
 		velocity = Vector3.ZERO
 
-## A chalk mark on the wall straight ahead, if one stands within
-## CHALK_REACH; floors, ceilings and Gastos take none.
-func chalk() -> bool:
+## Ear to the wall, or away from it. Starting needs a wall within
+## ListenModel.WALL_REACH straight ahead; returns whether he listens now.
+func set_listening(on: bool) -> bool:
+	if on and not listening and not facing_wall(ListenModel.WALL_REACH):
+		return false
+	if on != listening:
+		listening = on
+		listen_changed.emit(on)
+	return listening
+
+## A wall (not floor, ceiling or Gasto) within `reach` along the look, flat.
+func facing_wall(reach: float) -> bool:
+	return not _wall_hit(reach, true).is_empty()
+
+func _wall_hit(reach: float, flat := false) -> Dictionary:
 	var from := camera.global_position
-	var q := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * CHALK_REACH, 1)
+	var dir := -camera.global_basis.z
+	if flat:
+		dir.y = 0.0
+		dir = dir.normalized()
+	var q := PhysicsRayQueryParameters3D.create(from, from + dir * reach, 1)
 	q.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	if hit.is_empty() or absf((hit.normal as Vector3).y) > 0.5:
-		return false
+		return {}
 	if hit.collider != null and (hit.collider as Node).is_in_group(&"Gasto"):
+		return {}
+	return hit
+
+## A chalk mark on the wall straight ahead, if one stands within
+## CHALK_REACH; floors, ceilings and Gastos take none.
+func chalk() -> bool:
+	var hit := _wall_hit(CHALK_REACH)
+	if hit.is_empty():
 		return false
 	chalked.emit(hit.position, hit.normal)
 	return true

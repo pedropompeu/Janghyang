@@ -426,6 +426,7 @@ func _run() -> void:
 	await _capture(gastos)
 	await _noise(gastos)
 	await _giz()
+	await _escuta(gastos)
 	main.player.set_pretending(true)
 	await get_tree().create_timer(0.9).timeout
 	var chalk := get_tree().get_nodes_in_group(&"Chalk")
@@ -1190,6 +1191,65 @@ func _giz() -> void:
 		d.notes[lvl] = (d.notes[lvl] as Array).filter(func(n) -> bool: return n.kind != "giz")
 	fresh.from_dict(d)
 	main.plan_model.from_dict(fresh.to_dict())
+	pl.global_position = saved
+	pl.rotation.y = saved_yaw
+	await get_tree().physics_frame
+
+## Task 22: L by a wall. The house drops 18 dB, Elias stands still, and each
+## Gasto he can hear creaks where it stands, once per period.
+func _escuta(g) -> void:
+	print("SELFTEST: escuta")
+	var pl = main.player
+	var LM = main.ListenModel
+	var saved: Vector3 = pl.global_position
+	var saved_yaw: float = pl.rotation.y
+	var bus := AudioServer.get_bus_index(&"Casa")
+	var before := AudioServer.get_bus_volume_db(bus)
+	pl.camera.rotation.x = 0.0
+	var on := false
+	for k in 16:
+		pl.rotation.y = TAU * k / 16.0
+		for d in 16:
+			pl.global_position = Vector3(4.2, 0.2, 3.5) + (-pl.global_basis.z) * d * 0.25
+			await get_tree().physics_frame
+			if pl.set_listening(true):
+				on = true
+				break
+		if on:
+			break
+	_record(on and pl.listening, "escuta: L by a wall puts the ear to it", str(pl.global_position))
+	_record(absf(AudioServer.get_bus_volume_db(bus) - (before + LM.DUCK_DB)) < 0.01, "escuta: the house drops 18 dB", "%.1f" % AudioServer.get_bus_volume_db(bus))
+	for k in 6:
+		await get_tree().physics_frame
+	_record(Vector2(pl.velocity.x, pl.velocity.z).length() < 0.01, "escuta: Elias stands still", str(pl.velocity))
+	pl.set_listening(false)
+	_record(absf(AudioServer.get_bus_volume_db(bus) - before) < 0.01, "escuta: letting go brings the house back", "%.1f" % AudioServer.get_bus_volume_db(bus))
+	pl.global_position -= (-pl.global_basis.z) * 1.5
+	await get_tree().physics_frame
+	_record(not pl.set_listening(true) and not pl.listening, "escuta: away from a wall there is nothing to listen to", "")
+	pl.global_position = saved
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		_record(false, "escuta: a Gasto stands somewhere to hear", "")
+	else:
+		var head: Vector3 = g.head_of(at[0])
+		pl.global_position = g._bodies[at[0]].global_position + Vector3(4.0, 0.0, 0.0)
+		var heard: Array = []
+		var on_heard := func(p: Vector3) -> void: heard.append(p)
+		main.listened.connect(on_heard)
+		main.listen.reset()
+		var first: Array = main._tick_listen(0.0)
+		var again: Array = main._tick_listen(0.5)
+		main.listened.disconnect(on_heard)
+		_record(first.has(head) and heard.has(head), "escuta: a Gasto on the floor creaks where it stands", str(first))
+		_record(again.is_empty(), "escuta: one creak per period", str(again))
+		var ear: Vector3 = pl.camera.global_position
+		_record(LM.audible(head + Vector3(0.0, 4.0, 0.0), ear, true) and not LM.audible(head + Vector3(0.0, 4.0, 0.0), ear, false), "escuta: the stethoscope hears the floor above", "")
+		g.scatter()
 	pl.global_position = saved
 	pl.rotation.y = saved_yaw
 	await get_tree().physics_frame

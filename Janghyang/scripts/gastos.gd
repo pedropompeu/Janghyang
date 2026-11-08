@@ -445,6 +445,13 @@ func goal_of(i: int) -> int:
 		return _nearest_point(_heard[i].at)
 	return _goal()
 
+## Where the standing Gastos are (their heads), for the sounds of them.
+func positions() -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for i in placed():
+		out.append(head_of(i))
+	return out
+
 ## Indices of the Gastos standing somewhere now.
 func placed() -> Array:
 	var out := []
