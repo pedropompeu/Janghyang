@@ -38,34 +38,61 @@ func test_atlas_rooms_are_unchanged_by_the_merge(t) -> void:
 	for lvl in [&"casa", &"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]:
 		t.ok(Atlas.levels().has(lvl), "level %s is still known" % lvl)
 
-func test_every_overlap_resolves_to_the_first_room(t) -> void:
-	# Every 0.5 m inside every rect, near the bottom and the top of its band:
-	# room_at gives the first room of rooms() that holds the point.
-	var atlas := Atlas.new()
-	var rooms := Atlas.rooms()
-	var wrong := 0
-	for r in rooms:
-		var x: float = r.rect.position.x + 0.25
-		while x < r.rect.end.x:
-			var z: float = r.rect.position.y + 0.25
-			while z < r.rect.end.y:
-				for y in [r.y.x + 0.1, r.y.y - 0.1]:
-					var p := Vector3(x, y, z)
-					var first := &""
-					for q in rooms:
-						if q.rect.has_point(Vector2(x, z)) and y >= q.y.x and y < q.y.y:
-							first = q.id
-							break
-					if atlas.room_at(p) != first:
-						wrong += 1
-				z += 0.5
-			x += 0.5
-	t.eq(wrong, 0, "every sampled point lands in the first room that holds it")
+## Every pair of rooms whose boxes overlap, the room tried first on the left.
+## A new area that lands inside another, or a reordering, shows up here.
+const OVERLAPS := [
+	[&"passagem", &"sotao"],
+	[&"mecanismo", &"sotao"],
+	[&"loja_varela", &"tampo_leste"],
+	[&"oficina_varela", &"tampo_leste"],
+]
 
-func test_merged_maps_keep_todays_entries(t) -> void:
-	t.ok(Registry.safe_points() is Dictionary, "safe points are a map")
-	for k in ["tasks", "breaks", "catalog"]:
-		t.ok(Registry.merged(k) is Dictionary, "%s is a map" % k)
+func test_every_overlap_is_known_and_the_first_room_wins(t) -> void:
+	var rooms := Atlas.rooms()
+	var found := []
+	for i in rooms.size():
+		for j in range(i + 1, rooms.size()):
+			var a: Dictionary = rooms[i]
+			var b: Dictionary = rooms[j]
+			var flat: Rect2 = a.rect.intersection(b.rect)
+			var band := minf(a.y.y, b.y.y) - maxf(a.y.x, b.y.x)
+			if flat.get_area() > 0.0001 and band > 0.0001:
+				found.append([a.id, b.id])
+	t.eq(found, OVERLAPS, "the overlaps of the bench, the first room first")
+	var atlas := Atlas.new()
+	for pair in OVERLAPS:
+		var a: Dictionary = rooms.filter(func(r): return r.id == pair[0])[0]
+		var b: Dictionary = rooms.filter(func(r): return r.id == pair[1])[0]
+		var c: Vector2 = a.rect.intersection(b.rect).get_center()
+		var y := (maxf(a.y.x, b.y.x) + minf(a.y.y, b.y.y)) * 0.5
+		t.eq(atlas.room_at(Vector3(c.x, y, c.y)), pair[0], "%s wins over %s" % pair)
+
+func test_every_def_spells_out_what_it_needs(t) -> void:
+	# The defaults fill the optional keys; these four have no sane default
+	# (a missing safe point would wake Elias at the origin, in the playroom).
+	for a in Registry.AREAS:
+		for k in ["id", "name", "rooms", "safe"]:
+			t.ok(a.DEF.has(k), "%s says its %s" % [a.DEF.get("id", a.resource_path), k])
+		for r in a.DEF.get("rooms", []):
+			t.ok(r.get("id") is StringName and r.get("name", "") != "", "room of %s has id and name" % a.DEF.get("id"))
+			t.ok(r.get("rect") is Rect2 and r.rect.get_area() > 0.0, "room %s has a floor rect" % r.get("id"))
+			t.ok(r.get("y") is Vector2 and r.y.y > r.y.x, "room %s has a height band" % r.get("id"))
+
+func test_no_area_is_left_in_mains_legacy_maps(t) -> void:
+	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
+	var pairs := {"_LEGACY_SAFE": Registry.safe_points(), "_LEGACY_ROOM_TASKS": Registry.merged("tasks"), "_LEGACY_BREAK_TASKS": Registry.merged("breaks"), "_LEGACY_CATALOG_TASKS": Registry.merged("catalog")}
+	for name in pairs:
+		for k in consts.get(name, {}):
+			t.ok(not pairs[name].has(k), "%s is said once: in its area, not in main's %s" % [k, name])
+
+func test_the_maps_still_hold_todays_lots(t) -> void:
+	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
+	var tasks: Dictionary = consts.get("_LEGACY_ROOM_TASKS", {}).merged(Registry.merged("tasks"))
+	var breaks: Dictionary = consts.get("_LEGACY_BREAK_TASKS", {}).merged(Registry.merged("breaks"))
+	var catalog: Dictionary = consts.get("_LEGACY_CATALOG_TASKS", {}).merged(Registry.merged("catalog"))
+	t.eq(tasks, {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}, "lots struck by setting foot")
+	t.eq(breaks, {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}, "lots struck by breaking")
+	t.eq(catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
 
 func test_passagem_def_matches_today(t) -> void:
 	var d := Registry.def(&"passagem")
