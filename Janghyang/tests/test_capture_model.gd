@@ -80,3 +80,14 @@ func test_holding_counts_nothing_in_click_mode(t) -> void:
 	t.eq(c.update(3.0, true), &"", "segurar sem a opção não solta")
 	t.eq(c.progress(), 0.0, "nem conta como progresso")
 	t.eq(c.update(1.01, true), &"hug", "e o tempo acaba em abraço")
+
+func test_a_new_fight_starts_from_no_clicks(t) -> void:
+	var c = Capture.new(3)
+	c.grab(0)
+	for i in 3:
+		c.push()
+	t.eq(c.update(0.1, false), &"broke_free", "solta na primeira luta")
+	c.update(Capture.STAGGER + 0.01, false)
+	t.ok(c.grab(1), "agarrado de novo")
+	t.eq(c.progress(), 0.0, "a luta nova começa do zero")
+	t.eq(c.update(0.1, false), &"", "os cliques da luta anterior não soltam")

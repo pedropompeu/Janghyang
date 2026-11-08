@@ -102,3 +102,7 @@ func test_stop_all_silences_loops(t) -> void:
 	t.ok(bank.silent, "nothing new sounds after stop_all")
 	loop.free()
 	bank.free()
+
+func test_the_crack_is_a_small_give(t) -> void:
+	var w := Sfx.make(&"crack")
+	t.ok(w != null and _peak(w) <= 0.45, "o estalo da luta fica abaixo de 0,45")
