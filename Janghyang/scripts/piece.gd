@@ -29,5 +29,13 @@ func interact() -> void:
 	visible = false
 	taken.emit(piece_id)
 
+## Already in the campaign's hands from an earlier night: gone, no signal.
+func put_away() -> void:
+	_taken = true
+	for c in get_children():
+		if c is CollisionShape3D:
+			c.set_deferred(&"disabled", true)
+	visible = false
+
 func is_taken() -> bool:
 	return _taken

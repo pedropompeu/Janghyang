@@ -132,3 +132,8 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
 ## Pontos de integração {#integracoes}
 
 - [2026-09-12] (e) Ferramentas de IA suportadas nativamente: Claude Code CLI (`CLAUDE.md`), Antigravity / Gemini CLI (`GEMINI.md` e `AGENTS.md`), Cursor (`.cursorrules`).
+- [2026-11-08] (e) ← `Janghyang/scripts/main.gd`, `night_card_ui.gd`, `hour_event.gd`, `gastos.gd` Tarefa 12, o laço das noites:
+  - `main.gd`: `var campaign`, `var night`, `var night_card`, `var pockets`, `_save_path`; `static func night_arg(args)` (`--night N`/`--night=N`, limitado a 1..5); `_fresh_campaign_at(n)`; `begin_night(n)`; `_tick_night(delta)` (no lugar do `visit.update` do `_process`); `_night_over()`; `end_night()`. `_complete` chama `visit.on_goals_met()` quando todas as `night.goals` fecham; `_track_place` chama `visit.on_ground_floor(lvl == Registry.HOME)`; `_home_stretch()` marca `voltar_terreo`.
+  - `night_card_ui.gd` (novo, `CanvasLayer` 6): papel no estilo do caderno; `static func night_text(night, last)`, `DEMO_END`, `show_night`, `close`, `is_open`, `text`, `signal closed`. Trava o jogador e mostra o mouse.
+  - `hour_event.gd`: `begin(short := false)` e `reset()` (libera os ecos). `piece.gd`: `put_away()`. `quest_model.gd`: `_init(phases, carried)`. `wind_clock_model.gd`: `reset()`. `gastos.gd`: `var night`, `on_night`, `static func night_stalkers`.
+  - Contagens: unit 2039/0, selftest 324/0 (20 checks `noites:`).

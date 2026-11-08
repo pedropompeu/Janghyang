@@ -33,6 +33,9 @@ const Gastos = preload("res://scripts/gastos.gd")
 const Pretend = preload("res://scripts/pretend.gd")
 const Score = preload("res://scripts/score.gd")
 const SettingsUI = preload("res://scripts/settings_ui.gd")
+const Campaign = preload("res://scripts/campaign_model.gd")
+const Noites = preload("res://scripts/story/noites.gd")
+const NightCard = preload("res://scripts/night_card_ui.gd")
 ## Elias's real body, sitting at the workshop bench south of the dome.
 const GIANT_SEAT := Vector3(2.0, -10.0, 20.0)
 ## Where his right hand rests: the dome's top, over the entry.
@@ -127,6 +130,15 @@ var _black: ColorRect
 var _hugging := false
 var settings_ui
 var _shutting_down := false
+## What carries between nights (campaign_model.gd) and the night being played
+## (noites.gd). An empty night is today's single visit (selftest, tour, shots).
+var campaign
+var night: Dictionary = {}
+var night_card
+## The hand items Elias has on him this night.
+var pockets: Array[StringName] = []
+## Where the campaign saves; empty when this run must not touch the save.
+var _save_path := ""
 
 func _ready() -> void:
 	clock_model = preload("res://scripts/wind_clock_model.gd").new()
@@ -171,6 +183,16 @@ func _ready() -> void:
 			_prepare_shot(_shot_mode)
 			break
 
+	campaign = Campaign.new()
+	var start := night_arg(args)
+	if start > 0:
+		_fresh_campaign_at(start)
+		begin_night(start)
+	elif not (args.has("--selftest") or args.has("--tour") or _shot_mode != ""):
+		_save_path = Campaign.PATH
+		campaign.load_or_fresh(_save_path)
+		begin_night(campaign.night)
+
 	if args.has("--tour"):
 		var tour := preload("res://scripts/tour.gd").new()
 		tour.name = "Tour"
@@ -191,8 +213,7 @@ func _process(delta: float) -> void:
 	if player != null and atlas != null and not ended:
 		_track_place()
 	if autonomous and visit != null and player != null:
-		if visit.update(delta, in_bedroom(player.position)) == &"hora_started":
-			hora_started.emit()
+		_tick_night(delta)
 		_update_mirror(delta)
 	if player == null or prompt_label == null:
 		return
@@ -630,8 +651,11 @@ func _wire_catalog() -> void:
 	player.acted.connect(func(verb: StringName, _collider: Node) -> void:
 		recorder.mark_action(verb))
 	get_node("EntryClock").wound.connect(func(_amount: float) -> void:
-		if visit.on_wind() == &"hora_ended":
-			hora_ended.emit())
+		var r: StringName = visit.on_wind()
+		if r == &"hora_ended":
+			hora_ended.emit()
+		elif r == &"night_over":
+			_night_over())
 	cataloged.connect(func(entry: Dictionary) -> void:
 		visit.on_cataloged(entry.item))
 	hora_started.connect(func() -> void: print("03:33"))
@@ -776,6 +800,89 @@ func _wire_story() -> void:
 		if arg in ["--selftest", "--tour"] or arg.begins_with("--shot"):
 			settings_ui.path = ""
 	add_child(settings_ui)
+	night_card = NightCard.new()
+	night_card.name = "NightCard"
+	night_card.player = player
+	add_child(night_card)
+	night_card.closed.connect(func() -> void: begin_night(campaign.night))
+
+## `--night N` or `--night=N`: 0 when absent, else clamped to the campaign.
+static func night_arg(args: PackedStringArray) -> int:
+	var value := ""
+	for i in args.size():
+		if args[i] == "--night" and i + 1 < args.size():
+			value = args[i + 1]
+		elif args[i].begins_with("--night="):
+			value = args[i].substr(8)
+	if not value.is_valid_int():
+		return 0
+	return clampi(value.to_int(), 1, Noites.NOITES.size())
+
+## A clean campaign on night `n`, holding the pieces of the nights before it.
+## It never saves: `--night` and the selftest leave the player's save alone.
+func _fresh_campaign_at(n: int) -> void:
+	campaign = Campaign.new()
+	campaign.night = n
+	for i in range(1, n):
+		campaign.carry({"pieces": Noites.get_night(i).get("pieces", [])})
+	_save_path = ""
+
+## Elias wakes at the bench for night `n`: its lots, a clock as it leaves the
+## shop, what the campaign carries; the hour and the Gastos start over.
+func begin_night(n: int) -> void:
+	night = Noites.get_night(n)
+	quest = QuestModel.new(night.get("phases", []), campaign.pieces)
+	clock_model.reset()
+	visit = VisitState.new(clock_model, catalog, night)
+	notebook.quest = quest
+	if not campaign.catalog.is_empty():
+		catalog.from_dict(campaign.catalog)
+	if not campaign.visited.is_empty():
+		atlas.from_dict(campaign.visited)
+	notebook.refresh(catalog)
+	pockets.assign(campaign.items)
+	for p in get_tree().get_nodes_in_group(&"Piece"):
+		if campaign.pieces.has(p.piece_id):
+			p.put_away()
+	recorder = EchoRecorder.new()
+	hour_event.reset()
+	player.global_position = SPAWN
+	player.velocity = Vector3.ZERO
+	player.respawn_point = SPAWN
+	level = &""
+	gastos.on_night(night)
+
+## One frame of the night: the acts, the 03:33, the end of a short night.
+func _tick_night(delta: float) -> void:
+	if visit == null or player == null or (night_card != null and night_card.is_open()):
+		return
+	var ev: StringName = visit.update(delta, in_bedroom(player.position), _hugging)
+	if ev == &"hora_started":
+		hora_started.emit()
+	elif ev == &"night_over":
+		_night_over()
+
+## The short 03:33 is over (wound or run out): Elias wakes at the bench.
+func _night_over() -> void:
+	hour_event.halt()
+	_complete(&"dar_corda")
+	end_night()
+
+## Keeps what passes, moves the campaign on, saves and shows the card. The
+## demo's last night stays where it is: there is no next one to wake into.
+func end_night() -> void:
+	var n: int = night.get("n", campaign.night)
+	var held: Array[StringName] = []
+	for p in QuestModel.PIECES:
+		if quest.has_piece(p):
+			held.append(p)
+	campaign.carry({"pieces": held, "items": pockets, "catalog": catalog.to_dict(), "visited": atlas.to_dict()})
+	var last := n >= Noites.last()
+	if not last:
+		campaign.night = n + 1
+	if _save_path != "" and campaign.save(_save_path) != OK:
+		print("campanha: could not save to " + _save_path)
+	night_card.show_night(night, last)
 
 ## A piece of the pocket watch in Elias's hand: written down, the lot struck.
 func _on_piece(id: StringName) -> void:
@@ -796,6 +903,21 @@ func _complete(id: StringName) -> void:
 			dread.scare(0.08)
 	if id == &"voltar":
 		visit.on_pieces_ready()
+	if not night.is_empty() and not visit.goals_met and _goals_done():
+		visit.on_goals_met()
+	_home_stretch()
+
+func _goals_done() -> bool:
+	for g in night.get("goals", []):
+		if not quest.is_done(g.task):
+			return false
+	return true
+
+## On a short night, the goals met and Elias on the ground floor strike
+## "voltar ao térreo".
+func _home_stretch() -> void:
+	if visit.is_short() and visit.goals_met and visit.on_ground and not quest.is_done(&"voltar_terreo"):
+		_complete(&"voltar_terreo")
 
 ## Which room and floor Elias is in: the plan fills in, lots get struck,
 ## the safe point follows him and so do the Gastos.
@@ -810,6 +932,8 @@ func _track_place() -> void:
 	level = lvl
 	player.respawn_point = LEVEL_SAFE.get(lvl, SPAWN)
 	gastos.on_level(lvl)
+	visit.on_ground_floor(lvl == Registry.HOME)
+	_home_stretch()
 	if lvl == Registry.HOME and quest.all_pieces():
 		_complete(&"voltar")
 
@@ -863,7 +987,7 @@ func _wire_hour() -> void:
 	hour_event.name = "HourEvent"
 	hour_event.main = self
 	add_child(hour_event)
-	hora_started.connect(hour_event.begin)
+	hora_started.connect(func() -> void: hour_event.begin(visit.is_short()))
 	hora_ended.connect(hour_event.end)
 	hour_event.ended.connect(func() -> void:
 		get_node("GiantElias").visible = true)

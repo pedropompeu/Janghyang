@@ -25,6 +25,9 @@ const STYLE := {"coat": Color("#56504a"), "skin": Color("#ece6d8"), "hair": Colo
 ## Layer of their hitboxes: the stick finds them, bodies and sight lines don't.
 const HIT_LAYER := 8
 
+## The night being played (noites.gd); empty on today's single visit.
+var night: Dictionary = {}
+
 signal caught(gasto: int)
 
 ## Set by main before add_child.
@@ -218,14 +221,33 @@ func _largest_part(pts: Array[Vector3]) -> Dictionary:
 # The floor Elias is on
 # ---------------------------------------------------------------------------
 
-## How many Gastos the moment asks for: by phase, never in the refuge,
-## never during 03:33 or after the exit.
+## How many Gastos the moment asks for: by the night (by phase on today's
+## single visit), never in the refuge, never during 03:33, between nights or
+## after the exit.
 func wanted() -> int:
 	if main.quest == null or REFUGE.has(level) or level == &"" or main.ended:
 		return 0
 	if main.hour_event != null and main.hour_event.is_active():
 		return 0
-	return mini(main.quest.stalkers(), MAX)
+	if main.night_card != null and main.night_card.is_open():
+		return 0
+	if night.is_empty():
+		return mini(main.quest.stalkers(), MAX)
+	return mini(night_stalkers(night.stalkers, main.quest.is_done), MAX)
+
+## The night's count (noites.gd `stalkers`): the last step whose `after` is
+## struck (&"" is the start of the night) gives the number.
+static func night_stalkers(steps: Array, is_done: Callable) -> int:
+	var n := 0
+	for s in steps:
+		if s.after == &"" or is_done.call(s.after):
+			n = s.n
+	return n
+
+## A new night: whoever was out goes away; the count now follows `n`.
+func on_night(n: Dictionary) -> void:
+	night = n
+	scatter()
 
 ## Elias changed floors: whoever was following goes away and comes back later.
 func on_level(lvl: StringName) -> void:

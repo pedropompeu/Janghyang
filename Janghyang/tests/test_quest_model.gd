@@ -66,3 +66,11 @@ func test_the_default_phases_are_todays(t) -> void:
 func test_no_phases_falls_back_to_todays(t) -> void:
 	var q = Quest.new([])
 	t.eq(q.phase_id(), Quest.PHASES[0].id, "sem fases, as de hoje")
+
+func test_carried_pieces_count_from_the_start(t) -> void:
+	var q = Quest.new(Quest.PHASES, [&"coroa", &"ponteiros", &"mostrador", &"caixa"])
+	t.ok(q.all_pieces(), "as quatro peças vêm da campanha")
+	t.eq(q.phase_id(), &"V", "a fase aberta é a V")
+	var q2 = Quest.new(Quest.PHASES, [&"coroa", &"nao_e_peca"])
+	t.eq(q2.pieces(), 1, "só peças contam")
+	t.ok(not q2.is_done(&"nao_e_peca"), "o resto não é marcado")

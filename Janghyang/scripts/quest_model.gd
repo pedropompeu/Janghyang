@@ -45,9 +45,14 @@ var phases: Array
 var phase := 0
 var done: Dictionary = {}
 
-## A night with no phases (there should be none) plays today's.
-func _init(night_phases: Array = PHASES) -> void:
+## A night with no phases (there should be none) plays today's. `carried` are
+## the pieces the campaign already holds (only pieces count).
+func _init(night_phases: Array = PHASES, carried: Array = []) -> void:
 	phases = night_phases if not night_phases.is_empty() else PHASES
+	for p in carried:
+		if PIECES.has(p):
+			done[StringName(p)] = true
+	phase = _first_open_phase()
 
 ## Strikes a lot. Returns &"phase" when a new phase opens, &"task" when only
 ## the lot is new, &"" when it was already struck.

@@ -40,3 +40,14 @@ func test_tick_desyncs_as_spring_runs_out(t) -> void:
 	t.near(c.audio_tick_period(), 1.0, 0.001, "in sync when full")
 	c.spring = 0.0
 	t.near(c.audio_tick_period(), 1.25, 0.001, "late when empty")
+
+func test_reset_is_a_new_clock(t) -> void:
+	var c := WindClock.new()
+	c.wind()
+	c.can_stop = true
+	c.drain_rate = 0.9
+	c.tick(9999.0)
+	c.reset()
+	var fresh := WindClock.new()
+	t.eq([c.spring, c.winds, c.drain_rate, c.can_stop], [fresh.spring, fresh.winds, fresh.drain_rate, fresh.can_stop], "o relógio da noite nova é o de fábrica")
+	t.ok(not c.tick(0.1), "e não está parado")

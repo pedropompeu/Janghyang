@@ -38,13 +38,18 @@ var _double_pending := false
 func is_active() -> bool:
 	return _active
 
-func begin() -> void:
+## `short`: the 03:33 of nights 1 to 4 (spec §5): the silence and the night's
+## echoes only; no double, no time going back, nothing from the cracks, no
+## page. The chapter's own echo comes with the chapters.
+func begin(short := false) -> void:
 	if _active:
 		return
 	_active = true
 	_hour_t = 0.0
-	_to_write = Writer.entries(main.recorder.stats())
-	_double_pending = true
+	_to_write.clear()
+	if not short:
+		_to_write = Writer.entries(main.recorder.stats())
+	_double_pending = not short
 	main.sfx.set_casa_muted(true)
 	get_tree().create_timer(MUTE_SECONDS).timeout.connect(func() -> void:
 		main.sfx.set_casa_muted(false))
@@ -57,8 +62,9 @@ func begin() -> void:
 		root.add_child(echo)
 		echo.setup(main.recorder, segments[i], i * PHASE_STEP)
 		echoes.append(echo)
-	_turn_back_time()
-	_show_crack_things()
+	if not short:
+		_turn_back_time()
+		_show_crack_things()
 	began.emit()
 
 func end() -> void:
@@ -89,6 +95,15 @@ func halt() -> void:
 	for thing in crack_things:
 		if is_instance_valid(thing):
 			thing.deactivate()
+
+## A new night: last night's echoes go and the cracks are quiet again.
+func reset() -> void:
+	halt()
+	_to_write.clear()
+	for echo in echoes:
+		if is_instance_valid(echo):
+			echo.queue_free()
+	echoes.clear()
 
 func _process(delta: float) -> void:
 	if _double_pending:

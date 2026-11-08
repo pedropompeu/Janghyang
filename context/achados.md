@@ -140,6 +140,16 @@ relacionado:
 - **Estado:** aberto — diagnóstico instalado na U12 (`[reload] R via <evento>` em `player.gd`). Fecha quando o log aparecer numa rodada real de `--tour` ou numa sessão de Pedro.
 - [2026-11-07] (e) ← `Janghyang/scripts/player.gd` (ramo do `R`): com um evento de `R` injetado num selftest de cópia descartável, o log `[reload] R via InputEventKey: keycode=82 (R) ... pressed=true, echo=false` aparece antes do reload.
 
+### [A-022] Entre noites o mundo não volta ao começo, mas as marcas dele no catálogo vão para o save {#a-022}
+
+- [2026-11-08] (i) ← `Janghyang/scripts/main.gd` (`begin_night`, `end_night`) e `Janghyang/scripts/catalog.gd` (`to_dict` leva `flags`). Visto ao fechar a Tarefa 12.
+- **Severidade:** baixo — só os rascunhos das noites 1 e 2 rodam, e nenhum lote delas depende de dobra, porta ou quebra; mas a partir dos atalhos (Tarefa 29) a diferença vira progresso perdido ou duplicado.
+- **Onde:** na mesma sessão, dobras, portas, quebráveis, bola e boneca ficam como Elias deixou na noite anterior. Ao reabrir o jogo pelo save, o mundo volta ao padrão, mas `catalog.flags` (`f1_folded`, `doll_sat`, `after_hora`) chega do save como estava.
+- **Reprodução:** estática. Na noite 1, dobrar o F1 e fechar a noite: o save leva `f1_folded = true`. Reabrir na noite 2: o F1 está em pé e o catálogo acha que está dobrado.
+- **Por que importa:** o §5.1 diz o que passa de uma noite à outra (peças, itens de mão, atalhos, planta, catálogo, capítulos); o resto da casa deveria começar igual em toda noite, com ou sem reabrir o jogo.
+- **Fix recomendado:** um `reset_world()` chamado por `begin_night` que devolve dobras, portas e quebráveis ao estado inicial, menos os atalhos de `campaign.shortcuts`; e o save do catálogo sem as flags de adereço (ou com elas recalculadas pelo mundo). Dono natural: Tarefa 29, que cria `campaign.shortcuts`. Custo: uma tarde.
+- **Estado:** aberto. (i)
+
 ## Fechados
 
 ### [A-020] Elias no sótão sobre o quarto contava como "no quarto" para a visita {#a-020}

@@ -29,6 +29,14 @@ func tick(dt: float) -> bool:
 		return true
 	return false
 
+## Back to the clock as it leaves the shop: a new night starts on it.
+func reset() -> void:
+	spring = SPRING_MAX
+	winds = 0
+	drain_rate = 1.0
+	can_stop = false
+	_stopped = false
+
 ## Wind once. Returns how much spring went in. A stopped clock runs again.
 func wind() -> float:
 	var amount := maxf(WIND_FLOOR, FIRST_WIND * pow(WIND_FACTOR, winds))

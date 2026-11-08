@@ -513,6 +513,8 @@ func _run() -> void:
 	main.player.global_position = saved_m
 	_record((main.player.get_node("Camera3D").cull_mask & (1 << 10)) == 0, "player camera does not see the reflection layer", "")
 
+	await _nights()
+
 	print("SELFTEST: 03:33")
 	_feed_loop()
 	var duplo_before: int = main.catalog.entries.filter(func(e): return e.author == &"duplo").size()
@@ -606,6 +608,62 @@ func _run() -> void:
 	_record(_errors.count == 0, "no script errors during the selftest", "%d errors" % _errors.count)
 	print("SELFTEST RESULT: %d checks, %d failures" % [checks, failures])
 	get_tree().quit(0 if failures == 0 else 1)
+
+## The nights (Tarefa 12): night 1 from its goals to the card, night 2 to the
+## card on time, then night 5 with the whole pocket watch, where the old flow
+## (03:33, the exit, what stays) goes on unchanged.
+func _nights() -> void:
+	print("SELFTEST: noites")
+	main.begin_night(1)
+	_record(main.night.n == 1 and main.quest.phases == main.night.phases, "noites: night 1 plays its own lots", str(main.quest.phase_id()))
+	_record(main.visit.is_short() and not main.clock_model.can_stop, "noites: night 1 is short and its 03:33 is closed", "")
+	_record(main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: Elias wakes at the spawn", str(main.player.global_position))
+	main.player.global_position = main.night.goals[1].at
+	await _frames(2)
+	main._complete(&"achar_passagem")
+	main._complete(&"coroa")
+	_record(main.visit.goals_met and not main.clock_model.can_stop and not main.quest.is_done(&"voltar_terreo"), "noites: the goals alone do not open the 03:33 away from the ground floor", str(main.level))
+	main.player.global_position = main.SPAWN
+	await _frames(2)
+	_record(main.clock_model.can_stop and main.quest.is_done(&"voltar_terreo"), "noites: back on the ground floor, the 03:33 may come", str(main.level))
+	var began := [0]
+	var count := func() -> void: began[0] += 1
+	main.hora_started.connect(count)
+	_feed_loop()
+	main.clock_model.spring = 0.0
+	main._tick_night(0.1)
+	_record(main.hour_event.echoes.size() > 0, "noites: the night's echoes walk the short 03:33", "")
+	_record(began[0] == 1 and main.hour_event.is_active(), "noites: the short 03:33 starts when the clock runs out", str(began[0]))
+	_record(main.find_children("CrackThing*", "", true, false).is_empty(), "noites: nothing comes out of the cracks on a short 03:33", "")
+	main.pockets.assign([&"espelho", &"pilha", &"fosforo"])
+	main.get_node("EntryClock").wound.emit(1.0)
+	_record(main.night_card.is_open() and main.campaign.night == 2, "noites: winding ends night 1 on the paper card", str(main.campaign.night))
+	_record(main.campaign.pieces.size() == 1 and main.campaign.pieces.has(&"coroa"), "noites: the crown carries", str(main.campaign.pieces))
+	_record(main.quest.is_done(&"dar_corda") and main.night_card.text().contains("12 de novembro"), "noites: the card carries the night's date", main.night_card.text())
+	var lvl_before: StringName = main.gastos.level
+	main.gastos.level = &"passagem"
+	_record(main.gastos.wanted() == 0, "noites: no Gastos while the card is up, even away from home", "")
+	main.gastos.level = lvl_before
+	main.night_card.close()
+	_record(main.night.n == 2 and not main.night_card.is_open(), "noites: closing the card starts night 2", "")
+	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
+	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
+	_record(not main.hour_event.is_active() and main.hour_event.echoes.is_empty() and not main.clock_model.can_stop, "noites: night 2 starts with no echoes and a closed 03:33", "")
+	await _frames(2)
+	main._complete(&"alcapao")
+	main._complete(&"ponteiros")
+	_record(main.clock_model.can_stop, "noites: night 2's goals met at home open the 03:33", "")
+	main.clock_model.spring = 0.0
+	main._tick_night(0.1)
+	main._tick_night(91.0)
+	_record(main.night_card.is_open() and main.campaign.night == 3 and began[0] == 2, "noites: an unwound short 03:33 ends the night after 90 s", str(main.campaign.night))
+	main.hora_started.disconnect(count)
+	main.night_card.close()
+	_record(main.night.n == 3 and main.quest.pieces() == 2, "noites: night 3 holds the crown and the hands", str(main.quest.pieces()))
+	main._fresh_campaign_at(5)
+	main.begin_night(5)
+	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
+	await _frames(2)
 
 ## Every link of the area registry, walked crouched (the smallest capsule
 ## Elias has, and the one the crawlspace needs) from the safe point of its area
