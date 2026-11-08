@@ -4,19 +4,27 @@ extends Node3D
 ## one is a stalker_model.gd on a graph of lurk points for the floor Elias is
 ## on; they hop only while nobody looks, freeze in light, come apart under a
 ## long stare or the stick, and hug him when they reach him unseen.
-## The house's ground floor is a refuge: they never go there.
+## No floor is a refuge any more (spec §11): the house has its graph too, and
+## the night's `safety` rule (safety_model.gd) says which points they never
+## step onto and where they never hug him.
 
 const StalkerModel = preload("res://scripts/stalker_model.gd")
 const Atlas = preload("res://scripts/atlas.gd")
 const Mannequin = preload("res://scripts/mannequin.gd")
+const Safety = preload("res://scripts/safety_model.gd")
+const Registry = preload("res://scripts/areas/registry.gd")
 
-const MAX := 2
-const REFUGE := [&"casa"]
+## Night 5 asks for three.
+const MAX := 3
 ## Lurk points are sampled on this grid, then joined when one can see the other.
 const GRID := 2.2
 const LINK := 3.4
 const HEAD := 1.45
 const NEAR := 1.9
+## No lurk point this close (flat) to a keep_clear door: past arm's reach.
+const KEEP_CLEAR := NEAR + 0.6
+## A door joins the rooms on its two sides with a point this far from it.
+const PORTAL := 0.6
 ## Gone this long when Elias changes floors; the second one later.
 const FOLLOW := 6.0
 const FOLLOW_STAGGER := 9.0
@@ -27,6 +35,11 @@ const HIT_LAYER := 8
 
 ## The night being played (noites.gd); empty on today's single visit.
 var night: Dictionary = {}
+## Rule relogio_entrada (§11): the house is safe while the entry clock still
+## has spring; a test may force it. null follows main.clock_model.
+var entry_wound = null
+## The wound anchor clocks: [{"at": Vector3, "left": float}] (none yet).
+var anchors: Array = []
 
 signal caught(gasto: int)
 
@@ -39,7 +52,15 @@ var _models: Array = []
 var _bodies: Array[Node3D] = []
 var _hitboxes: Array[StaticBody3D] = []
 var _lamps: Array[OmniLight3D] = []
+## The doors (foldables named Door*): sight lines of the graph go through
+## them, open or shut, so every room of a floor joins the others.
+var _doors: Array[Node3D] = []
+var _door_rids: Array[RID] = []
 var _in_view: Array = []
+## Lurk points of this floor that are safe now, and whether Elias is; both
+## follow the night's rule and are refreshed with the view.
+var _safe: Array = []
+var _elias_safe := false
 var _view_in := 0.0
 var _tick_in := 1.5
 var _rng := RandomNumberGenerator.new()
@@ -119,10 +140,12 @@ func _build_graphs() -> void:
 	var atlas := Atlas.new()
 	for l in main.find_children("*", "OmniLight3D", true, false):
 		_lamps.append(l)
+	for d in main.find_children("Door*", "AnimatableBody3D", true, false):
+		_doors.append(d)
+		_door_rids.append((d as CollisionObject3D).get_rid())
 	for lvl in Atlas.levels():
-		if REFUGE.has(lvl):
-			continue
 		var pts: Array[Vector3] = []
+		var pairs: Array = []
 		for r in Atlas.rooms():
 			if r.level != lvl:
 				continue
@@ -131,7 +154,52 @@ func _build_graphs() -> void:
 					for p in _floors_at(x, z, r.y):
 						if atlas.room_at(p) == r.id:
 							pts.append(p)
-		_graphs[lvl] = _largest_part(pts)
+		for d in _doors:
+			var side := _door_sides(d, lvl, atlas)
+			if side.size() == 2:
+				pairs.append([pts.size(), pts.size() + 1])
+				pts.append_array(side)
+		var clear: Array[Vector3] = []
+		for name in Registry.def(lvl).get("keep_clear", []):
+			var door := main.find_child(String(name), true, false)
+			if door != null:
+				clear.append(door_center(door))
+		_graphs[lvl] = _largest_part(pts, pairs, clear)
+
+## The middle of door `d`'s opening, shut, at its foot.
+static func door_center(d: Node3D) -> Vector3:
+	var panel: Node3D = d.get_child(0)
+	var c: Vector3 = d.get_parent().global_transform * (d.position + Basis.from_euler(d.rotation_a) * panel.position)
+	return Vector3(c.x, d.get_parent().global_transform.origin.y + d.position.y, c.z)
+
+## One floor point on each side of door `d`, both in rooms of `lvl`; [] when
+## the door is not a wall door of that floor.
+func _door_sides(d: Node3D, lvl: StringName, atlas) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var panel := d.get_child(0) as MeshInstance3D
+	if panel == null or not panel.mesh is BoxMesh:
+		return out
+	var size: Vector3 = (panel.mesh as BoxMesh).size
+	var axis := Vector3.RIGHT if size.x <= minf(size.y, size.z) else (Vector3.BACK if size.z <= size.y else Vector3.UP)
+	var n: Vector3 = d.get_parent().global_transform.basis * (Basis.from_euler(d.rotation_a) * axis)
+	n.y = 0.0
+	if n.length() < 0.5:
+		return out
+	n = n.normalized()
+	var c := door_center(d)
+	for s in [-1.0, 1.0]:
+		var q: Vector3 = c + n * PORTAL * s
+		var room_id: StringName = atlas.room_at(q + Vector3(0.0, 0.3, 0.0))
+		var band := Vector2.ZERO
+		for r in Atlas.rooms():
+			if r.id == room_id and r.level == lvl:
+				band = r.y
+		var floors := _floors_at(q.x, q.z, band) if band != Vector2.ZERO else ([] as Array[Vector3])
+		if floors.is_empty():
+			out.clear()
+			return out
+		out.append(floors[0])
+	return out
 
 ## Sample lines across a room, centred so a narrow crawl gets its middle.
 func _rows(start: float, size: float) -> Array[float]:
@@ -165,18 +233,29 @@ func _fits(p: Vector3) -> bool:
 	var q := PhysicsShapeQueryParameters3D.new()
 	q.shape = sphere
 	q.collision_mask = 1
+	q.exclude = _door_rids
 	for h in [0.45, 0.95]:
 		q.transform = Transform3D(Basis(), p + Vector3(0.0, h, 0.0))
 		if not space.intersect_shape(q, 1).is_empty():
 			return false
 	return true
 
-## Links between points that see each other; only the biggest connected part.
-func _largest_part(pts: Array[Vector3]) -> Dictionary:
+## Links between points that see each other (through doors), plus each door's
+## two sides; points near a `clear` door are passed through, not kept; only
+## the biggest connected part is kept.
+func _largest_part(pts: Array[Vector3], pairs: Array = [], clear: Array[Vector3] = []) -> Dictionary:
 	var space := get_world_3d().direct_space_state
 	var links: Array = []
 	for i in pts.size():
 		links.append([])
+	for pr in pairs:
+		links[pr[0]].append(pr[1])
+		links[pr[1]].append(pr[0])
+	var dropped := {}
+	for i in pts.size():
+		for c in clear:
+			if Vector2(pts[i].x - c.x, pts[i].z - c.z).length() < KEEP_CLEAR:
+				dropped[i] = true
 	for i in pts.size():
 		for j in range(i + 1, pts.size()):
 			var a := pts[i]
@@ -184,13 +263,26 @@ func _largest_part(pts: Array[Vector3]) -> Dictionary:
 			if Vector2(a.x - b.x, a.z - b.z).length() > LINK or absf(a.y - b.y) > 0.5:
 				continue
 			var q := PhysicsRayQueryParameters3D.create(a + Vector3(0.0, 0.6, 0.0), b + Vector3(0.0, 0.6, 0.0), 1)
-			if space.intersect_ray(q).is_empty():
+			q.exclude = _door_rids
+			if space.intersect_ray(q).is_empty() and not links[i].has(j):
 				links[i].append(j)
 				links[j].append(i)
+	# A point by a clear door is a way through, never a place to stand: its
+	# neighbours are joined to each other before it goes (the playroom only
+	# opens onto the entrance hall, right by the street door).
+	for i in pts.size():
+		if dropped.has(i):
+			for a_ in links[i]:
+				for b_ in links[i]:
+					if a_ != b_ and not links[a_].has(b_):
+						links[a_].append(b_)
+			for n in links[i]:
+				links[n].erase(i)
+			links[i].clear()
 	var part := []
 	var seen := {}
 	for i in pts.size():
-		if seen.has(i):
+		if seen.has(i) or dropped.has(i):
 			continue
 		var group := [i]
 		seen[i] = true
@@ -222,10 +314,12 @@ func _largest_part(pts: Array[Vector3]) -> Dictionary:
 # ---------------------------------------------------------------------------
 
 ## How many Gastos the moment asks for: by the night (by phase on today's
-## single visit), never in the refuge, never during 03:33, between nights or
-## after the exit.
+## single visit, where the house still stays quiet), never during 03:33,
+## between nights or after the exit.
 func wanted() -> int:
-	if main.quest == null or REFUGE.has(level) or level == &"" or main.ended:
+	if main.quest == null or level == &"" or main.ended:
+		return 0
+	if night.is_empty() and level == Registry.HOME:
 		return 0
 	if main.hour_event != null and main.hour_event.is_active():
 		return 0
@@ -247,7 +341,51 @@ static func night_stalkers(steps: Array, is_done: Callable) -> int:
 ## A new night: whoever was out goes away; the count now follows `n`.
 func on_night(n: Dictionary) -> void:
 	night = n
+	entry_wound = null
 	scatter()
+
+## The night's safety rule (&"" on today's single visit: only anchors).
+func rule() -> StringName:
+	return night.get("safety", &"")
+
+## What safety_model.gd needs to judge point `p` on this floor.
+## `lit_rooms` (from lit_rooms()) saves recounting the lamps per point.
+func world_at(p: Vector3, lit: Variant = null) -> Dictionary:
+	var lit_here := false
+	if rule() == &"comodos_com_luz" and level == Registry.HOME:
+		var rooms: Dictionary = lit if lit != null else lit_rooms()
+		lit_here = rooms.has(main.atlas.room_at(p + Vector3(0.0, 0.3, 0.0)))
+	return {"level": level, "lit": lit_here, "entry_wound": _entry_has_spring(), "anchors": anchors}
+
+## Rooms of the house with a lamp switched on (a HouseLight shown), whatever
+## the dread does to its brightness.
+func lit_rooms() -> Dictionary:
+	var out := {}
+	for l in get_tree().get_nodes_in_group(&"HouseLight"):
+		if (l as Node3D).is_visible_in_tree():
+			out[main.atlas.room_at((l as Node3D).global_position)] = true
+	out.erase(&"")
+	return out
+
+func _entry_has_spring() -> bool:
+	if entry_wound != null:
+		return entry_wound
+	return main.clock_model != null and main.clock_model.spring > main.clock_model.STALL_SPRING
+
+func is_safe(p: Vector3) -> bool:
+	return Safety.is_safe(p, rule(), world_at(p))
+
+## Indices of this floor's lurk points the Gastos may not step onto now.
+func safe_points() -> Array:
+	var out := []
+	var g := graph(level)
+	if anchors.is_empty() and (level != Registry.HOME or rule() in [&"", &"so_ancoras"]):
+		return out
+	var lit: Variant = lit_rooms() if rule() == &"comodos_com_luz" else null
+	for k in g.points.size():
+		if Safety.is_safe(g.points[k], rule(), world_at(g.points[k], lit)):
+			out.append(k)
+	return out
 
 ## Elias changed floors: whoever was following goes away and comes back later.
 func on_level(lvl: StringName) -> void:
@@ -273,7 +411,7 @@ func spawn_now() -> void:
 		if m == null:
 			continue
 		m.send_away(0.0)
-		m.update(0.01, false, false, goal, false, false, _in_view)
+		m.update(0.01, false, false, goal, false, false, _in_view, _safe)
 		_show(i)
 
 ## Indices of the Gastos standing somewhere now.
@@ -347,7 +485,7 @@ func _process(delta: float) -> void:
 		if not m.is_away() and not veiled:
 			seen = main.is_seen(head_of(i)) and _lit(head_of(i))
 		var near: bool = not m.is_away() and m.points[m.at].distance_to(pp) < NEAR
-		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, _in_view)
+		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, _in_view, _safe, _elias_safe)
 		match r:
 			&"undone":
 				main.sfx.play_at(&"shatter", head_of(i), &"Mundo", -6.0)
@@ -387,6 +525,14 @@ func _low_ceiling(p: Vector3) -> bool:
 
 func _refresh_view() -> void:
 	_in_view.clear()
+	_safe = safe_points()
+	_elias_safe = main.player != null and is_safe(main.player.global_position)
+	# Whoever stands where it just became safe goes away (no frozen Gasto there).
+	for i in _models.size():
+		var m = _models[i]
+		if m != null and not m.is_away() and _safe.has(m.at):
+			m.send_away(StalkerModel.RETURN_TIME)
+			_show(i)
 	var g := graph(level)
 	for k in g.points.size():
 		if main.is_seen(g.points[k] + Vector3(0.0, HEAD, 0.0)) or main.is_seen(g.points[k] + Vector3(0.0, 0.5, 0.0)):
@@ -412,6 +558,10 @@ func _lit(p: Vector3) -> bool:
 		var to := p - fl.global_position
 		if to.length() < fl.spot_range and (-fl.global_basis.z).angle_to(to) < deg_to_rad(fl.spot_angle):
 			return true
+	return _lamp_lit(p)
+
+## Near a lamp that is on (the house's lit rooms, rule comodos_com_luz).
+func _lamp_lit(p: Vector3) -> bool:
 	for l in _lamps:
 		if is_instance_valid(l) and l.is_visible_in_tree() and l.light_energy > 0.25 and l.global_position.distance_to(p) < l.omni_range * 0.6:
 			return true

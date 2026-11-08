@@ -28,6 +28,8 @@ const DEF := {
 	],
 	## Where the game starts (main.SPAWN).
 	"safe": Vector3(1.8, 0.2, 8.3),
+	## Spec §11: no Gasto ever blocks the street door.
+	"keep_clear": [&"DoorFront"],
 	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"},
 }
 

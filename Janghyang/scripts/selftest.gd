@@ -369,7 +369,7 @@ func _run() -> void:
 		var fq := PhysicsRayQueryParameters3D.create(safe + Vector3(0.0, 0.3, 0.0), safe + Vector3(0.0, -0.5, 0.0), 1)
 		_record(not main.get_world_3d().direct_space_state.intersect_ray(fq).is_empty(), "safe point of %s stands on a floor" % lvl, str(safe))
 	if gastos != null:
-		for lvl in [&"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]:
+		for lvl in [&"casa", &"passagem", &"sotao", &"mecanismo", &"gaveta", &"tampo"]:
 			var g: Dictionary = gastos.graph(lvl)
 			_record(g.points.size() >= 4, "%s has lurk points" % lvl, str(g.points.size()))
 			_record(g.links.all(func(l): return not l.is_empty()), "every lurk point of %s leads somewhere" % lvl, "")
@@ -383,7 +383,7 @@ func _run() -> void:
 						reached[nxt_pt] = true
 						frontier.append(nxt_pt)
 			_record(not g.points.is_empty() and reached.size() == g.points.size(), "every lurk point of %s walks back to the rest" % lvl, "%d of %d" % [reached.size(), g.points.size()])
-		_record(gastos.graph(&"casa").points.is_empty(), "the house ground floor is a refuge", "")
+		_record(not gastos.get_script().get_script_constant_map().has("REFUGE"), "the house is no fixed refuge: it has lurk points like every area", "")
 	var coroa := main.find_child("Piece_coroa", true, false)
 	coroa.interact()
 	await get_tree().process_frame
@@ -514,6 +514,7 @@ func _run() -> void:
 	_record((main.player.get_node("Camera3D").cull_mask & (1 << 10)) == 0, "player camera does not see the reflection layer", "")
 
 	await _nights()
+	await _safety()
 
 	print("SELFTEST: 03:33")
 	_feed_loop()
@@ -664,6 +665,79 @@ func _nights() -> void:
 	main.begin_night(5)
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	await _frames(2)
+
+## Spec §11: safety by point and by night, not a refuge floor. Ends on night 5,
+## where the rest of the selftest plays.
+func _safety() -> void:
+	print("SELFTEST: safety")
+	var g = main.gastos
+	var door: Vector3 = g.door_center(main.get_node("DoorFront"))
+	_record(Vector2(door.x - 1.82, door.z - 9.1).length() < 0.05, "safety: the street door's opening is where the house puts it", str(door))
+	var near_door: Array = (g.graph(&"casa").points as Array).filter(func(p: Vector3) -> bool: return Vector2(p.x - door.x, p.z - door.z).length() < g.NEAR + 0.5)
+	_record(near_door.is_empty(), "safety: no lurk point within reach of the street door", str(near_door))
+	var house_rooms := {}
+	for p in g.graph(&"casa").points:
+		house_rooms[main.atlas.room_at(p + Vector3(0.0, 0.3, 0.0))] = true
+	for room in [&"brincar", &"corredor", &"quarto", &"corredor_sul"]:
+		_record(house_rooms.has(room), "safety: the house graph reaches %s through its doors" % room, str(house_rooms.keys()))
+	_record(not house_rooms.has(&"beira_sul"), "safety: no Gasto lurks outside the street door", str(house_rooms.keys()))
+	main._fresh_campaign_at(1)
+	main.begin_night(1)
+	await _frames(3)
+	_record(g.level == &"casa" and g.rule() == &"casa_toda", "safety: night 1 keeps the whole house", "%s %s" % [g.level, g.rule()])
+	_record(g.wanted() == 0, "safety: night 1, no Gasto in the house before the crown", str(g.wanted()))
+	main._complete(&"achar_passagem")
+	main._complete(&"coroa")
+	g.spawn_now()
+	# Read before a frame: _refresh_view would also send off one put on a safe point.
+	_record(g.placed().is_empty(), "safety: night 1, spawning never puts a Gasto on a safe point", str(g.placed()))
+	await _frames(1)
+	_record(g.wanted() == 1 and g.placed().is_empty(), "safety: night 1 after the crown, the one Gasto finds no point in the house", "%d %s" % [g.wanted(), g.placed()])
+	_record(g.is_safe(main.SPAWN) and g.safe_points().size() == g.graph(&"casa").points.size(), "safety: night 1, every point of the house is safe", "")
+	g._refresh_view()
+	_record(g._elias_safe, "safety: night 1, Elias at home is out of reach", "")
+	main._fresh_campaign_at(2)
+	main.begin_night(2)
+	await _frames(3)
+	_record(g.is_safe(main.SPAWN), "safety: night 2, the house is safe while the entry clock has spring", "")
+	main.clock_model.spring = 0.0
+	_record(not g.is_safe(main.SPAWN), "safety: night 2, an unwound entry clock leaves the house open", "")
+	main.clock_model.spring = main.clock_model.SPRING_MAX
+	g.entry_wound = true
+	main._fresh_campaign_at(3)
+	main.begin_night(3)
+	_record(g.entry_wound == null, "safety: a new night follows the clock again", "")
+	await _frames(3)
+	var room_pt: Vector3 = main.player.global_position
+	for p in g.graph(&"casa").points:
+		if main.atlas.room_at(p + Vector3(0.0, 0.3, 0.0)) == &"quarto":
+			room_pt = p
+	_record(g.rule() == &"comodos_com_luz" and g.is_safe(room_pt), "safety: night 3, the lit bedroom is safe", str(room_pt))
+	var bedroom_lights: Array = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return main.atlas.room_at(l.global_position) == &"quarto")
+	for l in bedroom_lights:
+		l.visible = false
+	_record(not bedroom_lights.is_empty() and not g.is_safe(room_pt), "safety: night 3, with its lamps off the bedroom is not", str(bedroom_lights.size()))
+	var squatter = g._models[0]
+	squatter.place((g.graph(&"casa").points as Array).find(room_pt))
+	for l in bedroom_lights:
+		l.visible = true
+	g._refresh_view()
+	_record(squatter.is_away(), "safety: night 3, a Gasto in the bedroom goes when its lamps come on", str(squatter.at))
+	main._fresh_campaign_at(4)
+	main.begin_night(4)
+	await _frames(3)
+	_record(g.graph(&"casa").points.size() >= 4 and g.wanted() == 2, "safety: night 4, the house has a graph and two Gastos", "%d %d" % [g.graph(&"casa").points.size(), g.wanted()])
+	_record(g.rule() == &"so_ancoras" and g.safe_points().is_empty() and not g.is_safe(main.SPAWN), "safety: night 4, only anchors keep Elias safe", str(g.safe_points().size()))
+	g._refresh_view()
+	_record(not g._elias_safe, "safety: night 4, Elias is not out of reach at home", "")
+	g.spawn_now()
+	await _frames(1)
+	_record(g.placed().size() == 2, "safety: night 4, both Gastos stand in the house", str(g.placed()))
+	g.scatter()
+	main._fresh_campaign_at(5)
+	main.begin_night(5)
+	await _frames(2)
+	_record(g.wanted() == 3, "safety: night 5 asks for three Gastos", str(g.wanted()))
 
 ## Every link of the area registry, walked crouched (the smallest capsule
 ## Elias has, and the one the crawlspace needs) from the safe point of its area

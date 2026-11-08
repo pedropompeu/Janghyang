@@ -127,3 +127,65 @@ func test_cut_off_point_stays_put(t) -> void:
 	var pts: Array[Vector3] = [Vector3(0.0, 0.0, 0.0), Vector3(9.0, 0.0, 0.0)]
 	var s := Stalker.new(pts, [[], []])
 	t.eq(s.next_toward(0, 1), 0, "no way back: it stays where it is, never wanders")
+
+func test_never_hops_onto_a_safe_point(t) -> void:
+	var pts: Array[Vector3] = [Vector3.ZERO, Vector3(4, 0, 0), Vector3(8, 0, 0)]
+	var s := Stalker.new(pts, [[1], [0, 2], [1]])
+	s.place(0)
+	var moved := false
+	for i in 200:
+		moved = moved or s.update(0.1, false, false, 2, false, false, [], [1]) == &"moved"
+	t.ok(not moved, "a safe point in the way: it waits")
+	t.eq(s.at, 0, "still at the start")
+
+func test_never_hops_onto_a_safe_goal(t) -> void:
+	# Elias stands on a safe point right next to it: the way there is open,
+	# but the last hop is not.
+	var pts: Array[Vector3] = [Vector3.ZERO, Vector3(4, 0, 0), Vector3(8, 0, 0)]
+	var s := Stalker.new(pts, [[1], [0, 2], [1]])
+	s.place(1)
+	var moved := false
+	for i in 200:
+		moved = moved or s.update(0.1, false, false, 2, false, false, [], [2]) == &"moved"
+	t.ok(not moved and s.at == 1, "the safe goal next door: it stays put")
+
+func test_never_returns_onto_a_safe_point(t) -> void:
+	var s := _line()
+	s.hit()
+	_run(s, Stalker.RETURN_TIME + 1.0, 4)
+	s.hit()
+	var ev: StringName = &""
+	for i in int((Stalker.RETURN_TIME + 1.0) / 0.1):
+		ev = s.update(0.1, false, false, 4, false, false, [], [0, 1])
+		if ev != &"":
+			break
+	t.eq(ev, &"returned", "back again")
+	t.eq(s.at, 2, "the farthest point that is not safe")
+
+func test_never_catches_a_safe_elias(t) -> void:
+	var s := _line()
+	s.place(3)
+	var hugged := false
+	for i in 200:
+		hugged = hugged or s.update(0.1, false, false, 4, true, false, [], [], true) == &"caught"
+	t.ok(not hugged, "safe: no hug")
+	t.eq(s.at, 3, "it stays where it is")
+	t.eq(_run(s, Stalker.STEP_TIME + 0.2, 4, false, false, true), &"caught", "no longer safe: the hug")
+
+func test_goes_around_a_safe_point(t) -> void:
+	var pts: Array[Vector3] = [Vector3.ZERO, Vector3(4, 0, 0), Vector3(0, 0, 4), Vector3(4, 0, 4)]
+	var s := Stalker.new(pts, [[1, 2], [0, 3], [0, 3], [1, 2]])
+	t.eq(s.next_toward(0, 3, [1]), 2, "the dark way round")
+	t.eq(s.next_toward(0, 3, [1, 2]), 0, "no way round: it waits")
+	s.place(0)
+	t.eq(_run_safe(s, Stalker.STEP_TIME + 0.2, 3, [1]), &"moved", "it hops the other way")
+	t.eq(s.at, 2, "onto the point that is not safe")
+
+func _run_safe(s: Stalker, seconds: float, goal: int, safe: Array) -> StringName:
+	var t := 0.0
+	while t < seconds:
+		var ev: StringName = s.update(0.1, false, false, goal, false, false, [], safe)
+		if ev != &"":
+			return ev
+		t += 0.1
+	return &""
