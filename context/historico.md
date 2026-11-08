@@ -321,3 +321,24 @@ cd /home/usuario/Dev/Jogo && python lint.py
 26. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 24: o diretor de sustos.~~ → feita na sessão principal: um forte por minuto, 20 s entre fracos, 8 s de silêncio antes de qualquer um, nenhum no 03:33, forte do mesmo tipo uma vez por noite; a lâmpada e a lanterna do `dread` pedem licença; unidade 2486/0, selftest 446/0.
 27. [2026-11-08 ~superseded 2026-11-08] (i) ~~Tarefa 25: o registro do playtest e o roteiro.~~ → feita na sessão principal: `--playtest` grava o CSV a cada 5 s e marca 3 minutos perdido; roteiro em [[playtest-1]]; export Linux com selftest; unidade 2502/0, selftest 449/0.
 28. [2026-11-08] (i) Tarefa 26: Pedro conduz de 3 a 5 sessões do playtest 1 (D12), com `--playtest`, seguindo [[playtest-1]].
+
+## [2026-11-08] Noite 1 em blocos pronta; pausa antes do playtest 1 {#sessao-2026-11-08-pausa-playtest-1}
+
+- [2026-11-08] (e) ← `git log` Tarefas 1 a 25 do plano da demo concluídas e enviadas ao `main` (último commit `80182ba`). Marcos M1 (registro inteiro) e M2 (noite 1 jogável em blocos) fechados antes das datas sugeridas (2026-11-29 e 2026-12-23).
+- [2026-11-08] (e) ← `run_unit.gd`, `--selftest`, `lint.py` Unidade 2502/0, selftest 449/0 (também no binário Linux exportado), lint ok.
+- [2026-11-08] (e) ← `Janghyang/README.md` Reescrito para o jogo de hoje: noites, capítulos, controles novos (T, G, L, H, roda do mouse), `--night`, `--playtest`, export Linux, sustos, verificação e estrutura.
+- [2026-11-08] (d) Pedro: "siga com o recomendado faça o push": os `.uid` dos scripts novos foram versionados, seguindo `4bb6210`.
+
+### Em aberto
+
+- [2026-11-08] (i) **D12, o playtest 1:** quem joga e quando. É o que destrava a T27 (triagem). Pela ordem da spec §15, também destrava as ações da noite 2 (T28 a T33).
+- [2026-11-08] (i) **D9, os textos:** as três hipóteses dos capítulos 1 e 2 foram mostradas a Pedro e esperam a leitura dele; a carta e os títulos seguem em rascunho.
+- [2026-11-08] (i) **D7, a aprovação visual:** `blockout-watch.png` espera Pedro; trava as T34 a T40 e a T43.
+- [2026-11-08] (i) **D1, D3, D4, D5** (plataforma, nome, idiomas, preço) só travam as T44 a T47; os defaults do plano valem até lá.
+- [2026-11-08] (i) **D10, sustos com estouro de volume:** default "não", `revisar: 2026-11-22`.
+
+### Próximo passo
+
+1. [2026-11-08] (i) Pedro lê as hipóteses (D9) e diz se alguma frase ou a resposta certa muda.
+2. [2026-11-08] (i) Pedro decide se as T28 a T33 (noite 2) começam já ou só depois do playtest 1, como manda a ordem da spec §15. Começar já adianta o calendário, mas arrisca retrabalho se o playtest mudar a bússola, a captura ou a luz.
+3. [2026-11-08] (i) Pedro conduz o playtest 1 ([[playtest-1]]), com os CSVs e as notas brutos em `fontes/`.

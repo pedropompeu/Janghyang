@@ -1,81 +1,93 @@
-# Janghyang — slice Godot 4.7
+# Janghyang — demo em construção (Godot 4.7)
 
-## O slice em 6 linhas
+Elias, catalogador, entra numa maquete de casa sob uma redoma, na bancada de um
+relojoeiro morto, Inácio. O jogo se divide em **noites**: cada noite é uma
+sessão em que Elias dá corda na maquete, acorda dentro da casa, joga os
+capítulos da noite e termina num 03:33. O que ele leva de uma noite para outra
+(peças, páginas do caderno, hipóteses) fica salvo na campanha.
 
-1. Elias, catalogador, entra numa maquete de casa sob uma redoma, em cima da bancada de um relojoeiro.
-2. Ele cataloga o que encontra (`Q`) e dá corda ao relógio da entrada; a casa imita, longe dele, os gestos que ele faz.
-3. Para o 03:33 chegar, ele junta as quatro peças do relógio de bolso do menino: a coroa (passagem atrás do desenho), os ponteiros (alto da torre do sótão), o mostrador (gaveta sob a bancada) e a caixa (oficina da Relojoaria Varela). Lá fora da casa, os Gastos — manequins de porcelana — o seguem.
-4. Às 03:33 o relógio para, a casa devolve os trajetos dele como ecos, três coisas saem das frestas e um duplo escreve no caderno dele.
-5. Depois do 03:33 aparece a verdade sobre Inácio e, pela porta da rua, o corpo gigante de Elias curvado sobre a bancada.
-6. Ele sai pela beira do tampo; conforme deu corda ou deixou parar, algo dele fica na maquete — e a última entrada do caderno diz o quê.
+**Estado em 2026-11-08:** a noite 1 está jogável **em blocos** (sem assets
+finais) e pronta para o primeiro playtest humano. A noite 2 tem os capítulos 3 e 4
+em rascunho, e as noites 3 a 5 são rascunhos que mantêm o fluxo e o final
+testáveis. A demo pública termina depois da noite 2. O que falta está em
+[`../context/historico.md`](../context/historico.md) (fila numerada no fim) e no
+plano `../docs/superpowers/plans/2026-11-08-janghyang-demo.md`.
 
-Não há combate, dano, cronômetro visível, HUD de objetivo nem game over. Os
-objetivos moram no caderno (`M`, página dos lotes). A porta da rua está sempre
-aberta; sair por ela **não** encerra o jogo. Só a beira do tampo encerra.
+Não há HUD, minimapa, marcador de objetivo nem game over. Quem guia é o
+**relógio de bolso** de Elias, que aponta para a meta da noite, e o **caderno**.
 
-## A história em cinco lotes
+## Uma noite
 
-| Lote | Onde | O que fazer | Gastos |
-|---|---|---|---|
-| I. A casa da rua do Porto | casa | catalogar o relógio e o desenho; quebrar o painel oco sob o desenho (`B`); pegar a coroa | nenhum |
-| II. O sótão | passagem → escada → sótão → torre | subir, entrar no mecanismo, pegar os ponteiros lá no alto | 1 |
-| III. A gaveta | alçapão no piso do quarto → gaveta | quebrar o alçapão, descer, pegar o mostrador | 2 |
-| IV. A relojoaria | vidro rachado da redoma → bancada → Relojoaria Varela | quebrar a redoma, chegar à loja, pegar a caixa na oficina | 2 |
-| V. 03:33 | casa | voltar com as quatro peças; o relógio chega ao 03:33 (ou depois de 60 min) | nenhum |
+1. Elias acorda na casa. O relógio da entrada marca o tempo até o 03:33.
+2. Cada capítulo tem **pistas** para catalogar (`Q`). Com todas, a **encenação**
+   abre: figuras de manequim refazem uma cena e só se mexem quando ninguém está
+   olhando. Quando a cena termina, o caderno ganha uma página com **três
+   hipóteses**. A errada fica riscada, e a certa fica escrita.
+3. A recompensa do capítulo (uma passagem, uma peça do relógio do menino) leva
+   adiante. Depois da peça, os **Gastos** (manequins de porcelana) aparecem fora do
+   refúgio. Eles só andam quando ninguém olha.
+4. Se um Gasto alcança Elias, há uma **luta**: cliques rápidos (10 em 4 s na
+   noite 1) para se soltar. Perder é um abraço: tudo escurece e ele acorda no
+   ponto seguro. Ninguém morre.
+5. De volta ao térreo, Elias dá corda e vem o 03:33 curto. O cartão da noite
+   mostra o que ele achou e a hipótese que escreveu.
 
-**Os Gastos.** O térreo da casa é refúgio: nenhum Gasto entra. Fora dele, eles
-só se movem quando ninguém olha, um ponto de espreita mais perto de Elias a cada
-vez, nunca para um ponto que ele vê. Olhados, congelam; olhados por 3,5 s com
-luz (lanterna ou lâmpada), se desfazem e voltam bem mais tarde, longe. Um golpe
-de vareta faz o mesmo na hora. Agachado num esconderijo, Elias os despista.
-De olhos fechados (`V`) ou no escuro eles somem da vista — e andam quatro vezes
-mais rápido. Se um deles alcança
-Elias, não há morte: tudo escurece, ele acorda caído na entrada daquele andar e
-o duplo escreve no caderno onde ele foi segurado.
-
-**Fazer de conta.** Segurando `V` (ou o botão direito), Elias fecha os olhos e a
-casa volta como era, em sépia: aparecem o giz do menino — setas, portas
-desenhadas, marcas de altura — que apontam as passagens.
+**A noite 1:** capítulo 1, *A casa da rua do Porto* (pistas: o desenho, o relógio
+da entrada e a casinha; recompensa: achar a passagem). Capítulo 2, *O menino que
+escutava* (pistas: a caixa de música e a bola; recompensa: a coroa). Um Gasto
+depois da coroa. A casa toda é refúgio.
 
 ## Requisitos
 
-- Godot **4.7.2.stable** (ou 4.7.x compatível), renderer GL Compatibility.
+- Godot **4.7.2.stable**, renderer GL Compatibility.
 - Rodar a partir da pasta `Janghyang/`.
 
 ## Rodar
 
 ```bash
 cd Janghyang
-godot --path .                 # jogar
-godot --path . -- --labels     # jogar com as labels de leitura do blockout
-godot --path . -- --tour       # demonstração: Elias anda sozinho, bate, quebra o painel, faz de conta, abre o plano, F9
+godot --path .                         # jogar (continua a campanha salva em user://campanha.json)
+godot --path . -- --night=2            # começa uma campanha nova na noite 2 (também: --night 2)
+godot --path . -- --playtest           # joga gravando o CSV do playtest (ver abaixo)
+godot --path . -- --labels             # com as labels de leitura do blockout
+godot --path . -- --tour               # demonstração: Elias anda sozinho
+```
+
+**Binário Linux** (fora do git, em `build/`):
+
+```bash
+godot --headless --path . --export-release "Linux" build/linux/Janghyang
+build/linux/Janghyang -- --playtest
 ```
 
 ## Controles
 
 | Tecla | Ação |
 |---|---|
-| `W A S D` | mover |
-| mouse | olhar |
-| `E` | interagir com a mão esquerda: dobra, porta, bola, caixa de música, boneco, relógio (dar corda) |
-| `Q` | catalogar o que está na mira |
-| `Tab` | abrir/fechar o caderno |
-| `M` | caderno aberto nos lotes (tarefas) e no plano dos andares visitados |
-| `V` / botão direito (segurar) | fazer de conta: olhos fechados, a casa como era, o giz do menino |
-| `Shift` | correr |
+| `W A S D` / mouse | mover / olhar |
+| `Shift` | correr (cansa: depois de uma corrida a respiração pesa e faz barulho) |
+| `C` ou `Ctrl` | agachar/levantar; agachado num esconderijo, os Gastos perdem Elias |
 | `Espaço` | pular |
-| `C` | agachar/levantar (a passagem só se atravessa agachado) |
-| `B` | golpe com a vareta de tília; bate na superfície à frente se ela estiver a até 1,5 m. Painel oco, alçapão, vidro e xícaras racham e quebram em três golpes; um Gasto quebra num. Golpe no ar só faz o zunido; `B` no meio do golpe é ignorado |
-| `F` | ligar/desligar a lanterna (na mão esquerda; o feixe sai dela) |
-| `R` | reiniciar a cena (funciona também depois do final) |
-| `Esc` | opções: pausa o jogo e abre a folha de opções (de novo `Esc` fecha) |
-| `F9` | **só em build de debug:** deixa o relógio acabar agora, para chegar ao 03:33 |
+| `E` | interagir: portas, dobras, bola, caixa de música, boneco, dar corda |
+| `Q` | catalogar o que está na mira |
+| `T` | abrir/fechar o relógio de bolso (a bússola, na mão esquerda) |
+| roda do mouse | trocar o item da mão esquerda (relógio, vareta, espelho, fósforo, lupa, estetoscópio, brinquedo, conforme Elias tem) |
+| botão esquerdo | usar o item da mão esquerda; numa luta, empurrar o Gasto |
+| `V` / botão direito (segurar) | fazer de conta: olhos fechados, a casa como era, o giz do menino |
+| `G` | riscar uma marca de giz na parede (até 20 aparecem na planta) |
+| `L` (segurar, de frente para a parede) | escutar: a casa abafa e cada Gasto audível estala onde está; com o estetoscópio, ouve através dos andares |
+| `H` (segurar) | prender a respiração; segurar demais acaba num arquejo alto |
+| `B` | golpe com a vareta (racha painel oco, alçapão, vidro; quebra um Gasto) |
+| `F` | lanterna (gasta pilha) |
+| `Tab` / `M` | caderno / caderno na planta e nos capítulos |
+| `R` | reiniciar a cena |
+| `Esc` | opções (pausa) |
+| `F9` | **só em debug:** o relógio acaba agora |
 
 ## Opções
 
-`Esc` pausa e abre uma folha no papel do caderno. Cada mudança vale na hora; ao
-fechar, tudo fica salvo em `user://opcoes.cfg` (no Linux,
-`~/.local/share/godot/app_userdata/<projeto>/opcoes.cfg`) e volta na próxima vez.
+`Esc` pausa e abre uma folha no papel do caderno. Cada mudança vale na hora, e ao
+fechar tudo é salvo em `user://opcoes.cfg`.
 
 | Opção | Faixa | Padrão |
 |---|---|---|
@@ -85,46 +97,49 @@ fechar, tudo fica salvo em `user://opcoes.cfg` (no Linux,
 | Brilho (exposição) | 60% a 180% | 100% |
 | Volume geral / Música / Sons da casa e do mundo | 0% a 100% | 100% |
 | Tela cheia | sim/não | não |
+| Reduzir piscadas (a luta pisca a 1 Hz e com metade da força) | sim/não | não |
+| Segurar para se soltar (em vez de clicar) | sim/não | não |
 
-A folha também tem **Padrões**, **Reiniciar** e **Sair do jogo**. Selftest, tour
-e capturas não leem nem gravam esse arquivo.
+Selftest, tour e capturas não leem nem gravam esse arquivo.
+
+## O clima e os sustos
+
+A tensão (0 a 1) acompanha a noite e sobe até o 03:33. Com ela, as lâmpadas
+baixam, a neblina engrossa, o zumbido e a respiração sobem, as bordas da tela
+escurecem e as mãos tremem. Os rangidos vêm de cômodos a pelo menos 4 m.
+
+Os **sustos** pedem licença a um diretor (`scare_director.gd`): no máximo um
+forte por minuto, pelo menos 20 s entre os fracos, 8 s de silêncio antes de
+qualquer um, e nenhum no 03:33. O mesmo tipo de susto forte só acontece uma vez
+por noite. **Não há estouro de volume** (é a decisão D10, ainda aberta): nenhum
+som passa do pico do banco.
+
+## Playtest
+
+O roteiro está em [`../context/discussoes/playtest-1.md`](../context/discussoes/playtest-1.md).
+Com `--playtest`, o jogo grava uma linha a cada 5 s em `user://playtest/<data-hora>.csv`
+(no Linux, `~/.local/share/godot/app_userdata/Janghyang — blockout/playtest/`):
+
+`t, noite, area, comodo, meta, dist, relogio_aberto, caderno_aberto, capturas, perdido`
+
+`perdido` vira 1 depois de 180 s na mesma meta sem chegar 2 m mais perto.
 
 ## Verificação automática
 
 ```bash
 cd Janghyang
 timeout 60  godot --headless --path . -s res://tests/run_unit.gd   # unit: modelos puros
-timeout 150 godot --headless --path . -- --selftest               # cena: colisão, laço, 03:33, final
-cd .. && python lint.py                                             # integridade de context/
+timeout 500 godot --headless --path . -- --selftest               # cena real, todas as noites
+cd .. && python3 lint.py                                            # integridade de context/
 ```
 
-- O **unit** roda todo `test_*` de `tests/test_*.gd` sobre os modelos `RefCounted`
-  (relógio, visita, catálogo, gravador, espelho, ecos, frestas, duplo, final,
-  lotes, plano, Gastos, mobilidade, trilha, opções). Hoje: 1059 checks.
-- O **selftest** monta a cena real e confere estados iniciais, portas, o laço com
-  uma cápsula do tamanho do jogador, as dobras, a cabana, o catálogo, o 03:33
-  (ecos, coisas das frestas, duplo), as provas sobre Inácio, a saída e o que fica
-  na maquete; e a expansão: quebráveis, pontos de espreita de cada andar, peça →
-  lote → fase, Gastos aparecendo fora da vista, abraço e volta ao ponto seguro,
-  fazer de conta, profundidade da trilha, a página do plano e as opções. Hoje: 241 checks.
-  Os dois harnesses contam erro de script como falha.
-- Nenhum dos dois substitui o playtest: não avaliam ritmo, medo, som nem leitura
-  da luz.
-
-## O clima da casa
-
-A tensão (0 a 1) acompanha a visita. Sobe enquanto o relógio corre, chega ao pico
-no 03:33, continua alta depois dele e solta quando Elias sai. Com ela:
-
-- as lâmpadas da casa baixam (nunca apagam);
-- a neblina engrossa e a luz ambiente cai;
-- um zumbido grave e a respiração de Elias sobem, sempre baixos;
-- as bordas da tela escurecem, com um grão leve;
-- as mãos tremem um pouco.
-
-Rangidos vêm de cômodos a pelo menos 4 m. A partir de 0,3 de tensão, a lâmpada
-mais próxima falha às vezes; perto do pico, a lanterna também. Não há susto,
-perseguição nem som alto: o medo vem do ambiente.
+- **Unit:** roda todo `test_*` de `tests/test_*.gd` sobre os modelos `RefCounted`.
+  Hoje são 2502 checks.
+- **Selftest:** monta a cena real e confere a casa, o laço, as noites, os
+  capítulos e as encenações, a bússola, a captura, a luz, o giz, a escuta, os
+  sustos, o 03:33, o final e o registro do playtest. Hoje são 449 checks, que
+  também passam no binário Linux exportado.
+- Os dois contam erro de script como falha. Nenhum substitui o playtest humano.
 
 ## Telas de revisão
 
@@ -133,69 +148,46 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-<modo>
 ```
 
 Modos: `playroom`, `atelier`, `corridor`, `fold`, `notebook`, `mirror`, `clock`,
-`top`, `hour`, `double`, `giant`, `ending`, `dread` (o corredor com a casa
-perto do 03:33), `leste` (a bancada a leste da redoma), `shop` (fachada da
-Relojoaria Varela), `dome` (o vidro rachado visto de fora), `plano` (o caderno
-nos lotes e no plano), `gasto` (um Gasto na gaveta, sob a lanterna), `opcoes`
-(a folha de opções). Cada um salva `blockout-<modo>.png`
-na raiz do projeto e fecha o Godot.
-
-## Caminho sugerido para o playtest
-
-1. Comece na entrada; dê corda ao relógio e catalogue o que achar.
-2. Visite o quarto de brincar, dobre F1 e agache na cabana (`C`). Feche os olhos
-   (`V`) diante do desenho e quebre o painel oco (`B`). Agache e ache a coroa.
-3. Suba pela escada no fim da passagem; o primeiro Gasto vem atrás. Na torre,
-   ache os ponteiros. Depois o alçapão do quarto e a gaveta; depois o vidro
-   rachado da redoma, a bancada e a Relojoaria Varela. Use `M` para ver o que falta.
-4. Faça o laço pelo corredor e pelo quarto; dobre F2/F4, role a bola, bata (`B`).
-   Olhe o espelho do quarto.
-5. Com as quatro peças, volte para casa e espere o 03:33 (ou `F9` em debug). Reconheça seus trajetos nos ecos.
-6. Depois, leia o caderno (`Tab`), ache a página da cabana e olhe pela porta da rua.
-7. Saia pela beira do tampo de três jeitos: cedo; sem dar corda depois do 03:33;
-   dando corda depois do 03:33.
+`top`, `hour`, `double`, `giant`, `ending`, `dread`, `leste`, `shop`, `dome`,
+`plano`, `gasto`, `opcoes`, `watch`. Cada um salva `blockout-<modo>.png` na raiz
+do projeto e fecha o Godot.
 
 ## Estrutura
 
 ```
 Janghyang/
-├── project.godot, main.tscn
+├── project.godot, main.tscn, export_presets.cfg
 ├── scripts/
-│   ├── main.gd                # constrói casa, tampo, oficina, móveis, UI; liga tudo
-│   ├── player.gd              # primeira pessoa, verbos, agachar, correr, pular, escadas, lanterna
-│   ├── areas/                 # passagem, sotao (e torre), gaveta, leste (Relojoaria Varela)
-│   ├── quest_model.gd         # (lógica) os cinco lotes e as peças
-│   ├── atlas.gd               # (lógica) cômodos por andar, o que Elias já viu
-│   ├── stalker_model.gd       # (lógica) um Gasto: onde espreita, quando chega
-│   ├── gastos.gd              # os Gastos: grafo de espreita, corpos, abraço
-│   ├── pretend.gd             # fazer de conta: pálpebras, sépia, giz
-│   ├── score_model.gd, score.gd  # trilha procedural por profundidade e ameaça
-│   ├── mobility_model.gd, ladder.gd, breakable.gd, piece.gd, turning_gear.gd
-│   ├── hands.gd               # mãos de Elias: vareta (B), lanterna, alcance (E)
-│   ├── dread_model.gd         # (lógica) o humor da casa ao longo da visita
-│   ├── dread.gd               # luz, neblina, zumbido, respiração, rangidos, vinheta
-│   ├── foldable.gd            # dobras e portas
-│   ├── ball.gd, music_box.gd, doll.gd, figure.gd, entry_clock.gd
-│   ├── wind_clock_model.gd    # (lógica) corda e 03:33
-│   ├── visit_state.gd         # (lógica) atos da visita e desfecho
-│   ├── catalog_data.gd, catalog.gd, catalog_target.gd
-│   ├── notebook_ui.gd         # caderno (Tab) e página dos lotes + plano (M)
-│   ├── settings_model.gd      # (lógica) opções: faixas, padrões, arquivo
-│   ├── settings_ui.gd         # folha de opções (Esc), pausa, aplica e salva
-│   ├── sfx_bank.gd            # som sintetizado, sem assets
-│   ├── echo_recorder.gd, echo.gd, mannequin.gd
-│   ├── mirror_brain.gd, house_mirror.gd, mirror_reflection.gd
-│   ├── hour_event.gd, crack_placement.gd, crack_thing.gd, double_writer.gd
-│   ├── ending_model.gd, ending.gd
-│   ├── tour.gd                # demonstração automática (--tour)
-│   └── selftest.gd
-├── tests/                     # run_unit.gd + test_*.gd
+│   ├── main.gd                 # monta a cena, liga tudo, começa e termina as noites
+│   ├── story/noites.gd         # (dados) as cinco noites: capítulos, metas, peças, Gastos, luz
+│   ├── areas/                  # registro de áreas: casa, passagem, sotao, mecanismo, gaveta, tampo, leste
+│   ├── maquetes/registry.gd    # (dados) as maquetes
+│   ├── campaign_model.gd       # (lógica) o que passa de uma noite para outra; save
+│   ├── chapter_model.gd, staging_model.gd   # capítulos, pistas, encenação, hipóteses
+│   ├── compass_model.gd, pocket_watch.gd    # o relógio-bússola
+│   ├── capture_model.gd, capture_fx.gd      # a luta com o Gasto
+│   ├── light_model.gd, light_pickup.gd      # luz escassa: pilhas, fósforos, velas
+│   ├── noise_model.gd, listen_model.gd      # barulho, respiração, escutar pela parede
+│   ├── fog_grid.gd, plan_model.gd, plan_revealer.gd   # a planta com névoa
+│   ├── scare_director.gd, dread_model.gd, dread.gd    # tensão e sustos
+│   ├── safety_model.gd         # refúgio por noite
+│   ├── lost_model.gd, playtest_log.gd       # registro do playtest (--playtest)
+│   ├── player.gd, hands.gd, hands_model.gd  # primeira pessoa, mãos, itens da esquerda
+│   ├── gastos.gd, stalker_model.gd, mannequin.gd
+│   ├── quest_model.gd, atlas.gd, catalog*.gd, notebook_ui.gd, night_card_ui.gd
+│   ├── hour_event.gd, echo*.gd, crack_*.gd, double_writer.gd, ending*.gd
+│   ├── settings_model.gd, settings_ui.gd, sfx_bank.gd (som sintetizado)
+│   ├── tour.gd, selftest.gd
+│   └── … (dobras, espelhos, peças, escadas, trilha)
+├── tests/                      # run_unit.gd + test_*.gd
 └── blockout-*.png
 ```
 
 Scripts de lógica são `RefCounted` puros, sem `class_name`, carregados por
-`preload` e testados no unit; os nós da cena só leem e escrevem neles.
+`preload` e testados no unit. Os nós da cena só leem e escrevem neles. Os arquivos
+`.uid` e `.import` do Godot são versionados.
 
-O design está em `../docs/superpowers/specs/2026-10-27-faz-de-conta-relojoeiro-design.md`
-(expansão: `../docs/superpowers/specs/2026-10-28-faz-de-conta-expansao-design.md`)
-e o plano em `../docs/superpowers/plans/2026-10-27-faz-de-conta-relojoeiro.md`.
+**Documentos:**
+- direção: `../docs/superpowers/specs/2026-11-08-janghyang-direcao-design.md`;
+- plano da demo: `../docs/superpowers/plans/2026-11-08-janghyang-demo.md`;
+- memória do projeto: `../context/index.md`.
