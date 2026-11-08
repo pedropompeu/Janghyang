@@ -26,11 +26,11 @@ func test_levels_group_rooms(t) -> void:
 	t.ok(not a.rooms_on(&"casa").has(&"sotao"), "attic is another sheet")
 
 func test_every_room_has_a_name_and_a_level(t) -> void:
-	for r in Atlas.ROOMS:
-		t.ok(r.name != "" and Atlas.LEVELS.has(r.level), "room %s" % r.id)
+	for r in Atlas.rooms():
+		t.ok(r.name != "" and Atlas.levels().has(r.level), "room %s" % r.id)
 
 func test_every_room_says_where_in_portuguese(t) -> void:
-	for r in Atlas.ROOMS:
+	for r in Atlas.rooms():
 		var at: String = Atlas.where(r.id)
 		t.ok(at.ends_with(r.name) and (at.begins_with("no ") or at.begins_with("na ")), "%s: %s" % [r.id, at])
 	t.eq(Atlas.where(&"passagem"), "na passagem", "feminine")

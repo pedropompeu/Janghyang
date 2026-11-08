@@ -26,6 +26,7 @@ const Hands = preload("res://scripts/hands.gd")
 const DreadModel = preload("res://scripts/dread_model.gd")
 const Dread = preload("res://scripts/dread.gd")
 const Breakable = preload("res://scripts/breakable.gd")
+const Registry = preload("res://scripts/areas/registry.gd")
 const AreaPassagem = preload("res://scripts/areas/passagem.gd")
 const AreaSotao = preload("res://scripts/areas/sotao.gd")
 const AreaGaveta = preload("res://scripts/areas/gaveta.gd")
@@ -51,7 +52,7 @@ const PANEL := Rect2(6.15, 0.0, 1.1, 1.25)
 const CRACKED_Z := Vector2(9.1, 12.5)
 ## Where Elias wakes after a hug or a fall, by the floor he is on: where that
 ## floor begins. The crawlspace has no room to stand, so its point is outside.
-const LEVEL_SAFE := {
+const _LEGACY_SAFE := {
 	&"casa": SPAWN,
 	&"passagem": Vector3(6.7, 0.2, 1.2),
 	&"sotao": Vector3(9.8, 3.14, 0.55),
@@ -60,9 +61,15 @@ const LEVEL_SAFE := {
 	&"tampo": AreaLeste.SAFE,
 }
 ## Lots struck by setting foot somewhere, breaking something, or cataloguing.
-const ROOM_TASKS := {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}
-const BREAK_TASKS := {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}
-const CATALOG_TASKS := {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}
+const _LEGACY_ROOM_TASKS := {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}
+const _LEGACY_BREAK_TASKS := {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}
+const _LEGACY_CATALOG_TASKS := {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}
+## The maps main reads: the legacy ones above with every registered area's own
+## entries over them (an area's word wins once it has moved to the registry).
+var LEVEL_SAFE: Dictionary = _LEGACY_SAFE.merged(Registry.safe_points(), true)
+var ROOM_TASKS: Dictionary = _LEGACY_ROOM_TASKS.merged(Registry.merged("tasks"), true)
+var BREAK_TASKS: Dictionary = _LEGACY_BREAK_TASKS.merged(Registry.merged("breaks"), true)
+var CATALOG_TASKS: Dictionary = _LEGACY_CATALOG_TASKS.merged(Registry.merged("catalog"), true)
 
 signal exit_edge_reached
 signal cataloged(entry: Dictionary)

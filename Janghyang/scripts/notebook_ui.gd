@@ -165,7 +165,7 @@ func page_text() -> String:
 func plan_text() -> String:
 	var parts: Array[String] = [_lots.text]
 	for lvl in _levels_seen():
-		parts.append(String(atlas.LEVELS[lvl]))
+		parts.append(String(atlas.levels()[lvl]))
 	for id in _rooms_drawn():
 		parts.append(String(atlas.room(id).name))
 	return "\n".join(parts)
@@ -181,7 +181,7 @@ func _lots_bbcode() -> String:
 
 func _levels_seen() -> Array[StringName]:
 	var out: Array[StringName] = []
-	for lvl in atlas.LEVELS:
+	for lvl in atlas.levels():
 		for id in atlas.rooms_on(lvl):
 			if atlas.visited.has(id):
 				out.append(lvl)
@@ -203,7 +203,7 @@ func _draw_map() -> void:
 	var tabs_y := 30.0
 	var x := 26.0
 	for lvl in _levels_seen():
-		var name := String(atlas.LEVELS[lvl])
+		var name := String(atlas.levels()[lvl])
 		var col := INK if lvl == _plan_level else RULE.darkened(0.3)
 		_map.draw_string(_font, Vector2(x, tabs_y), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, col)
 		var w := _font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x

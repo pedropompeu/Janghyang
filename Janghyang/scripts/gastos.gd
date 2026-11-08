@@ -116,11 +116,11 @@ func _build_graphs() -> void:
 	var atlas := Atlas.new()
 	for l in main.find_children("*", "OmniLight3D", true, false):
 		_lamps.append(l)
-	for lvl in Atlas.LEVELS:
+	for lvl in Atlas.levels():
 		if REFUGE.has(lvl):
 			continue
 		var pts: Array[Vector3] = []
-		for r in Atlas.ROOMS:
+		for r in Atlas.rooms():
 			if r.level != lvl:
 				continue
 			for x in _rows(r.rect.position.x, r.rect.size.x):

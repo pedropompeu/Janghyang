@@ -3,12 +3,18 @@ extends RefCounted
 ## which ones he has set foot in. Rects are on the floor (x, z); a room also
 ## has a height band so the attic is not the playroom. Order matters: the
 ## first room that contains a point wins (the tower sits inside the attic).
+##
+## The rooms come from the area registry; the LEGACY_ lists hold the areas not
+## yet moved there. rooms() puts a registered area's rooms where its legacy
+## rooms stood, so the order never changes while the move is under way.
+
+const Registry = preload("res://scripts/areas/registry.gd")
 
 const ATTIC_Y := 2.94
 const ATTIC_TOP := 5.24
 const DRAWER_Y := -3.2
 
-const LEVELS := {
+const LEGACY_LEVELS := {
 	&"casa": "A casa",
 	&"passagem": "A passagem",
 	&"sotao": "O sótão",
@@ -17,7 +23,7 @@ const LEVELS := {
 	&"tampo": "O tampo",
 }
 
-const ROOMS := [
+const LEGACY_ROOMS := [
 	{"id": &"entrada", "name": "entrada", "level": &"casa", "rect": Rect2(0.0, 7.0, 3.5, 2.1), "y": Vector2(-0.4, 2.8)},
 	{"id": &"brincar", "name": "quarto de brincar", "level": &"casa", "rect": Rect2(0.0, 0.0, 8.4, 7.0), "y": Vector2(-0.4, 2.8)},
 	{"id": &"corredor", "name": "corredor", "level": &"casa", "rect": Rect2(8.4, 0.0, 2.1, 7.7), "y": Vector2(-0.4, 2.8)},
@@ -40,9 +46,39 @@ const FEMININE := [&"entrada", &"figuras", &"beira_oeste", &"beira_sul", &"passa
 
 var visited: Dictionary = {}
 
+static var _rooms: Array = []
+static var _levels: Dictionary = {}
+
+## Every room of the bench, in order: legacy ones and registered areas merged.
+static func rooms() -> Array:
+	if _rooms.is_empty():
+		var done := {}
+		for r in LEGACY_ROOMS:
+			if Registry.has_area(r.level):
+				if not done.has(r.level):
+					done[r.level] = true
+					_rooms.append_array(Registry.def(r.level).rooms)
+			else:
+				_rooms.append(r)
+		for d in Registry.defs():
+			if not done.has(d.id):
+				_rooms.append_array(d.rooms)
+	return _rooms
+
+## Level id → its name on the plan, in today's order, then new areas.
+static func levels() -> Dictionary:
+	if _levels.is_empty():
+		var reg := Registry.levels()
+		for lvl in LEGACY_LEVELS:
+			_levels[lvl] = reg.get(lvl, LEGACY_LEVELS[lvl])
+		for lvl in reg:
+			if not _levels.has(lvl):
+				_levels[lvl] = reg[lvl]
+	return _levels
+
 ## "na passagem", "no corredor": where something happened, for the notebook.
 static func where(id: StringName) -> String:
-	for r in ROOMS:
+	for r in rooms():
 		if r.id == id:
 			return ("na " if FEMININE.has(id) else "no ") + r.name
 	return "na casa"
@@ -53,7 +89,7 @@ func room_at(pos: Vector3) -> StringName:
 
 func room_data(pos: Vector3) -> Dictionary:
 	var p := Vector2(pos.x, pos.z)
-	for r in ROOMS:
+	for r in rooms():
 		if r.rect.has_point(p) and pos.y >= r.y.x and pos.y < r.y.y:
 			return r
 	return {}
@@ -67,20 +103,20 @@ func visit(pos: Vector3) -> StringName:
 	return id
 
 func level_of(id: StringName) -> StringName:
-	for r in ROOMS:
+	for r in rooms():
 		if r.id == id:
 			return r.level
 	return &""
 
 func rooms_on(level: StringName) -> Array[StringName]:
 	var out: Array[StringName] = []
-	for r in ROOMS:
+	for r in rooms():
 		if r.level == level:
 			out.append(r.id)
 	return out
 
 func room(id: StringName) -> Dictionary:
-	for r in ROOMS:
+	for r in rooms():
 		if r.id == id:
 			return r
 	return {}
