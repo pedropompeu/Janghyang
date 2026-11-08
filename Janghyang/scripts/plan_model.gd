@@ -8,12 +8,16 @@ const FogGrid = preload("res://scripts/fog_grid.gd")
 const Atlas = preload("res://scripts/atlas.gd")
 
 const KINDS: Array[StringName] = [&"gasto", &"item", &"barricada", &"ancora", &"giz"]
+## Elias's chalk marks, on every sheet together: the 21st wipes the oldest.
+const MAX_MARKS := 20
 
 var _fogs: Dictionary = {}
 ## Saved fog waiting for its grid (made when first asked for).
 var _pending: Dictionary = {}
 ## level → Array of {"at", "kind", "label", "time", "id"}
 var _notes: Dictionary = {}
+## [level, note] of every chalk mark, oldest first.
+var _marks: Array = []
 
 ## The fog of `level`, made on first use; null for a level with no rooms.
 func fog(level: StringName) -> FogGrid:
@@ -46,8 +50,20 @@ func note(level: StringName, at: Vector3, kind: StringName, label: String, time:
 				n.label = label
 				n.time = time
 				return
-	list.append({"at": at, "kind": kind, "label": label, "time": time, "id": id})
+	var n := {"at": at, "kind": kind, "label": label, "time": time, "id": id}
+	list.append(n)
 	_notes[level] = list
+	if kind == &"giz":
+		_marks.append([level, n])
+		if _marks.size() > MAX_MARKS:
+			_wipe(_marks.pop_front())
+
+func _wipe(mark: Array) -> void:
+	var list: Array = _notes.get(mark[0], [])
+	for k in list.size():
+		if is_same(list[k], mark[1]):
+			list.remove_at(k)
+			return
 
 func notes_on(level: StringName) -> Array:
 	return _notes.get(level, []).duplicate()
@@ -86,6 +102,7 @@ func from_dict(d: Dictionary) -> void:
 	_fogs.clear()
 	_pending.clear()
 	_notes.clear()
+	_marks.clear()
 	var fogs = d.get("fog", {})
 	if fogs is Dictionary:
 		for level in fogs:

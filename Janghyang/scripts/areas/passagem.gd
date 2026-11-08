@@ -29,6 +29,10 @@ const DEF := {
 		{"id": &"vela_passagem", "kind": &"vela", "at": Vector3(5.0, 0.05, -1.1)},
 		{"id": &"fosforo_passagem", "kind": &"fosforo", "at": Vector3(8.0, 0.05, -1.0), "n": 4},
 	],
+	## The boy's chalk trail (main._build_chalk_trails), seen with eyes closed.
+	"chalk": [
+		{"id": &"giz_passagem", "points": [Vector3(6.0, 0.006, -0.65), Vector3(4.8, 0.006, -0.65), Vector3(3.6, 0.006, -0.8)], "leads_to": &"pilha_passagem"},
+	],
 	"breaks": {"HollowPanel": &"achar_passagem"},
 }
 

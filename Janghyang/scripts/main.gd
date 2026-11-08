@@ -141,6 +141,8 @@ var plan_revealer
 ## Scarce light (light_model.gd): the lantern's battery and the match.
 var light = LightModel.new()
 var _match_glow: OmniLight3D
+## Elias's own chalk marks (G), oldest first; the plan keeps the last MAX_MARKS.
+var _chalk_marks: Array[MeshInstance3D] = []
 var _lantern_energy := 0.0
 var _light_time := 0.0
 var _dark: Array[Tween] = []
@@ -177,6 +179,7 @@ func _ready() -> void:
 	for area in Registry.AREAS:
 		area.build(self)
 	_build_light_pickups()
+	_build_chalk_trails()
 	_build_giant_elias()
 	_build_player()
 	# F1 never folds onto a player sitting in the cabana.
@@ -192,6 +195,7 @@ func _ready() -> void:
 	_wire_story()
 	_wire_light()
 	_wire_noise()
+	player.chalked.connect(chalk_mark)
 
 	var args := OS.get_cmdline_user_args()
 	if args.has("--labels"):
@@ -989,6 +993,64 @@ func _build_light_pickups() -> void:
 
 ## The match's flame in the left hand, the lantern's own energy, and the
 ## Gastos fearing every flame.
+## Task 21: Elias's chalk on a wall: a square seen with eyes open, a giz note
+## on the plan; past PlanModel.MAX_MARKS the oldest mark goes from both.
+func chalk_mark(at: Vector3, normal: Vector3) -> MeshInstance3D:
+	var root := get_node_or_null("EliasChalk") as Node3D
+	if root == null:
+		root = Node3D.new()
+		root.name = "EliasChalk"
+		add_child(root)
+	var mi := _chalk(root, Vector3(0.16, 0.16, 0.004), Vector3.ZERO)
+	mi.remove_from_group(&"Chalk")
+	mi.add_to_group(&"EliasChalk")
+	mi.visible = true
+	var up := Vector3.UP if absf(normal.y) < 0.9 else Vector3.FORWARD
+	mi.global_transform = Transform3D(Basis.looking_at(-normal, up), at + normal * 0.004)
+	_chalk_marks.append(mi)
+	var level: StringName = atlas.level_of(atlas.room_at(at + normal * 0.3 + Vector3(0.0, 0.1, 0.0)))
+	var now: float = visit.elapsed if visit != null else 0.0
+	plan_model.note(level, at, &"giz", "giz", now)
+	while _chalk_marks.size() > PlanModel.MAX_MARKS:
+		_chalk_marks.pop_front().queue_free()
+	return mi
+
+## The boy's chalk trails (DEF `chalk`): arrows on the floor, one per point,
+## each toward the next and the last toward what the trail leads to; seen
+## only with eyes closed, like the rest of his chalk.
+func _build_chalk_trails() -> void:
+	var root := Node3D.new()
+	root.name = "ChalkTrails"
+	add_child(root)
+	for def in Registry.defs():
+		for trail in def.chalk:
+			var pts: Array = trail.points
+			var end := chalk_target(trail.leads_to)
+			for k in pts.size():
+				var p: Vector3 = pts[k]
+				var next: Vector3 = pts[k + 1] if k + 1 < pts.size() else end
+				var to := Vector2(next.x - p.x, next.z - p.z)
+				if to.length() < 0.01:
+					to = Vector2(1.0, 0.0)
+				var yaw := atan2(-to.y, to.x)
+				var arrow := Node3D.new()
+				arrow.name = "%s_%d" % [trail.id, k]
+				arrow.position = p
+				arrow.rotation.y = yaw
+				root.add_child(arrow)
+				_chalk(arrow, Vector3(0.5, 0.01, 0.04), Vector3.ZERO)
+				_chalk(arrow, Vector3(0.22, 0.01, 0.04), Vector3(0.18, 0.0, 0.07), Vector3(0.0, 0.7, 0.0))
+				_chalk(arrow, Vector3(0.22, 0.01, 0.04), Vector3(0.18, 0.0, -0.07), Vector3(0.0, -0.7, 0.0))
+
+## Where a trail's `leads_to` stands: a light pickup or a catalog target
+## (Vector3.INF when neither exists).
+func chalk_target(id: StringName) -> Vector3:
+	var p: Dictionary = LightModel.pickup(id)
+	if not p.is_empty():
+		return p.at
+	var n := find_child("Catalog_" + String(id), true, false) as Node3D
+	return n.global_position if n != null else Vector3.INF
+
 ## Task 20: what Elias does makes noise, and the Gastos near enough hear it.
 func _wire_noise() -> void:
 	player.noised.connect(gastos.hear)

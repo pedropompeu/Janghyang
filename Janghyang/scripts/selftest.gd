@@ -425,6 +425,7 @@ func _run() -> void:
 	_record(gastos.placed().is_empty(), "the Gastos scatter after a hug", "")
 	await _capture(gastos)
 	await _noise(gastos)
+	await _giz()
 	main.player.set_pretending(true)
 	await get_tree().create_timer(0.9).timeout
 	var chalk := get_tree().get_nodes_in_group(&"Chalk")
@@ -1128,6 +1129,69 @@ func _noise(g) -> void:
 	pl.global_position = saved
 	g._heard.clear()
 	g.scatter()
+	await get_tree().physics_frame
+
+## Task 21: the boy's trails of night 1 end by what they lead to and hide
+## with eyes open; G marks a wall within reach, never a ceiling, and the
+## 21st mark wipes the oldest from the wall and the plan.
+func _giz() -> void:
+	print("SELFTEST: giz")
+	var pl = main.player
+	var night1: Array = main.Noites.get_night(1).get("pickups", [])
+	var trails := 0
+	for def in main.Registry.defs():
+		var mine: bool = def.pickups.any(func(p) -> bool: return night1.has(p.id))
+		if not mine:
+			continue
+		for trail in def.chalk:
+			trails += 1
+			var end: Vector3 = trail.points[-1]
+			var target: Vector3 = main.chalk_target(trail.leads_to)
+			_record(end.distance_to(target) < 1.5, "giz: the trail %s ends by %s" % [trail.id, trail.leads_to], "%.2f m" % end.distance_to(target))
+	_record(trails >= 2, "giz: night 1 has the boy's trails to follow", str(trails))
+	var arrows: Array = main.get_node("ChalkTrails").get_children()
+	_record(not arrows.is_empty() and arrows.all(func(a) -> bool: return a.get_child(0).is_in_group(&"Chalk") and not a.get_child(0).visible), "giz: the boy's trails show only with eyes closed", str(arrows.size()))
+	var saved: Vector3 = pl.global_position
+	var saved_yaw: float = pl.rotation.y
+	pl.global_position = Vector3(4.2, 0.2, 3.5)
+	pl.camera.rotation.x = PI * 0.5 - 0.05
+	await get_tree().physics_frame
+	_record(not pl.chalk(), "giz: the ceiling takes no chalk", "")
+	pl.camera.rotation.x = 0.0
+	var marked := false
+	for k in 16:
+		pl.rotation.y = TAU * k / 16.0
+		await get_tree().physics_frame
+		for d in 12:
+			pl.global_position = Vector3(4.2, 0.2, 3.5) + (-pl.global_basis.z) * d * 0.3
+			await get_tree().physics_frame
+			if pl.chalk():
+				marked = true
+				break
+		if marked:
+			break
+	var marks: Array = get_tree().get_nodes_in_group(&"EliasChalk")
+	var level: StringName = main.atlas.level_of(main.atlas.room_at(pl.global_position + Vector3(0.0, 0.3, 0.0)))
+	var notes: Array = main.plan_model.notes_on(level).filter(func(n) -> bool: return n.kind == &"giz")
+	_record(marked and marks.size() == 1 and marks[0].visible, "giz: G marks the wall ahead, seen with eyes open", "%s %d" % [marked, marks.size()])
+	_record(notes.size() == 1, "giz: the mark goes on the plan", str(notes.size()))
+	for k in main.PlanModel.MAX_MARKS:
+		pl.chalk()
+	await get_tree().process_frame
+	marks = get_tree().get_nodes_in_group(&"EliasChalk")
+	notes = main.plan_model.notes_on(level).filter(func(n) -> bool: return n.kind == &"giz")
+	_record(marks.size() == main.PlanModel.MAX_MARKS and notes.size() == main.PlanModel.MAX_MARKS, "giz: the 21st mark wipes the oldest", "%d %d" % [marks.size(), notes.size()])
+	for m in marks:
+		m.queue_free()
+	main._chalk_marks.clear()
+	var fresh = main.PlanModel.new()
+	var d: Dictionary = main.plan_model.to_dict()
+	for lvl in d.notes:
+		d.notes[lvl] = (d.notes[lvl] as Array).filter(func(n) -> bool: return n.kind != "giz")
+	fresh.from_dict(d)
+	main.plan_model.from_dict(fresh.to_dict())
+	pl.global_position = saved
+	pl.rotation.y = saved_yaw
 	await get_tree().physics_frame
 
 ## Puts a Gasto at arm's length behind Elias, its next step due; returns which

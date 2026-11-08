@@ -41,11 +41,15 @@ signal pushed
 signal noised(at: Vector3, level: int)
 ## Held too long: the breath bursts out.
 signal gasped
+## G on a wall within CHALK_REACH: a chalk mark at `at`, facing `normal`.
+signal chalked(at: Vector3, normal: Vector3)
 
 const VERBS := {&"Ball": &"rolar", &"Doll": &"boneco", &"MusicBox": &"musica", &"Figure": &"vela", &"EntryClock": &"corda"}
 
 const EXAMINE_FOV := 45.0
 const KNOCK_REACH := 1.5
+## Chalk (G) takes on a wall this close along the look.
+const CHALK_REACH := 2.0
 const CLIMB_SPEED := 1.7
 const RUNG := 0.32
 ## Falls below this are taken back to the respawn point.
@@ -150,6 +154,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_want_jump = true
 			KEY_F:
 				flashlight.visible = not flashlight.visible
+			KEY_G:
+				chalk()
 
 func _physics_process(delta: float) -> void:
 	var input_dir := Vector2.ZERO
@@ -223,6 +229,20 @@ func _physics_process(delta: float) -> void:
 	if position.y < FALL_LIMIT:
 		position = respawn_point
 		velocity = Vector3.ZERO
+
+## A chalk mark on the wall straight ahead, if one stands within
+## CHALK_REACH; floors, ceilings and Gastos take none.
+func chalk() -> bool:
+	var from := camera.global_position
+	var q := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * CHALK_REACH, 1)
+	q.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty() or absf((hit.normal as Vector3).y) > 0.5:
+		return false
+	if hit.collider != null and (hit.collider as Node).is_in_group(&"Gasto"):
+		return false
+	chalked.emit(hit.position, hit.normal)
+	return true
 
 ## One footfall: its sound, and its noise for the Gastos.
 func step() -> void:

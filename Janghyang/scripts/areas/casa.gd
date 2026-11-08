@@ -41,6 +41,11 @@ const DEF := {
 		{"id": &"fosforo_entrada", "kind": &"fosforo", "at": Vector3(0.6, 0.05, 8.6), "n": 4},
 		{"id": &"fosforo_corredor_sul", "kind": &"fosforo", "at": Vector3(9.8, 0.05, 8.6), "n": 4},
 	],
+	## The boy's chalk trails (main._build_chalk_trails), seen with eyes closed.
+	"chalk": [
+		{"id": &"giz_figuras", "points": [Vector3(8.2, 0.006, 8.4), Vector3(10.0, 0.006, 8.4), Vector3(11.4, 0.006, 8.5), Vector3(12.2, 0.006, 8.6)], "leads_to": &"pilha_figuras"},
+		{"id": &"giz_quarto", "points": [Vector3(9.45, 0.006, 5.0), Vector3(9.45, 0.006, 3.0), Vector3(10.9, 0.006, 1.6), Vector3(11.0, 0.006, 1.1)], "leads_to": &"pilha_quarto"},
+	],
 	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"},
 }
 

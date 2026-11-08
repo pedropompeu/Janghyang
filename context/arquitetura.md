@@ -180,3 +180,9 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - `player.gd`: sinais `noised(at, level)` e `gasped`; `breath`, `step()`, `step_level()`; `H` prende a respiração; a batida da vareta é LOUD.
   - `main.gd`: `_wire_noise()` (passos, batidas, ofego, corda do relógio da entrada LOUD, tique do relógio aberto QUIET a `Compass.HEARD_RADIUS`).
   - Contagens: unit 2393/0, selftest 412/0 (checks `ruido:`).
+- [2026-11-08] (e) ← `Janghyang/scripts/plan_model.gd`, `scripts/player.gd`, `scripts/main.gd`, `scripts/areas/casa.gd`, `scripts/areas/passagem.gd` Tarefa 21, o giz:
+  - `plan_model.gd`: `MAX_MARKS` 20; as notas `giz` de todas as folhas numa fila (`_marks`), a 21ª apaga a mais antiga.
+  - `player.gd`: `CHALK_REACH` 2,0, sinal `chalked(at, normal)`, `chalk()` (G; só parede, nunca piso, teto ou Gasto).
+  - `main.gd`: `chalk_mark(at, normal)` (nó `EliasChalk`, grupo `EliasChalk`, visível de olhos abertos), `_build_chalk_trails()` (nó `ChalkTrails`, setas no grupo `Chalk`), `chalk_target(id)` (pickup ou `Catalog_<id>`).
+  - DEFs: chave `chalk` (`{id, points, leads_to}`): `giz_figuras`, `giz_quarto` (casa), `giz_passagem`.
+  - Contagens: unit 2402/0, selftest 421/0 (checks `giz:`).
