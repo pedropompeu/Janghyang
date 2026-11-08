@@ -87,8 +87,8 @@ Para ver só o teste da tarefa: `... run_unit.gd 2>&1 | grep -E "UNIT: test_<arq
 |---|---|---|
 | U00, U01, U10–U16, U20, U33–U37, U43, U60 | concluídas | — |
 | U02 export templates | já instalados: `~/.local/share/godot/export_templates/4.7.2.stable` | Tarefa 1 só registra |
-| U30 todo ponto de espreita alcança toda meta | aberta | Tarefa 2 |
-| U31 pancadas depois da quebra | aberta | Tarefa 2 |
+| U30 todo ponto de espreita alcança toda meta | já feita em 2026-11-07 (`e430d7b`), conferida por mutante em 2026-11-08 | Tarefa 2 |
+| U31 pancadas depois da quebra | já feita em 2026-11-07 (`af3a440`), conferida por mutante em 2026-11-08 | Tarefa 2 |
 | U32 gate do 03:33 | aberta, regra mudou (§5.1) | Tarefa 11, adaptada à noite |
 | U38 gate da fase 3 e D2 congelamento | obsoletas: o escopo foi reaberto (R10) | — |
 | U40 luz da oficina, U41 relógio em captura | abertas, D7 | Tarefa 43 |
@@ -185,6 +185,8 @@ Para ver só o teste da tarefa: `... run_unit.gd 2>&1 | grep -E "UNIT: test_<arq
 - [ ] **Step 3:** Fechar com `T1: complete`. Não há commit, porque o ledger é ignorado pelo git.
 
 ### Tarefa 2: Testes herdados U30 e U31
+
+> **Executada em 2026-11-08:** os dois testes já existiam (`test_every_lurk_point_walks_back_to_every_goal`, com uma grade 3×3, e `test_hits_after_break_change_nothing`, que também confere o sinal único). A tarefa ficou só na prova por mutante (Step 2); os Steps 1 e 4 não se aplicam.
 
 **Files:** Modify `Janghyang/tests/test_stalker_model.gd`, `Janghyang/tests/test_breakable.gd`. Ler `scripts/stalker_model.gd:94` (`next_toward`) e `scripts/breakable.gd:16` (`hit`).
 
