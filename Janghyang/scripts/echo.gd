@@ -72,7 +72,7 @@ func _process(delta: float) -> void:
 	_t += delta
 	var before := global_position
 	var s := sample_at(_t)
-	_apply(s)
+	_apply(s, delta)
 	if sfx == null:
 		return
 	_walked += Vector2(global_position.x - before.x, global_position.z - before.z).length()
@@ -84,9 +84,13 @@ func _process(delta: float) -> void:
 		if s.action != &"":
 			sfx.play_at(&"click", global_position + Vector3(0.0, 1.0, 0.0), &"Casa", VOLUME_DB)
 
-func _apply(s: Dictionary) -> void:
+## Puts the echo where the sample says; over `delta` seconds of play it walks
+## there, legs and arms in step with the ground it covered.
+func _apply(s: Dictionary, delta := 0.0) -> void:
 	if s.is_empty():
 		return
-	global_position = s.pos
+	var to: Vector3 = s.pos
+	_body.walk(Vector2(to.x - global_position.x, to.z - global_position.z).length(), delta)
+	global_position = to
 	_body.set_look(s.yaw, s.pitch)
 	_body.set_pose(&"agachado" if s.crouched else &"em_pe")

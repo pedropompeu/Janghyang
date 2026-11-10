@@ -25,6 +25,15 @@ const ARM_SPLAY := 4.0
 ## Hip joint heights for the poses (figure space, before scale).
 const SEAT_Y := 0.45
 const FLOOR_Y := 0.13
+## Walking: the ground one cycle (two steps) covers, for a body at scale 1; the
+## pace that makes a full stride; how far the thighs swing at full stride and
+## how much of that the arms take (radians); faster than this is a jump, not a
+## step (an echo's loop starting over).
+const STRIDE_CYCLE := 1.4
+const STRIDE_PACE := 2.2
+const STRIDE_SWING := 0.42
+const ARM_SWING := 0.55
+const JUMP_PACE := 8.0
 
 var _hips: Node3D
 var _head: Node3D
@@ -34,6 +43,12 @@ var _arms := {}
 var _mats := {}
 var _layers := 1
 var _seat: Node3D
+var _pose := &"em_pe"
+## The walk: where along its cycle (radians), how wide (0..1), and whether the
+## last stride drawn left the body off its rest.
+var _stride_phase := 0.0
+var _stride := 0.0
+var _striding := false
 
 # The skinned figure, when its model loaded.
 var _skel: Skeleton3D
@@ -102,8 +117,12 @@ func has_model() -> bool:
 func set_pose(pose: StringName) -> void:
 	if _hips == null:
 		return
+	_pose = pose
+	if pose != &"em_pe":
+		_stride = 0.0
 	if has_model():
 		_pose_model(pose)
+		_apply_stride()
 		_sync()
 		return
 	var hip_y := 0.85
@@ -124,6 +143,34 @@ func set_pose(pose: StringName) -> void:
 	_torso.rotation.x = lean
 	for leg in _legs:
 		leg.rotation.x = leg_angle
+	_apply_stride()
+
+## Walks the body over `moved` metres of ground in `delta` seconds: the legs
+## and arms swing in step, a stride as wide as the pace allows (STRIDE_PACE and
+## up is a full one), easing in and out. Only a standing body walks; a jump
+## faster than JUMP_PACE is no step. The bones follow on the next frame.
+func walk(moved: float, delta: float) -> void:
+	if delta <= 0.0:
+		return
+	var pace := moved / delta
+	if pace > JUMP_PACE:
+		moved = 0.0
+		pace = 0.0
+	var wide := clampf(pace / STRIDE_PACE, 0.0, 1.0) if _pose == &"em_pe" else 0.0
+	_stride = move_toward(_stride, wide, delta * 4.0)
+	_stride_phase = fposmod(_stride_phase + moved / (STRIDE_CYCLE * scale.x) * TAU, TAU)
+	_apply_stride()
+
+## Holds the body mid-step: `phase` along the cycle (radians; PI/2 is the left
+## foot ahead), `amount` of a full stride. Standing only.
+func set_stride(phase: float, amount: float) -> void:
+	_stride_phase = fposmod(phase, TAU)
+	_stride = clampf(amount, 0.0, 1.0) if _pose == &"em_pe" else 0.0
+	_apply_stride()
+
+## How wide the body is striding now (0 standing still, 1 a full stride).
+func stride() -> float:
+	return _stride
 
 func set_look(yaw: float, pitch: float) -> void:
 	rotation.y = yaw
@@ -220,6 +267,49 @@ func add_notebook() -> void:
 	var book := _part(_hips, Vector3(0.22, 0.025, 0.3), Vector3(0.0, lap, -0.3), &"paper")
 	book.rotation.x = deg_to_rad(-10.0)
 	book.layers = _layers
+
+## Lays the stride over the standing pose: each thigh swings opposite the
+## other, the knee of the leg coming forward bends, the arms swing against the
+## legs, the hips dip as the legs spread (so the planted foot stays down) and
+## the shoulders turn a little. A body that never strode is left as it is, so
+## a reaching arm keeps its reach.
+func _apply_stride() -> void:
+	if _hips == null or _pose != &"em_pe":
+		_striding = false
+		return
+	if _stride <= 0.0 and not _striding:
+		return
+	_striding = _stride > 0.0
+	var a := _stride
+	var swing := a * STRIDE_SWING
+	# How far the lowest ankle hangs under the hip joints, standing and now:
+	# the hips come down by the difference, so that foot stays on the floor.
+	var rest_drop := 0.85
+	var drop := 0.0
+	var thighs := []
+	for i in _legs.size():
+		var side := -1.0 if i == 0 else 1.0
+		var thigh := -side * swing * sin(_stride_phase)
+		thighs.append(thigh)
+		_legs[i].rotation.x = thigh
+		if i < _knees.size():
+			var knee := -a * (0.08 + 0.7 * maxf(0.0, -side * cos(_stride_phase)))
+			_knees[i].rotation.x = knee
+			# The leading foot comes down nearly flat, heel first; the one
+			# behind pushes off, heel up and toes down.
+			_feet[i].rotation.x = -(thigh + knee) * (0.6 if thigh + knee > 0.0 else 0.2)
+			var g: Dictionary = _leg_geo[i]
+			rest_drop = g.l1 * cos(g.a1) + g.l2 * cos(g.a2)
+			drop = maxf(drop, g.l1 * cos(g.a1 + thigh) + g.l2 * cos(g.a2 + thigh + knee))
+		else:
+			drop = maxf(drop, rest_drop * cos(thigh))
+	var hip_y: float = _hip_rest.y if has_model() else 0.85
+	_hips.position.y = hip_y - (rest_drop - drop)
+	_torso.rotation.y = 0.08 * a * sin(_stride_phase)
+	for side in _arms:
+		# Each arm swings with the leg of the other side.
+		var arm: Node3D = _arms[side]
+		arm.rotation = Vector3(thighs[0 if side > 0.0 else 1] * ARM_SWING, 0.0, deg_to_rad(side * ARM_SPLAY))
 
 # --- The sculpted figure --------------------------------------------------
 

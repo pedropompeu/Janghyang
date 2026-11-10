@@ -125,3 +125,94 @@ func test_a_seat_holds_a_sitting_figure_and_hides_otherwise(t) -> void:
 		m.set_seat(false)
 		t.ok(not seat.visible, "%s: the seat goes when the figure stands" % body)
 		m.free()
+
+## Walks the figure at `pace` m/s for `seconds`, in 60 Hz frames.
+func _walk(m, pace: float, seconds: float) -> void:
+	var dt := 1.0 / 60.0
+	for k in roundi(seconds / dt):
+		m.walk(pace * dt, dt)
+	m.sync_pose()
+
+func test_a_stride_puts_one_leg_ahead_and_the_other_arm_forward(t) -> void:
+	for body in [&"adulto", &"nenhum"]:
+		var m = _figure(body)
+		m.set_stride(PI * 0.5, 1.0)
+		m.sync_pose()
+		t.ok(m._legs[0].rotation.x > 0.2 and m._legs[1].rotation.x < -0.2, "%s: the left leg ahead, the right behind" % body)
+		t.ok(m.arm(1.0).rotation.x > 0.1 and m.arm(-1.0).rotation.x < -0.1, "%s: the right arm swings forward with the left leg" % body)
+		m.free()
+	var f = _figure()
+	f.set_stride(PI * 0.5, 1.0)
+	f.sync_pose()
+	t.ok(f.bone_position(&"foot.L").z < f.bone_position(&"foot.R").z - 0.3, "the left foot a step ahead of the right")
+	t.ok(f.bone_position(&"hand.R").z < f.bone_position(&"hand.L").z - 0.1, "the right hand ahead of the left")
+	t.near(f.bone_position(&"foot.L").y, 0.09, 0.02, "mid-stride, the leading foot is on the floor")
+	t.ok(f.bone_position(&"foot.R").y < 0.21, "the foot behind lifts its heel, no more")
+	t.ok(f.bone_transform(&"foot.R").basis.y.y < f.bone_transform(&"foot.L").basis.y.y - 0.2, "the foot behind tips its toes down")
+	f.free()
+
+func test_walking_steps_with_the_ground_covered(t) -> void:
+	for body in [&"adulto", &"nenhum"]:
+		var m = _figure(body)
+		_walk(m, 2.6, 1.0)
+		t.near(m.stride(), 1.0, 0.01, "%s: at walking pace, a full stride" % body)
+		var l: float = m._legs[0].rotation.x
+		var r: float = m._legs[1].rotation.x
+		t.near(l, -r, 0.001, "%s: the legs swing opposite each other" % body)
+		# Half a cycle of ground further on, the legs have traded places.
+		_walk(m, 2.6, Mannequin.STRIDE_CYCLE * 0.5 / 2.6)
+		t.near(m._legs[0].rotation.x, r, 0.02, "%s: half a cycle on, the left leg is where the right was" % body)
+		m.free()
+	var boy = Mannequin.new()
+	boy.build(STYLE, 0.45, &"menino")
+	var man = _figure()
+	_walk(boy, 1.0, 1.0)
+	_walk(man, 1.0, 1.0)
+	t.ok(absf(boy._legs[0].rotation.x - man._legs[0].rotation.x) > 0.05, "a smaller body takes more steps over the same ground")
+	boy.free()
+	man.free()
+
+func test_stopping_brings_the_body_back_to_rest(t) -> void:
+	for body in [&"adulto", &"nenhum"]:
+		var m = _figure(body)
+		var head: float = m.bone_position(&"head").y
+		_walk(m, 2.6, 1.0)
+		_walk(m, 0.0, 1.0)
+		t.near(m.stride(), 0.0, 0.001, "%s: standing still, no stride" % body)
+		for leg in m._legs:
+			t.near(leg.rotation.x, 0.0, 0.001, "%s: the legs back under the body" % body)
+		t.near(m.arm(1.0).rotation.x, 0.0, 0.001, "%s: the arms hang again" % body)
+		t.near(m.bone_position(&"head").y, head, 0.005, "%s: back at its full height" % body)
+		m.free()
+
+func test_only_a_standing_figure_walks(t) -> void:
+	for pose in [&"sentado", &"agachado", &"no_chao"]:
+		var m = _figure()
+		m.set_pose(pose)
+		var legs: Array = m._legs.map(func(n): return n.rotation)
+		_walk(m, 2.6, 1.0)
+		t.eq(m.stride(), 0.0, "%s: no stride" % pose)
+		t.eq(m._legs.map(func(n): return n.rotation), legs, "%s: the legs keep the pose" % pose)
+		m.free()
+	var w = _figure()
+	_walk(w, 2.6, 1.0)
+	w.set_pose(&"agachado")
+	t.eq(w.stride(), 0.0, "crouching ends the stride")
+	w.free()
+
+func test_a_jump_is_not_a_step(t) -> void:
+	var m = _figure()
+	m.walk(5.0, 1.0 / 60.0)
+	m.sync_pose()
+	t.eq(m.stride(), 0.0, "a body moved across the room at once (an echo's loop restarting) takes no step")
+	t.near(m._legs[0].rotation.x, 0.0, 0.001, "its legs stay put")
+	m.free()
+
+func test_a_figure_that_never_walks_keeps_its_reach(t) -> void:
+	for body in [&"adulto", &"nenhum"]:
+		var m = _figure(body)
+		m.reach(1.0, Vector3(0.4, 1.3, -0.9))
+		var b: Basis = m.arm(1.0).basis
+		m.set_pose(&"em_pe")
+		t.ok(m.arm(1.0).basis.is_equal_approx(b), "%s: standing again does not drop a reaching arm" % body)
+		m.free()

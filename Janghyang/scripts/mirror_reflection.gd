@@ -59,7 +59,7 @@ func _ready() -> void:
 	_elias.visible = false
 	add_child(_elias)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var on: bool = main.in_bedroom(main.player.global_position)
 	if on != _active:
 		_active = on
@@ -69,7 +69,9 @@ func _process(_delta: float) -> void:
 		return
 	var s: Dictionary = main.recorder.delayed(DELAY)
 	if not s.is_empty():
-		_elias.global_position = s.pos
+		var to: Vector3 = s.pos
+		_elias.walk(Vector2(to.x - _elias.global_position.x, to.z - _elias.global_position.z).length(), delta)
+		_elias.global_position = to
 		_elias.set_look(s.yaw, s.pitch)
 		_elias.set_pose(&"agachado" if s.crouched else &"em_pe")
 	var eye: Vector3 = main.player.camera.global_position

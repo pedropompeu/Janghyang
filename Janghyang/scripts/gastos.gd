@@ -73,12 +73,15 @@ var _elias_safe := false
 var _view_in := 0.0
 var _tick_in := 1.5
 var _rng := RandomNumberGenerator.new()
+## The strides they are caught in; apart from _rng, so their sounds keep time.
+var _stride_rng := RandomNumberGenerator.new()
 ## Gasto index -> {"at": Vector3, "left": seconds}: the last noise it heard.
 var _heard := {}
 
 func _ready() -> void:
 	name = "Gastos"
 	_rng.seed = 333
+	_stride_rng.seed = 334
 	for i in MAX:
 		var body: Node3D = Mannequin.new()
 		body.name = "Gasto%d" % i
@@ -598,8 +601,14 @@ func _show(i: int) -> void:
 	var m = _models[i]
 	var here: bool = m != null and not m.is_away() and i < wanted()
 	if here:
+		var moved: bool = not _bodies[i].global_position.is_equal_approx(m.points[m.at])
 		_bodies[i].global_position = m.points[m.at]
 		_bodies[i].set_pose(&"agachado" if _low_ceiling(m.points[m.at]) else &"em_pe")
+		# It moved while nobody looked: it is caught mid-step, a new stride
+		# each time.
+		if moved:
+			var lead := PI * (0.5 if _stride_rng.randf() < 0.5 else 1.5)
+			_bodies[i].set_stride(lead + _stride_rng.randf_range(-0.35, 0.35), _stride_rng.randf_range(0.65, 1.0))
 	_bodies[i].visible = here and not veiled
 	_set_hittable(i, here)
 

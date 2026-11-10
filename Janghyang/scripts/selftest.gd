@@ -404,6 +404,8 @@ func _run() -> void:
 	_record(placed.size() == 1, "one Gasto stands somewhere", str(placed.size()))
 	if placed.size() == 1:
 		_record(not main.is_seen(gastos.head_of(placed[0])), "it appears out of view", "")
+		var gb = gastos._bodies[placed[0]]
+		_record(gb.stride() > 0.5 if gb._pose == &"em_pe" else gb.stride() == 0.0, "standing, it is caught mid-step (crouched, it keeps still)", "%s %.2f" % [gb._pose, gb.stride()])
 		_record(gastos.threat() >= 0.0 and gastos.threat() <= 1.0, "the music knows how near it is", str(gastos.threat()))
 		var hit_sounds: Array = []
 		var on_hit := func(kind: StringName) -> void: hit_sounds.append(kind)
@@ -542,6 +544,13 @@ func _run() -> void:
 	await get_tree().create_timer(0.5).timeout
 	_record(main.hour_event.echoes.size() > 0, "echoes appear at 03:33", "")
 	_record(main.get_node("Echoes").find_children("*", "CollisionObject3D", true, false).is_empty(), "echoes have no collision", "")
+	# An echo walking its path swings its legs, not a statue sliding along.
+	var widest := 0.0
+	for k in 60:
+		await get_tree().process_frame
+		for e in main.hour_event.echoes:
+			widest = maxf(widest, e._body.stride())
+	_record(widest > 0.3, "echoes walk their paths in step", "%.2f" % widest)
 	var director = main.dread.director
 	director.update(100.0, false)
 	_record(not director.request(&"lampada", false, 0.5), "sustos: no scare during 03:33", "")

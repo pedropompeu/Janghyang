@@ -376,4 +376,23 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 1. [2026-11-09 ~superseded 2026-11-09] (i) ~~Pedro olha as figuras e diz se seguem para o playtest 1 ou se algo muda (porcelana, cores, o assento do capítulo 1).~~ → Pedro: "pode fazer, precisamos dar movimento aos personagens".
 2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]).
-3. [2026-11-09] (d) Dar movimento aos personagens: Pedro, "precisamos dar movimento aos personagens". O que se move, e se algo se move à vista, ainda está em conversa.
+3. [2026-11-09 ~superseded 2026-11-09] (d) ~~Dar movimento aos personagens: Pedro, "precisamos dar movimento aos personagens". O que se move, e se algo se move à vista, ainda está em conversa.~~ → [[historico#sessao-2026-11-09-movimento]].
+
+## [2026-11-09] Movimento: o passo dos ecos, do reflexo e dos Gastos {#sessao-2026-11-09-movimento}
+
+- [2026-11-09] (d) Pedro aprovou o banquinho e os commits ("pode fazer") e pediu movimento: [[decisoes#movimento]].
+- [2026-11-09] (e) ← `git log` Commits `aa4f941` (hipóteses) e `535aaa6` (figuras de porcelana e banquinho), sem push.
+- [2026-11-09] (e) ← `mannequin.gd`, `echo.gd`, `mirror_reflection.gd`, `gastos.gd` Passo procedural no manequim; os ecos e o reflexo andam conforme o chão que cobrem, e cada Gasto aparece travado no meio de um passo a cada salto. A encenação não mudou.
+- [2026-11-09] (e) ← `run_unit.gd`, `--selftest` Unidade 2610/0, selftest 454/0 ("echoes walk their paths in step", "standing, it is caught mid-step").
+- [2026-11-09] (e) ← render descartável de cinco fases do passo e de um Gasto travado, conferido à mão. Custo: 29 µs por figura por frame.
+
+### Em aberto
+
+- [2026-11-09] (i) **Movimento à vista:** as figuras da encenação continuam imóveis enquanto Elias olha, e o Gasto visto gira para acompanhá-lo ([[achados#a-030]]). Se algo deve se mexer à vista é regra de Pedro.
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**Commit do passo:** espera o sinal de Pedro.~~ → Pedro: "perfeito"; o passo foi commitado, sem push.
+- [2026-11-09] (i) **D12, D7, D1, D3, D4, D5 e D10** continuam como em [[historico#sessao-2026-11-08-pausa-playtest-1]].
+
+### Próximo passo
+
+1. [2026-11-09 ~superseded 2026-11-09] (i) ~~Pedro diz se algo se mexe à vista (encenação, o giro do Gasto) e se o passo vai para commit.~~ → o commit está feito; segue em aberto só o movimento à vista ([[achados#a-030]]).
+2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]).
