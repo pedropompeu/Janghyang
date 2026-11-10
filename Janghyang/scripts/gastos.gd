@@ -360,9 +360,12 @@ func on_night(n: Dictionary) -> void:
 	entry_wound = null
 	scatter()
 
-## The night's safety rule (&"" on today's single visit: only anchors).
+## The safety rule in force (&"" on today's single visit: only anchors). A
+## night may change it as its steps are struck (safety_model.rule_of).
 func rule() -> StringName:
-	return night.get("safety", &"")
+	return Safety.rule_of(night.get("safety", &""), main.step_done)
+
+var _entry_clock: Node3D
 
 ## What safety_model.gd needs to judge point `p` on this floor.
 ## `lit_rooms` (from lit_rooms()) saves recounting the lamps per point.
@@ -371,7 +374,12 @@ func world_at(p: Vector3, lit: Variant = null) -> Dictionary:
 	if rule() == &"comodos_com_luz" and level == Registry.HOME:
 		var rooms: Dictionary = lit if lit != null else lit_rooms()
 		lit_here = rooms.has(main.atlas.room_at(p + Vector3(0.0, 0.3, 0.0)))
-	return {"level": level, "lit": lit_here, "entry_wound": _entry_has_spring(), "anchors": anchors}
+	var w := {"level": level, "lit": lit_here, "entry_wound": _entry_has_spring(), "anchors": anchors}
+	if _entry_clock == null:
+		_entry_clock = main.get_node_or_null("EntryClock") as Node3D
+	if _entry_clock != null:
+		w["clock"] = _entry_clock.global_position
+	return w
 
 ## A flame lit later (a candle, the match): counted as a lamp from now on.
 func add_lamp(l: OmniLight3D) -> void:
@@ -400,11 +408,12 @@ func is_safe(p: Vector3) -> bool:
 func safe_points() -> Array:
 	var out := []
 	var g := graph(level)
-	if anchors.is_empty() and (level != Registry.HOME or rule() in [&"", &"so_ancoras"]):
+	var r := rule()
+	if anchors.is_empty() and (level != Registry.HOME or r in [&"", &"so_ancoras"]):
 		return out
-	var lit: Variant = lit_rooms() if rule() == &"comodos_com_luz" else null
+	var lit: Variant = lit_rooms() if r == &"comodos_com_luz" else null
 	for k in g.points.size():
-		if Safety.is_safe(g.points[k], rule(), world_at(g.points[k], lit)):
+		if Safety.is_safe(g.points[k], r, world_at(g.points[k], lit)):
 			out.append(k)
 	return out
 

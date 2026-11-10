@@ -290,7 +290,7 @@ func test_main_keeps_the_setpiece_contract(t) -> void:
 	var methods := {}
 	for m in script.get_script_method_list():
 		methods[m.name] = m.args.size()
-	var want := {"_build_setpieces": 0, "setpiece": 1, "set_night_flag": 1, "step_done": 1}
+	var want := {"_build_setpieces": 0, "setpiece": 1, "set_night_flag": 1, "step_done": 1, "wake_point": 0}
 	for m in want:
 		t.eq(methods.get(m, -1), want[m], "main has %s with its arity" % m)
 	t.ok(script.get_script_signal_list().any(func(s): return s.name == "night_flag_set"), "main signals night_flag_set")

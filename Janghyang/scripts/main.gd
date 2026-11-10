@@ -48,6 +48,7 @@ const LightPickup = preload("res://scripts/light_pickup.gd")
 const PlanRevealer = preload("res://scripts/plan_revealer.gd")
 const Campaign = preload("res://scripts/campaign_model.gd")
 const Noites = preload("res://scripts/story/noites.gd")
+const Safety = preload("res://scripts/safety_model.gd")
 const NightCard = preload("res://scripts/night_card_ui.gd")
 ## Elias's real body, sitting at the workshop bench south of the dome.
 const GIANT_SEAT := Vector3(2.0, -10.0, 20.0)
@@ -717,7 +718,14 @@ func set_night_flag(id: StringName) -> void:
 	if night_flags.has(id):
 		return
 	night_flags[id] = true
+	player.respawn_point = wake_point()
 	night_flag_set.emit(id)
+
+## Where Elias wakes after a hug or a fall (safety_model.wake_for): the safe
+## point of the floor he is on, or the entry while only the clock's radius is
+## safe. Read again whenever the floor, a task or a flag may change the rule.
+func wake_point() -> Vector3:
+	return Safety.wake_for(gastos.rule(), LEVEL_SAFE.get(level, SPAWN), LEVEL_SAFE[Registry.HOME])
 
 ## Whether a step of the night is behind us: no step, a task done or a flag raised.
 func step_done(id: StringName) -> bool:
@@ -1395,6 +1403,7 @@ func _on_piece(id: StringName) -> void:
 
 func _complete(id: StringName) -> void:
 	var r: StringName = quest.complete(id)
+	player.respawn_point = wake_point()
 	if r == &"phase":
 		var title: String = quest.phases[quest.phase].title
 		var tw := create_tween()
@@ -1438,8 +1447,8 @@ func _track_place() -> void:
 	if lvl == &"" or lvl == level:
 		return
 	level = lvl
-	player.respawn_point = LEVEL_SAFE.get(lvl, SPAWN)
 	gastos.on_level(lvl)
+	player.respawn_point = wake_point()
 	visit.on_ground_floor(lvl == Registry.HOME)
 	_home_stretch()
 	if lvl == Registry.HOME and quest.all_pieces():

@@ -12,6 +12,9 @@ const PANEL := Rect2(6.15, 0.0, 1.1, 1.25)
 ## The cracked pane of the dome's east wall, out onto the bench (z range).
 const CRACKED_Z := Vector2(9.1, 12.5)
 
+## The entry clock, against the facade beside the front door.
+const ENTRY_CLOCK := Vector3(3.1, 1.0, 8.88)
+
 const DEF := {
 	"id": &"casa",
 	"maquete": &"item_214",
@@ -462,7 +465,7 @@ static func _build_entry_clock(main: Node3D) -> void:
 	# Tall case clock against the facade, beside the front door, facing in.
 	var clock = preload("res://scripts/entry_clock.gd").new()
 	clock.name = "EntryClock"
-	clock.position = Vector3(3.1, 1.0, 8.88)
+	clock.position = ENTRY_CLOCK
 	main.add_child(clock)
 	var case_mesh := MeshInstance3D.new()
 	var case_box := BoxMesh.new()
