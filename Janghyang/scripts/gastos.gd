@@ -77,6 +77,10 @@ var _rng := RandomNumberGenerator.new()
 var _stride_rng := RandomNumberGenerator.new()
 ## Gasto index -> {"at": Vector3, "left": seconds}: the last noise it heard.
 var _heard := {}
+## How many were wanted on the last tick, and the steps whose Gasto was
+## already born at its `birth` point this night (_birth).
+var _wanted_before := 0
+var _born := {}
 
 func _ready() -> void:
 	name = "Gastos"
@@ -343,21 +347,62 @@ func wanted() -> int:
 		return 0
 	if night.is_empty():
 		return mini(main.quest.stalkers(), MAX)
-	return mini(night_stalkers(night.stalkers, main.quest.is_done), MAX)
+	return mini(night_stalkers(night.stalkers, main.step_done, level), MAX)
 
-## The night's count (noites.gd `stalkers`): the last step whose `after` is
-## struck (&"" is the start of the night) gives the number.
-static func night_stalkers(steps: Array, is_done: Callable) -> int:
-	var n := 0
+## The night's count (noites.gd `stalkers`): the step in force gives the number.
+static func night_stalkers(steps: Array, is_done: Callable, lvl: StringName = &"") -> int:
+	return night_step(steps, is_done, lvl).get("n", 0)
+
+## The step in force: the last one whose `after` is behind us (&"" is the
+## start of the night; a task or a flag of the night, main.step_done). A step
+## with `levels` only counts while Elias is on one of them; off them the step
+## before it holds. A step may say where its Gasto is born: `birth` {level, at}.
+static func night_step(steps: Array, is_done: Callable, lvl: StringName = &"") -> Dictionary:
+	var out := {}
 	for s in steps:
+		if s.has("levels") and not s.levels.has(lvl):
+			continue
 		if s.after == &"" or is_done.call(s.after):
-			n = s.n
-	return n
+			out = s
+	return out
+
+## The lurk point nearest `at` (-1 on an empty graph): where a step's `birth`
+## puts its Gasto.
+static func birth_index(points: Array, at: Vector3) -> int:
+	var best := -1
+	var best_d := INF
+	for i in points.size():
+		var d: float = (points[i] as Vector3).distance_squared_to(at)
+		if d < best_d:
+			best_d = d
+			best = i
+	return best
+
+## The count went up with Elias on the level the step in force names: the new
+## Gasto stands at once on the point nearest the step's `birth.at`, instead of
+## coming back far and out of view. Once a night for each step.
+func _birth(from: int, to: int) -> void:
+	var step := night_step(night.get("stalkers", []), main.step_done, level)
+	var b: Dictionary = step.get("birth", {})
+	if b.is_empty() or b.level != level or _born.has(step.after):
+		return
+	_born[step.after] = true
+	for i in range(from, mini(to, _models.size())):
+		var m = _models[i]
+		if m == null:
+			continue
+		var k := birth_index(m.points, b.at)
+		if k < 0:
+			continue
+		m.place(k)
+		_show(i)
 
 ## A new night: whoever was out goes away; the count now follows `n`.
 func on_night(n: Dictionary) -> void:
 	night = n
 	entry_wound = null
+	_born.clear()
+	_wanted_before = 0
 	scatter()
 
 ## The safety rule in force (&"" on today's single visit: only anchors). A
@@ -432,6 +477,9 @@ func on_level(lvl: StringName) -> void:
 		var m = StalkerModel.new(g.points, g.links)
 		m.send_away(FOLLOW + FOLLOW_STAGGER * i)
 		_models.append(m)
+	# A count that changes with the floor is no birth: only a step struck
+	# while he stands here is.
+	_wanted_before = wanted()
 
 ## The wanted ones appear now, far and out of view (for tests and phase turns).
 func spawn_now() -> void:
@@ -531,6 +579,9 @@ func _process(delta: float) -> void:
 		if _models[i] != null and _bodies[i].visible:
 			_bodies[i].visible = false
 			_set_hittable(i, false)
+	if n > _wanted_before:
+		_birth(_wanted_before, n)
+	_wanted_before = n
 	if n == 0 or main.world_frozen():
 		return
 	_view_in -= delta
