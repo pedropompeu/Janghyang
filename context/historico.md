@@ -332,13 +332,28 @@ cd /home/usuario/Dev/Jogo && python lint.py
 ### Em aberto
 
 - [2026-11-08] (i) **D12, o playtest 1:** quem joga e quando. É o que destrava a T27 (triagem). Pela ordem da spec §15, também destrava as ações da noite 2 (T28 a T33).
-- [2026-11-08] (i) **D9, os textos:** as três hipóteses dos capítulos 1 e 2 foram mostradas a Pedro e esperam a leitura dele; a carta e os títulos seguem em rascunho.
+- [2026-11-08 ~superseded 2026-11-09] (i) ~~**D9, os textos:** as três hipóteses dos capítulos 1 e 2 foram mostradas a Pedro e esperam a leitura dele; a carta e os títulos seguem em rascunho.~~ → [[historico#sessao-2026-11-09-hipoteses]].
 - [2026-11-08] (i) **D7, a aprovação visual:** `blockout-watch.png` espera Pedro; trava as T34 a T40 e a T43.
 - [2026-11-08] (i) **D1, D3, D4, D5** (plataforma, nome, idiomas, preço) só travam as T44 a T47; os defaults do plano valem até lá.
 - [2026-11-08] (i) **D10, sustos com estouro de volume:** default "não", `revisar: 2026-11-22`.
 
 ### Próximo passo
 
-1. [2026-11-08] (i) Pedro lê as hipóteses (D9) e diz se alguma frase ou a resposta certa muda.
+1. [2026-11-08 ~superseded 2026-11-09] (i) ~~Pedro lê as hipóteses (D9) e diz se alguma frase ou a resposta certa muda.~~ → [[decisoes#d9-hipoteses]].
 2. [2026-11-08] (i) Pedro decide se as T28 a T33 (noite 2) começam já ou só depois do playtest 1, como manda a ordem da spec §15. Começar já adianta o calendário, mas arrisca retrabalho se o playtest mudar a bússola, a captura ou a luz.
 3. [2026-11-08] (i) Pedro conduz o playtest 1 ([[playtest-1]]), com os CSVs e as notas brutos em `fontes/`.
+
+## [2026-11-09] Hipóteses dos capítulos 1 e 2 revisadas {#sessao-2026-11-09-hipoteses}
+
+- [2026-11-09] (d) Pedro aprovou ("pode aplicar") a reescrita das hipóteses dos capítulos 1 e 2, mantendo as respostas certas: [[decisoes#d9-hipoteses]].
+- [2026-11-09] (e) ← `run_unit.gd`, `--selftest` Unidade 2502/0, selftest 449/0, sem teste a mudar: os testes leem as frases de `noites.gd`.
+
+### Em aberto
+
+- [2026-11-09] (i) **D9, o resto:** a carta, os títulos e os textos das noites 3 a 5 seguem em rascunho.
+- [2026-11-09] (i) **D12, D7, D1, D3, D4, D5 e D10** continuam como em [[historico#sessao-2026-11-08-pausa-playtest-1]].
+
+### Próximo passo
+
+1. [2026-11-09] (i) Pedro decide se as T28 a T33 (noite 2) começam já ou só depois do playtest 1.
+2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]) e aprova o `blockout-watch.png` (D7).

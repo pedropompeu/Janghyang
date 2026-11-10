@@ -34,15 +34,15 @@ const NOITES := [
 		"chapters": [
 			{"id": 1, "area": &"casa", "title": "A casa da rua do Porto", "clues": [&"desenho", &"relogio_entrada", &"casinha"], "reward": &"achar_passagem",
 				"poses": 4, "right": 1, "hypothesis": [
-					"Inácio fez a maquete de uma casa qualquer, tirada de um catálogo.",
-					"A maquete é a casa onde Inácio foi menino, na rua do Porto.",
-					"A casa de brinquedo foi feita para um filho que ele nunca teve.",
+					"Inácio copiou a maquete de uma casa que viu num catálogo de relojoeiro.",
+					"A maquete é a casa onde o próprio Inácio foi menino.",
+					"Inácio fez a casinha para um filho que esperou e nunca chegou a ter.",
 				]},
 			{"id": 2, "area": &"passagem", "title": "O menino que escutava", "clues": [&"caixa_musica", &"bola"], "reward": &"coroa",
 				"poses": 4, "right": 2, "hypothesis": [
-					"O menino se escondia na passagem com medo do pai.",
-					"A passagem era o caminho do pai até a oficina.",
-					"Pela parede, o menino ouvia o pai consertar relógios e aprendeu que tudo que tem corda para.",
+					"Na passagem, o menino escutava o pai escondido, morrendo de medo dele.",
+					"A passagem era o atalho do pai até a oficina, onde só ele entrava.",
+					"Pela parede, o menino aprendeu com o pai que tudo que tem corda para.",
 				]},
 		],
 		"goals": [
