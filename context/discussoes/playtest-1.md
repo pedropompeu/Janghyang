@@ -87,3 +87,5 @@ nada antes:
 - [2026-11-08 ~superseded 2026-11-09] (i) ~~**As sessões usam o binário em blocos, sem os assets (D7 em espera).**~~ → as figuras de porcelana entraram antes do playtest por pedido de Pedro ([[decisoes#figuras-porcelana]]); a casa e os objetos seguem em blocos. Texto original: O
   playtest testa medo, busca e bússola; a aparência entra depois (spec §15, ordem 4).
   `revisar: 2027-01-15`.
+- [2026-11-10] (i) **As sessões esperam a noite 1 refeita.** Pedro aprovou os doze itens de [[decisoes#noite-1-2026-11-10]], que mudam a noite que este roteiro testa; a espera em si ele não disse com todas as letras. Os binários de 2026-11-09 continuam sendo os da noite antiga.
+- [2026-11-10] (i) Quando a noite nova estiver construída, este roteiro precisa de: o que observar nos trechos novos (a chama no quarto, a chave, a fresta, o painel, o nicho, a travessia, a vigília), o piso novo do bot no lugar dos 81 s e o teto de tempo, que o desenho propõe subir de 20 para 30 minutos (à espera do aceite de Pedro). O aviso "sem sustos de volume" continua verdadeiro.

@@ -455,3 +455,37 @@ cd /home/usuario/Dev/Jogo && python lint.py
 1. [2026-11-09] (i) Pedro roda as sessões do playtest 1 com os binários de `build/`. Os CSVs vão brutos para `fontes/YYYY-MM-DD-playtest-1-<pessoa>.csv` e as notas para `fontes/YYYY-MM-DD-playtest-1-notas.md`.
 2. [2026-11-09] (i) Com os CSVs e as notas, a T27: comparar o tempo de cada pessoa com o piso do bot (81 s), as linhas `perdido = 1` e as respostas às perguntas finais.
 3. [2026-11-09] (i) Se o playtest atrasar, Pedro decide se a noite 2 (T28 a T33) começa antes dele.
+
+## [2026-11-10] A noite 1 refeita: desenho à espera de Pedro {#sessao-2026-11-10-noite-1-design}
+
+- [2026-11-10] (d) Pedro pediu ideias para o jogo, depois "o voce sugere para melhorar a fase A noite 1?", depois "queria mais desafios, mais horror e mais sustos", e aprovou os doze itens com "pode fazer todos, sem estouro de volume" ([[decisoes#noite-1-2026-11-10]]).
+- [2026-11-10] (e) ← `docs/superpowers/specs/2026-11-10-janghyang-noite-1-design.md` O desenho da noite nova está escrito: os doze itens na ordem da noite, onde cada um cai no código, o que precisa existir de novo (segurança em degraus, nascimento do Gasto, banco de sete figuras, fresta, armário e chave, nicho na passagem, catálogo que se reescreve, sustos de roteiro) e dez [escolha da IA] no §15.
+- [2026-11-10] (e) ← `git status` Nenhum código foi mexido e nada foi commitado nesta sessão. Mudaram só o spec novo, a fonte `fontes/2026-11-10-pedro-noite-1-pedidos.md`, o `context/` e a linha da D10 no plano da demo.
+
+### Em aberto
+
+- [2026-11-10 ~superseded 2026-11-10] (i) ~~**A aprovação do desenho por Pedro**, em especial as dez [escolha da IA] do §15.~~ → aprovado: [[historico#sessao-2026-11-10-noite-1-plano]].
+- [2026-11-10] (i) **D12 (playtest 1)** agora espera a noite nova ([[playtest-1]]). D7, o resto de D9, D1, D3, D4, D5 e a pergunta "noite 2 antes do playtest?" seguem como em [[historico#sessao-2026-11-09-pausa-playtest-1]]. A D10 fechou.
+
+### Próximo passo
+
+1. [2026-11-10 ~superseded 2026-11-10] (i) ~~Pedro lê o desenho e aprova ou corrige.~~ → aprovado: [[historico#sessao-2026-11-10-noite-1-plano]].
+2. [2026-11-10 ~superseded 2026-11-10] (i) ~~Aprovado, escreve-se o plano de construção da noite 1 nova; só depois, código.~~ → o plano está escrito: [[historico#sessao-2026-11-10-noite-1-plano]].
+3. [2026-11-10] (i) Com a noite construída: bot novo, selftest, binários refeitos, roteiro do playtest atualizado, e aí as sessões da T26.
+
+## [2026-11-10] A noite 1 refeita: desenho aprovado, plano à espera de Pedro {#sessao-2026-11-10-noite-1-plano}
+
+- [2026-11-10] (d) Pedro respondeu "aprovado" ao desenho da noite 1 e, na retomada, "vamos seguir de onde paramos" ([[decisoes#noite-1-2026-11-10]]).
+- [2026-11-10] (e) ← `docs/superpowers/plans/2026-11-10-janghyang-noite-1.md` O plano de construção está escrito: 20 tarefas na ordem base (peças de cena, segurança em degraus, degraus de Gasto, Gasto no escuro, diretor e sons), casa (luz de fora, sala das figuras maior, desenho de cera, relógio, bola, banco, catálogo, parede e fresta, reflexo), painel, passagem, beco, travessia e vigília, bot e selftest, binários e roteiro do playtest. Cinco pontos de revisão com teste nomeado e dez escolhas técnicas no §0.5.
+- [2026-11-10] (e) ← `git status` Nenhum código do jogo foi mexido e nada foi commitado. No disco: o spec, o plano novo, a fonte, o `context/` e a linha da D10 no plano da demo; `origin/main` segue em `473591d`.
+
+### Em aberto
+
+- [2026-11-10] (i) **A leitura do plano por Pedro**, em especial as dez escolhas do §0.5, e a forma de execução (subagentes por tarefa ou a sessão inteira).
+- [2026-11-10] (i) **D12 (playtest 1)** continua atrás da noite nova ([[playtest-1]]).
+
+### Próximo passo
+
+1. [2026-11-10] (i) Pedro lê o plano, corrige ou aceita as escolhas do §0.5 e escolhe a forma de execução.
+2. [2026-11-10] (i) Execução do plano a partir da Tarefa 1, com ledger em `.superpowers/sdd/2026-11-10-janghyang-noite-1/progress.md`.
+3. [2026-11-10] (i) Com a noite construída (Tarefas 19 e 20): bot novo, binários refeitos, roteiro do playtest atualizado, e aí as sessões da T26.

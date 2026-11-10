@@ -107,7 +107,7 @@ Para ver só o teste da tarefa: `... run_unit.gd 2>&1 | grep -E "UNIT: test_<arq
 | D5 | Modelo e preço | demo gratuita; preço do jogo depois do playtest 3 | Tarefa 46 |
 | D7 | Aprovação visual das capturas | Pedro aprova cada `--shot-*` | Tarefas 34–40, 43 |
 | D9 | Texto dos capítulos 1 a 4, a carta e as hipóteses (§20) | rascunho da IA no jogo, marcado no ledger | Tarefa 45 (texto final) |
-| D10 | Sustos com estouro de volume (§20) | não | só o afinamento da Tarefa 24 (revisar 2026-11-22) |
+| D10 | Sustos com estouro de volume (§20) | **fechada em 2026-11-10: não** (`context/decisoes.md#noite-1-2026-11-10`) | nada |
 | D11 | Se faltar tempo, o que sai | saem antes a isca (Tarefa 33) e a barricada (Tarefa 32) | marco M3 |
 | D12 | Quem joga os playtests e quando | Pedro recruta 3 a 5 pessoas por rodada | Tarefas 26, 41 |
 
