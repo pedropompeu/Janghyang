@@ -1,6 +1,7 @@
 extends RefCounted
 const Registry = preload("res://scripts/areas/registry.gd")
 const Atlas = preload("res://scripts/atlas.gd")
+const CatalogData = preload("res://scripts/catalog_data.gd")
 
 ## Today's rooms, in today's order: the first room that holds a point wins, so
 ## the tower must stay before the attic. The merge must never reorder them.
@@ -232,3 +233,65 @@ func test_main_knows_no_area_by_name(t) -> void:
 	var consts: Dictionary = load("res://scripts/main.gd").get_script_constant_map()
 	for name in ["_LEGACY_SAFE", "_LEGACY_ROOM_TASKS", "_LEGACY_BREAK_TASKS", "_LEGACY_CATALOG_TASKS"]:
 		t.ok(not consts.has(name), "main keeps no %s" % name)
+
+## The catalog targets main.gd placed by hand before they moved into the DEFs.
+const MOVED_TARGETS := [&"relogio_entrada", &"bola", &"caixa_musica", &"desenho", &"casinha", &"cabana", &"cama", &"espelho", &"boneco", &"vela", &"casaco", &"figura_inacio_a", &"figura_inacio_b", &"figura_catalogador"]
+
+func test_new_def_keys_default_empty(t) -> void:
+	for d in Registry.defs():
+		t.ok(d.get("setpieces") is Array, "%s has setpieces" % d.id)
+		t.ok(d.get("targets") is Array, "%s has targets" % d.id)
+		t.ok(d.get("locks") is Dictionary, "%s has locks" % d.id)
+
+## A target is {item, at, size} in the area's own rooms, or {item, node, size}
+## (with an optional local `at`) hung on a node that moves, like the ball.
+func test_targets_are_catalog_items_in_their_area(t) -> void:
+	var atlas := Atlas.new()
+	var seen := {}
+	for d in Registry.defs():
+		var own: Array = d.rooms.map(func(r): return r.id)
+		for e in d.get("targets", []):
+			t.ok(CatalogData.ITEMS.has(e.item), "target %s of %s is a catalog item" % [e.item, d.id])
+			t.ok(not seen.has(e.item), "target %s appears once over every area" % e.item)
+			seen[e.item] = true
+			t.ok(e.get("size") is Vector3, "target %s has a size" % e.item)
+			if e.has("node"):
+				t.ok(e.node is String and e.node != "", "target %s names its node" % e.item)
+			else:
+				t.ok(e.get("at") is Vector3 and own.has(atlas.room_at(e.get("at", Vector3.INF))), "target %s lies in a room of %s" % [e.item, d.id])
+
+func test_all_of_todays_targets_moved(t) -> void:
+	var items := []
+	for d in Registry.defs():
+		for e in d.get("targets", []):
+			items.append(e.item)
+	for it in MOVED_TARGETS:
+		t.ok(items.has(it), "target %s lives in a DEF" % it)
+
+func test_setpieces_are_well_formed(t) -> void:
+	var ids := {}
+	for d in Registry.defs():
+		for e in d.setpieces:
+			t.ok(e.get("id") is StringName and e.get("id") != &"", "a setpiece of %s has an id" % d.id)
+			t.ok(not ids.has(e.get("id")), "setpiece %s appears once" % e.get("id"))
+			ids[e.get("id")] = true
+			t.ok(e.get("script") is Script, "setpiece %s has a script" % e.get("id"))
+			if e.get("script") is Script:
+				var n = e.script.new()
+				t.ok(n is Node3D, "setpiece %s is a Node3D" % e.id)
+				t.ok(n.has_method("on_night"), "setpiece %s answers on_night" % e.id)
+				for p in ["main", "def", "data"]:
+					t.ok(p in n, "setpiece %s carries %s" % [e.id, p])
+				n.free()
+
+## What every setpiece and every later scene reads from main.gd.
+func test_main_keeps_the_setpiece_contract(t) -> void:
+	var script = load("res://scripts/main.gd")
+	var methods := {}
+	for m in script.get_script_method_list():
+		methods[m.name] = m.args.size()
+	var want := {"_build_setpieces": 0, "setpiece": 1, "set_night_flag": 1, "step_done": 1}
+	for m in want:
+		t.eq(methods.get(m, -1), want[m], "main has %s with its arity" % m)
+	t.ok(script.get_script_signal_list().any(func(s): return s.name == "night_flag_set"), "main signals night_flag_set")
+	t.ok(script.get_script_property_list().any(func(p): return p.name == "night_flags"), "main keeps night_flags")

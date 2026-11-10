@@ -68,6 +68,24 @@ const DEF := {
 		{"id": &"giz_quarto", "points": [Vector3(9.45, 0.006, 5.0), Vector3(9.45, 0.006, 3.0), Vector3(10.9, 0.006, 1.6), Vector3(11.0, 0.006, 1.1)], "leads_to": &"pilha_quarto"},
 	],
 	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"},
+	## What Elias can write down (main._build_catalog_targets). The page under
+	## the cabana cushion only shows after 03:33 (main.reveal_cabana_page).
+	"targets": [
+		{"item": &"relogio_entrada", "at": Vector3(3.1, 1.2, 8.8), "size": Vector3(0.55, 1.6, 0.4)},
+		{"item": &"bola", "node": "Ball", "size": Vector3(0.4, 0.4, 0.4)},
+		{"item": &"caixa_musica", "at": Vector3(3.35, 0.7, 4.45), "size": Vector3(0.45, 0.3, 0.35)},
+		{"item": &"desenho", "at": Vector3(6.7, 1.6, 0.1), "size": Vector3(0.8, 0.6, 0.15)},
+		{"item": &"casinha", "at": Vector3(7.5, 0.3, 1.0), "size": Vector3(1.0, 0.8, 0.8)},
+		{"item": &"cabana", "at": Vector3(1.0, 0.4, 3.5), "size": Vector3(1.4, 0.8, 1.6)},
+		{"item": &"cama", "at": Vector3(13.2, 0.5, 3.0), "size": Vector3(2.2, 0.6, 3.1)},
+		{"item": &"espelho", "at": Vector3(15.25, 1.35, 2.0), "size": Vector3(0.15, 1.6, 1.0)},
+		{"item": &"boneco", "node": "Doll", "at": Vector3(0.0, 0.3, 0.0), "size": Vector3(0.55, 1.0, 0.35)},
+		{"item": &"vela", "at": Vector3(11.85, 0.6, 7.7), "size": Vector3(0.25, 0.3, 0.25)},
+		{"item": &"casaco", "at": Vector3(0.2, 1.2, 7.6), "size": Vector3(0.25, 0.9, 0.5)},
+		{"item": &"figura_inacio_a", "at": Vector3(11.15, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},
+		{"item": &"figura_inacio_b", "at": Vector3(11.85, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},
+		{"item": &"figura_catalogador", "at": Vector3(12.55, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},
+	],
 }
 
 static func build(main: Node3D) -> void:

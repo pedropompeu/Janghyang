@@ -70,6 +70,7 @@ signal hora_started
 signal hora_ended
 ## Every knock of the stick, by what it sounded like (oco, tink, glass...).
 signal knock_sounded(kind: StringName)
+signal night_flag_set(id: StringName)
 
 var mat_floor_play: StandardMaterial3D
 var mat_floor_corridor: StandardMaterial3D
@@ -170,6 +171,8 @@ var _shutting_down := false
 ## (noites.gd). An empty night is today's single visit (selftest, tour, shots).
 var campaign
 var night: Dictionary = {}
+## What happened this night that is no task (set_night_flag, step_done).
+var night_flags: Dictionary = {}
 var night_card
 ## Grabs this session (the playtest log counts them).
 var grabs := 0
@@ -199,6 +202,7 @@ func _ready() -> void:
 	_build_light_pickups()
 	_build_chalk_trails()
 	_build_staging()
+	_build_setpieces()
 	_build_giant_elias()
 	_build_player()
 	# F1 never folds onto a player sitting in the cabana.
@@ -684,20 +688,40 @@ func _catalog_target(parent: Node3D, item: StringName, pos: Vector3, size: Vecto
 	return area
 
 func _build_catalog_targets() -> void:
-	_catalog_target(self, &"relogio_entrada", Vector3(3.1, 1.2, 8.8), Vector3(0.55, 1.6, 0.4))
-	_catalog_target(get_node("Ball"), &"bola", Vector3.ZERO, Vector3(0.4, 0.4, 0.4))
-	_catalog_target(self, &"caixa_musica", Vector3(3.35, 0.7, 4.45), Vector3(0.45, 0.3, 0.35))
-	_catalog_target(self, &"desenho", Vector3(6.7, 1.6, 0.1), Vector3(0.8, 0.6, 0.15))
-	_catalog_target(self, &"casinha", Vector3(7.5, 0.3, 1.0), Vector3(1.0, 0.8, 0.8))
-	_catalog_target(self, &"cabana", Vector3(1.0, 0.4, 3.5), Vector3(1.4, 0.8, 1.6))
-	_catalog_target(self, &"cama", Vector3(13.2, 0.5, 3.0), Vector3(2.2, 0.6, 3.1))
-	_catalog_target(self, &"espelho", Vector3(15.25, 1.35, 2.0), Vector3(0.15, 1.6, 1.0))
-	_catalog_target(get_node("Doll"), &"boneco", Vector3(0.0, 0.3, 0.0), Vector3(0.55, 1.0, 0.35))
-	_catalog_target(self, &"vela", Vector3(11.85, 0.6, 7.7), Vector3(0.25, 0.3, 0.25))
-	_catalog_target(self, &"casaco", Vector3(0.2, 1.2, 7.6), Vector3(0.25, 0.9, 0.5))
-	_catalog_target(self, &"figura_inacio_a", Vector3(11.15, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
-	_catalog_target(self, &"figura_inacio_b", Vector3(11.85, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
-	_catalog_target(self, &"figura_catalogador", Vector3(12.55, 0.7, 8.35), Vector3(0.45, 1.3, 0.45))
+	for def in Registry.defs():
+		for e in def.targets:
+			if e.has("node"):
+				_catalog_target(get_node(e.node), e.item, e.get("at", Vector3.ZERO), e.size)
+			else:
+				_catalog_target(self, e.item, e.at, e.size)
+
+## The scripted scenes of every area (DEF.setpieces, scripts/setpieces/): one
+## node each, built once. Outside the nights that list it a setpiece stays in
+## its resolved state, so it starts there.
+func _build_setpieces() -> void:
+	for def in Registry.defs():
+		for e in def.setpieces:
+			var n: Node3D = e.script.new()
+			n.name = "Setpiece_" + String(e.id)
+			n.main = self
+			n.def = def
+			n.data = e
+			n.add_to_group(&"Setpiece")
+			add_child(n)
+
+func setpiece(id: StringName) -> Node3D:
+	return get_node_or_null("Setpiece_" + String(id)) as Node3D
+
+## Raises a flag of this night (a scene played, a door opened). Idempotent.
+func set_night_flag(id: StringName) -> void:
+	if night_flags.has(id):
+		return
+	night_flags[id] = true
+	night_flag_set.emit(id)
+
+## Whether a step of the night is behind us: no step, a task done or a flag raised.
+func step_done(id: StringName) -> bool:
+	return id == &"" or quest.is_done(id) or night_flags.has(id)
 
 func _wire_catalog() -> void:
 	_build_catalog_targets()
@@ -919,6 +943,7 @@ func _fresh_campaign_at(n: int) -> void:
 ## shop, what the campaign carries; the hour and the Gastos start over.
 func begin_night(n: int) -> void:
 	night = Noites.get_night(n)
+	night_flags.clear()
 	quest = QuestModel.new(night.get("phases", []), campaign.pieces)
 	clock_model.reset()
 	visit = VisitState.new(clock_model, catalog, night)
@@ -955,6 +980,8 @@ func begin_night(n: int) -> void:
 	player.respawn_point = SPAWN
 	level = &""
 	gastos.on_night(night)
+	for s in get_tree().get_nodes_in_group(&"Setpiece"):
+		s.on_night(night)
 	pocket_watch.new_night()
 	pocket_watch.set_goal(watch_goal())
 	for tw in _dark:

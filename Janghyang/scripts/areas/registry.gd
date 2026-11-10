@@ -1,7 +1,11 @@
 extends RefCounted
 ## Every area of the bench, as data. Each area script carries a `const DEF`
 ## (id, maquete, name, rooms, safe, safe_room, links, tasks, breaks, catalog, anchors,
-## hideouts, pickups, chalk, mechanisms, keep_clear: door names no Gasto may lurk by) and a `static func build(main)`; main
+## hideouts, pickups, chalk, mechanisms, keep_clear: door names no Gasto may lurk by,
+## setpieces: {id, script, ...its own data}, the scripted scenes of scripts/setpieces/,
+## targets: catalog targets, {item, at, size} or {item, node, size[, at]} on a node that moves,
+## locks: {Breakable node name: chapter id}, shut until that chapter's scene ends)
+## and a `static func build(main)`; main
 ## builds them in this order and reads its maps from here. The order matters:
 ## the first room that holds a point wins, so the tower stays before the attic.
 ##
@@ -33,6 +37,7 @@ const _EMPTY := {
 	"tasks": {}, "breaks": {}, "catalog": {}, "anchors": [], "hideouts": [],
 	"pickups": [], "chalk": [], "mechanisms": [], "staging": [],
 	"keep_clear": [],
+	"setpieces": [], "targets": [], "locks": {},
 }
 
 ## The area every night starts in and Elias comes back to ("voltar").
