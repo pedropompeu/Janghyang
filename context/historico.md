@@ -427,3 +427,31 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 - [2026-11-09] (d) Pedro: "b e pode comitar e fazer o push".
 - [2026-11-09] (e) ← `tests/bot_noite1.gd` Com o relógio apontando na volta, o bot fecha a noite 1 nos mesmos 81,2 s, com o ponteiro em `point` depois da coroa e no térreo. Unit 2616/0, selftest 457/0, binários refeitos ([[playtest-1#rodar]]).
+- [2026-11-09] (e) ← `git push` `ea9b0de..b0bfcf9` em `origin/main`: `0e2f96a` (pose fora de Elias), `7462ea4` (relógio na volta), `693910f` (bot da noite 1), `b0bfcf9` (`context/`).
+
+## [2026-11-09] Pausa: playtest 1 pronto para as sessões {#sessao-2026-11-09-pausa-playtest-1}
+
+- [2026-11-09] (d) Pedro: "quero que faça o comit e o push e que documente o que foi feito para seguirmos amanha".
+- [2026-11-09] (e) ← `git log` O que entrou no jogo em 2026-11-09, todo em `origin/main`:
+  - hipóteses dos capítulos 1 e 2 reescritas ([[decisoes#d9-hipoteses]]);
+  - figuras de porcelana no lugar das caixas e banquinho sob quem senta ([[historico#sessao-2026-11-09-figuras]]);
+  - passo procedural dos ecos, do reflexo e dos Gastos, e a regra "pode girar mas não se mexer" ([[historico#sessao-2026-11-09-movimento]], [[decisoes#gira-nao-anda]]);
+  - a pose da encenação que esperava Elias sair do lugar ([[achados#a-031]]);
+  - o relógio apontando a volta depois da coroa ([[decisoes#relogio-volta]]);
+  - o bot da noite 1, `Janghyang/tests/bot_noite1.gd` ([[historico#sessao-2026-11-09-bot-noite-1]]).
+- [2026-11-09] (e) ← `run_unit.gd`, `--selftest`, bot, `lint.py` Unit 2616/0, selftest 457/0 (também no binário Linux), bot ok em 81,2 s, lint sem nada a reportar.
+- [2026-11-09] (e) ← `Janghyang/build/` (fora do git) Binários do playtest prontos: `Janghyang/build/linux/Janghyang` e `Janghyang/build/windows/Janghyang.exe`. Cada sessão roda `Janghyang -- --playtest --night=1`. Os CSVs e o roteiro estão em [[playtest-1#rodar]]. Se a pasta `build/` sumir, a refação é `godot --headless --path . --export-release "Linux" build/linux/Janghyang` (e `"Windows" build/windows/Janghyang.exe`), a partir de `Janghyang/`.
+- [2026-11-09] (e) ← `tests/bot_noite1.gd` Para conferir a noite 1 depois de qualquer mudança, rodar de `Janghyang/` `godot --headless --path . --fixed-fps 60 -s res://tests/bot_noite1.gd -- --playtest --night=1`. Espera-se `BOT RESULT ok`, perto de 81 s.
+
+### Em aberto
+
+- [2026-11-09] (i) **D12, o playtest 1 (T26):** de 3 a 5 pessoas, conduzidas por Pedro pelo roteiro [[playtest-1]]. Destrava a T27 (triagem) e, pela ordem da spec §15, a noite 2 (T28 a T33).
+- [2026-11-09] (i) **Noite 2 antes do playtest?** Pedro ainda não decidiu se as T28 a T33 começam já ([[historico#sessao-2026-11-08-pausa-playtest-1]]).
+- [2026-11-09] (i) **D7, D9 (resto), D1, D3, D4, D5 e D10** continuam como em [[historico#sessao-2026-11-08-pausa-playtest-1]] e [[historico#sessao-2026-11-09-hipoteses]]. D10 tem `revisar: 2026-11-22`.
+- [2026-11-09] (i) **Achados abertos sem pressa para o playtest:** [[achados#a-029]] (sobras de arte das figuras) e os anteriores da lista "Abertos" de [[achados]].
+
+### Próximo passo
+
+1. [2026-11-09] (i) Pedro roda as sessões do playtest 1 com os binários de `build/`. Os CSVs vão brutos para `fontes/YYYY-MM-DD-playtest-1-<pessoa>.csv` e as notas para `fontes/YYYY-MM-DD-playtest-1-notas.md`.
+2. [2026-11-09] (i) Com os CSVs e as notas, a T27: comparar o tempo de cada pessoa com o piso do bot (81 s), as linhas `perdido = 1` e as respostas às perguntas finais.
+3. [2026-11-09] (i) Se o playtest atrasar, Pedro decide se a noite 2 (T28 a T33) começa antes dele.
