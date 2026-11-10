@@ -1213,7 +1213,7 @@ func _build_staging() -> void:
 				var m := Mannequin.new()
 				m.name = "Figure_%d" % k
 				node.add_child(m)
-				m.build(f.style, f.scale)
+				m.build(f.style, f.scale, f.get("body", &"adulto"))
 				figs.append([m, f.poses])
 			_staging[st.chapter] = {"node": node, "figures": figs}
 			_apply_pose(st.chapter, 0)
@@ -1228,6 +1228,8 @@ func _apply_pose(id: int, k: int) -> void:
 		m.position = p.at
 		var to: Vector3 = p.face - p.at
 		m.set_pose(p.get("pose", &"em_pe"))
+		# The house has no chair where they sit: a stool comes with the pose.
+		m.set_seat(p.get("pose", &"em_pe") == &"sentado")
 		m.set_look(atan2(-to.x, -to.z), atan2(to.y - 1.2 * m.scale.y, Vector2(to.x, to.z).length()))
 		for side in [-1.0, 1.0]:
 			m.arm(side).rotation = Vector3(0.0, 0.0, deg_to_rad(side * 4.0))
@@ -1805,6 +1807,13 @@ func _prepare_shot(mode: String) -> void:
 				body.global_position = player.position + Vector3(-2.3, 0.0, 0.25)
 				body.visible = true
 				gastos._face(0, player.position))
+		"figuras", "figuras_fim":
+			# Chapter 1's scene, the father and the boy, first and last pose.
+			if mode == "figuras_fim":
+				_apply_pose(1, 3)
+			player.position = Vector3(4.6, 0.2, 4.4)
+			player.rotation.y = deg_to_rad(-28.0)
+			camera.rotation.x = deg_to_rad(-16.0)
 		"top":
 			player.position = Vector3(7.7, 8.5, 5.8)
 			player.rotation.y = 0.0

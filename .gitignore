@@ -3,3 +3,7 @@
 *.tmp
 Janghyang/build/
 .superpowers/
+# Raw art (spec §14.2): downloaded bundles stay out of git; arte/fontes/*/README.md says where each came from
+arte/fontes/**/bundle.zip
+arte/fontes/**/extraido/
+__pycache__/

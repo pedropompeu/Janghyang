@@ -82,8 +82,9 @@ func _ready() -> void:
 	for i in MAX:
 		var body: Node3D = Mannequin.new()
 		body.name = "Gasto%d" % i
-		body.build(STYLE, 1.02)
-		_dress(body)
+		body.build(STYLE, 1.02, &"gasto")
+		if not body.has_model():
+			_dress(body)
 		body.visible = false
 		add_child(body)
 		_bodies.append(body)
@@ -105,7 +106,8 @@ func _ready() -> void:
 		_hitboxes.append(hb)
 	_build_graphs_when_solid()
 
-## Cracks and long hands over the mannequin: a person turned into a piece.
+## Cracks and long hands over the box body: a person turned into a piece
+## (the sculpted gasto has its own).
 func _dress(body: Node3D) -> void:
 	var crack := StandardMaterial3D.new()
 	crack.albedo_color = Color(0.12, 0.1, 0.09)

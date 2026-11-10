@@ -618,6 +618,12 @@ func _run() -> void:
 		var cam: Camera3D = main.ending.final_camera
 		_record(fig.find_children("*", "CollisionObject3D", true, false).is_empty(), "new figure has no collision", "")
 		_record(fig.global_position.distance_to(Vector3(main.SPAWN.x, 0.0, main.SPAWN.z)) < 0.2, "new figure sits where Elias arrived", "")
+		var skels := fig.find_children("*", "Skeleton3D", true, false)
+		if not skels.is_empty():
+			# Posed before it entered the maquete: its skeleton must still draw the pose.
+			var sk: Skeleton3D = skels[0]
+			var hips := sk.find_bone("hips")
+			_record(sk.get_bone_global_pose(hips).origin.is_equal_approx(sk.get_bone_pose(hips).origin), "new figure is drawn sitting on the floor, not standing", str(sk.get_bone_global_pose(hips).origin))
 		_record(cam.is_position_in_frustum(head), "final camera frames the new figure", "")
 		var q := PhysicsRayQueryParameters3D.create(cam.global_position, head, 1)
 		_record(main.get_world_3d().direct_space_state.intersect_ray(q).is_empty(), "new figure is seen through the redoma and the open door", "")
@@ -722,6 +728,9 @@ func _capitulo() -> void:
 	var seen: bool = main._staging_seen(ch.id)
 	main._tick_staging(5.0)
 	_record(seen and ch.staging.pose == 0, "capitulo: watched, the figures keep still", "%s %d" % [seen, ch.staging.pose])
+	var father = main._staging[ch.id].figures[0][0]
+	var stool: Node3D = father.get_node_or_null("Seat")
+	_record(stool != null and stool.visible, "capitulo: the sitting father has a stool under him", "")
 	pl.rotation.y += PI
 	await get_tree().physics_frame
 	_record(not main._staging_seen(ch.id), "capitulo: looking away, they are out of sight", "")
@@ -730,6 +739,7 @@ func _capitulo() -> void:
 	var boy = main._staging[ch.id].figures[1][0]
 	var last: Dictionary = main._staging[ch.id].figures[1][1][-1]
 	_record(ch.staging.done() and ch.staging.pose == 3 and boy.position.distance_to(last.at) < 0.01, "capitulo: four looks away bring the scene to its end", "%d" % ch.staging.pose)
+	_record(stool != null and stool.visible, "capitulo: sitting again at the end, the stool came with him", "")
 	_record(boy.position.distance_to(main.night.goals[0].at) < 1.0, "capitulo: the scene ends at the panel", "%.2f m" % boy.position.distance_to(main.night.goals[0].at))
 	_record(main.watch_goal().get("task") == &"achar_passagem" and main.pocket_watch.goal.get("task") == &"achar_passagem", "capitulo: then the watch points at the passage", str(main.pocket_watch.goal.get("task")))
 	var nb = main.notebook

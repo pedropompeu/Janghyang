@@ -38,7 +38,7 @@ const DEF := {
 	## wall, crawls west and ends kneeling by the crown.
 	"staging": [
 		{"chapter": 2, "figures": [
-			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "poses": [
+			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "body": &"menino", "poses": [
 				{"at": Vector3(8.4, 0.0, -1.0), "face": Vector3(8.4, 0.45, -1.4), "pose": &"agachado"},
 				{"at": Vector3(5.6, 0.0, -1.0), "face": Vector3(5.6, 0.45, -1.4), "pose": &"agachado"},
 				{"at": Vector3(3.0, 0.0, -0.55), "face": Vector3(0.75, 0.1, -0.65), "pose": &"sentado"},

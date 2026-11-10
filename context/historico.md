@@ -357,3 +357,23 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 1. [2026-11-09] (i) Pedro decide se as T28 a T33 (noite 2) começam já ou só depois do playtest 1.
 2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]) e aprova o `blockout-watch.png` (D7).
+
+## [2026-11-09] Figuras de porcelana no lugar das caixas {#sessao-2026-11-09-figuras}
+
+- [2026-11-09] (d) Pedro pediu figuras humanas mais reais antes do playtest 1 e mandou pular as perguntas: [[decisoes#figuras-porcelana]].
+- [2026-11-09] (e) ← `arte/blender/figuras.py`, `Janghyang/assets/` Três corpos de porcelana (adulto, menino, Gasto) feitos da malha CC0 Human Base Meshes, ligados ao `mannequin.gd` sem mudar a API; sem o `.glb`, voltam as caixas. Mapa em [[arquitetura#assets-figuras]].
+- [2026-11-09] (e) ← `run_unit.gd`, `--selftest` Unidade 2545/0, selftest 450/0. Dois bugs achados e corrigidos no caminho: [[achados#a-027]] (material nulo ao soltar uma figura) e [[achados#a-028]] (a figura do final aparecia em pé).
+- [2026-11-09] (e) ← medida descartável com vsync desligado Cena do capítulo 1: 268,1 fps com as figuras contra 285,5 com as caixas (−6%); vista de cima sem diferença.
+- [2026-11-09] (e) ← shots `figuras`, `figuras_fim`, `gasto`, `giant`, `mirror` e `ending`, conferidos à mão. Os `blockout-*.png` versionados não foram trocados.
+
+### Em aberto
+
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**Sobras de arte:** [[achados#a-029]] (vinco do sapato, rosto do menino, o pai sentado no ar no capítulo 1).~~ → o pai senta num banquinho; seguem o sapato e o rosto ([[achados#a-029]]).
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**Commit:** as mudanças das hipóteses (sessão anterior) e as figuras esperam o sinal de Pedro.~~ → Pedro: "pode fazer"; commitado em dois commits, hipóteses e figuras.
+- [2026-11-09] (i) **D12, D7, D1, D3, D4, D5 e D10** continuam como em [[historico#sessao-2026-11-08-pausa-playtest-1]].
+
+### Próximo passo
+
+1. [2026-11-09 ~superseded 2026-11-09] (i) ~~Pedro olha as figuras e diz se seguem para o playtest 1 ou se algo muda (porcelana, cores, o assento do capítulo 1).~~ → Pedro: "pode fazer, precisamos dar movimento aos personagens".
+2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]).
+3. [2026-11-09] (d) Dar movimento aos personagens: Pedro, "precisamos dar movimento aos personagens". O que se move, e se algo se move à vista, ainda está em conversa.

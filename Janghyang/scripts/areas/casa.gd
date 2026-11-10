@@ -30,8 +30,9 @@ const DEF := {
 	"safe": Vector3(1.8, 0.2, 8.3),
 	## Chapter 1's staged scene (main._build_staging, staging_model.gd): the
 	## father and the boy by the playroom's north wall; it ends at the panel.
-	## Each figure: a style, a scale and one pose per step ({at, face, pose,
-	## reach}). Meshes only: nothing to bump into, no Gasto graph changes.
+	## Each figure: a style, a scale, a body (mannequin.BODIES, adulto when
+	## left out) and one pose per step ({at, face, pose, reach}). Meshes only:
+	## nothing to bump into, no Gasto graph changes.
 	"staging": [
 		{"chapter": 1, "figures": [
 			{"style": {"coat": Color("#5a4636"), "skin": Color("#d1b195"), "hair": Color("#8a8378"), "trousers": Color("#2f2a26")}, "scale": 0.75, "poses": [
@@ -40,7 +41,7 @@ const DEF := {
 				{"at": Vector3(5.4, 0.0, 1.4), "face": Vector3(6.7, 0.4, 0.4), "pose": &"em_pe"},
 				{"at": Vector3(5.2, 0.0, 1.9), "face": Vector3(6.7, 0.4, 0.4), "pose": &"sentado"},
 			]},
-			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "poses": [
+			{"style": {"coat": Color("#6b5a3e"), "skin": Color("#dcbfa2"), "hair": Color("#3e2e22"), "trousers": Color("#3a3430")}, "scale": 0.45, "body": &"menino", "poses": [
 				{"at": Vector3(5.6, 0.0, 2.9), "face": Vector3(6.1, 0.5, 2.4), "pose": &"em_pe"},
 				{"at": Vector3(5.9, 0.0, 1.9), "face": Vector3(6.7, 0.6, 0.0), "pose": &"em_pe"},
 				{"at": Vector3(6.5, 0.0, 0.7), "face": Vector3(6.7, 0.4, 0.0), "pose": &"agachado"},

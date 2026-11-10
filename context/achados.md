@@ -191,7 +191,38 @@ relacionado:
 - **Fix recomendado:** um `reset_world()` chamado por `begin_night` que devolve dobras, portas e quebráveis ao estado inicial, menos os atalhos de `campaign.shortcuts`; e o save do catálogo sem as flags de adereço (ou com elas recalculadas pelo mundo). Dono natural: Tarefa 29, que cria `campaign.shortcuts`. Custo: uma tarde.
 - **Estado:** aberto. (i)
 
+### [A-029] Sobras de arte das figuras de porcelana {#a-029}
+
+- [2026-11-09] (i) ← shots `--shot-figuras`, `--shot-figuras_fim` e as vistas de conferência do Blender (`arte/blender/figuras.py --preview`).
+- **Severidade:** baixo — nada quebra; são detalhes que um jogador atento nota de perto.
+- **Onde:** `arte/blender/figuras.py` (sapato e rosto do menino); `Janghyang/scripts/areas/casa.gd:39`, `casa.gd:42` e `passagem.gd:44` (pose `sentado` sem assento).
+- **Reprodução:** chegar perto de uma figura: há um vinco na ponta do sapato, e o rosto do menino ainda tem traços de adulto. No capítulo 1, o pai senta em `sentado`, e na casa não há cadeira nesse ponto: ele fica sentado no ar.
+- **Por que importa:** a porcelana pede acabamento. Sentar no ar lê como erro, não como estranheza da casa.
+- **Fix recomendado:** pôr um banco ou uma cadeira sob cada `sentado` da encenação, ou trocar para `no_chao` (minutos). Suavizar o sapato e arredondar o rosto do menino em `figuras.py` (uma hora). Medido junto, para não precisar de nova entrada: com as figuras, a cena do capítulo 1 caiu de 285,5 para 268,1 fps (−6%) e a vista de cima ficou igual (301 → 304). O limite de alerta é 20%.
+- [2026-11-09 ~superseded 2026-11-09] ~~**Estado:** aberto.~~ → **Estado:** em parte corrigido. O assento foi resolvido (linha abaixo); seguem o vinco do sapato e o rosto do menino. (e)
+- [2026-11-09] (e) ← `Janghyang/scripts/mannequin.gd` (`set_seat`), `scripts/main.gd` (`_apply_pose`) Toda pose `sentado` da encenação traz um banquinho de madeira sob o quadril, que vem e vai com a pose. Selftest: "the sitting father has a stool under him" e "sitting again at the end, the stool came with him". Unidade 2573/0, selftest 452/0.
+
 ## Fechados
+
+### [A-028] A figura que fica no final aparecia em pé em vez de sentada no chão {#a-028}
+
+- [2026-11-09] (e) ← `Janghyang/scripts/ending.gd:85` posa a `NewFigure` (`no_chao`) antes do `add_child`. No Godot 4.7, posar os ossos de um `Skeleton3D` fora da árvore o marca sujo sem agendar o redesenho, e ele passa a ignorar todas as poses seguintes. Visto no shot `--shot-ending` e confirmado num render das quatro poses: só as figuras posadas depois do `add_child` apareciam posadas.
+- **Severidade:** alto — é a última imagem do jogo. Elias ficava de pé na entrada com o caderno caído aos pés, e não sentado no chão.
+- **Onde:** `Janghyang/scripts/mannequin.gd` (`_notification`); o efeito aparece em `ending.gd:85`.
+- **Reprodução:** criar um `Mannequin`, chamar `build` e `set_pose(&"no_chao")` e só depois `add_child`. O corpo desenhado fica em pé. Em headless, `get_bone_global_pose(hips)` continua 0,88 enquanto `get_bone_pose(hips)` diz 0,13.
+- **Por que importa:** qualquer figura posada antes de entrar na cena some da pose. Hoje é a figura nova; amanhã pode ser outra.
+- **Fix recomendado:** em `NOTIFICATION_POST_ENTER_TREE`, `force_update_all_bone_transforms()`, esvaziar `_last` e chamar `_sync()`. Custo: minutos. Parente do mesmo comportamento: `get_bone_global_pose` não se atualiza fora da árvore, por isso `bone_transform()` compõe as poses locais ([[decisoes#figuras-porcelana]]).
+- **Estado:** corrigido. Selftest novo: "new figure is drawn sitting on the floor, not standing". Unidade 2545/0, selftest 450/0, render conferido. (e)
+
+### [A-027] Soltar os materiais de uma figura dava erro de material nulo com outra figura viva {#a-027}
+
+- [2026-11-09] (e) ← `--selftest` com as figuras novas: 7 erros `material_get_instance_shader_parameters: Parameter "material" is null` quando os ecos da noite 1 eram soltos com outras figuras adultas vivas.
+- **Severidade:** médio — o selftest falhava em "no script errors during the selftest". O erro saiu no renderer dummy do headless; com janela, ele não foi procurado. Soltar figuras é rotina (ecos, troca de noite).
+- **Onde:** `Janghyang/scripts/mannequin.gd` (`_porcelain`, `_porcelain_cache`).
+- **Reprodução:** duas figuras com a mesma malha, cada uma com materiais próprios em `set_surface_override_material`; ao soltar uma, a outra gera um erro por superfície. Testado à parte: `material_override`, materiais mantidos vivos, malha duplicada ou material compartilhado não dão o erro.
+- **Por que importa:** cada erro de engine reprova o selftest, e um vazamento no renderer real seria pior.
+- **Fix recomendado:** cache estático de materiais por parte, cor e arquivo, compartilhado e nunca solto no jogo. Custo: minutos.
+- **Estado:** corrigido. Teste unitário "one style, one set of materials"; selftest 450/0 sem o erro. (e)
 
 ### [A-020] Elias no sótão sobre o quarto contava como "no quarto" para a visita {#a-020}
 
