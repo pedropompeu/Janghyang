@@ -5,6 +5,9 @@ extends RefCounted
 ## starts the count again; they stop on the last one.
 
 const UNSEEN := 1.5
+## How near Elias (feet, flat) a figure may not appear: his capsule plus a
+## body. A pose that would put one closer waits until he steps away.
+const CLEAR := 0.6
 
 var poses := 1
 var pose := 0
@@ -29,3 +32,11 @@ func update(dt: float, seen: bool) -> bool:
 
 func done() -> bool:
 	return pose >= poses - 1
+
+## True when none of the spots (a pose's figure positions) is within CLEAR of
+## `at`, on the floor plane.
+static func clear_of(spots: Array, at: Vector3) -> bool:
+	for p in spots:
+		if Vector2(p.x - at.x, p.z - at.z).length() < CLEAR:
+			return false
+	return true

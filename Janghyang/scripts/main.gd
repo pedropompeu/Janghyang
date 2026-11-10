@@ -21,6 +21,7 @@ const HouseMirror = preload("res://scripts/house_mirror.gd")
 const MirrorReflection = preload("res://scripts/mirror_reflection.gd")
 const HourEvent = preload("res://scripts/hour_event.gd")
 const Mannequin = preload("res://scripts/mannequin.gd")
+const StagingModel = preload("res://scripts/staging_model.gd")
 const Ending = preload("res://scripts/ending.gd")
 const Hands = preload("res://scripts/hands.gd")
 const DreadModel = preload("res://scripts/dread_model.gd")
@@ -1251,6 +1252,15 @@ func _staging_seen(id: int) -> bool:
 			return true
 	return false
 
+## Chapter `id`'s pose `k` puts no figure on Elias.
+func _staging_clear(id: int, k: int) -> bool:
+	if player == null:
+		return true
+	var spots: Array = []
+	for pair in _staging[id].figures:
+		spots.append(pair[1][clampi(k, 0, pair[1].size() - 1)].at)
+	return StagingModel.clear_of(spots, player.global_position)
+
 ## The night's chapters, fed what the catalogue already holds; their scenes
 ## back in the first pose.
 func _start_chapters() -> void:
@@ -1275,7 +1285,9 @@ func _tick_staging(delta: float) -> void:
 	for ch in chapters:
 		if not ch.opened or ch.staging.done() or not _staging.has(ch.id):
 			continue
-		if not ch.update(delta, _staging_seen(ch.id)):
+		# Out of sight is not enough: the next pose must not land on Elias.
+		var held := _staging_seen(ch.id) or not _staging_clear(ch.id, ch.staging.pose + 1)
+		if not ch.update(delta, held):
 			continue
 		_apply_pose(ch.id, ch.staging.pose)
 		if ch.staging.done():

@@ -29,3 +29,12 @@ func test_one_pose_is_done_from_the_start(t) -> void:
 	var s = Staging.new(1)
 	t.ok(s.done(), "uma pose só já está no fim")
 	t.ok(not s.update(5.0, false), "e não anda")
+
+func test_a_pose_never_lands_on_elias(t) -> void:
+	var spots := [Vector3(6.4, 0.0, 1.1), Vector3(5.9, 0.0, 1.9)]
+	t.ok(not Staging.clear_of(spots, Vector3(6.45, 1.0, 1.0)), "pai a 0,11 m: espera")
+	t.ok(not Staging.clear_of(spots, Vector3(5.9, 0.0, 2.4)), "menino a 0,5 m: espera")
+	t.ok(not Staging.clear_of(spots, Vector3(6.4, 0.0, 1.8)), "0,7 m do pai mas 0,5 do menino: espera")
+	t.ok(Staging.clear_of(spots, Vector3(6.4, 0.0, 0.45)), "0,65 m do pai: pode")
+	t.ok(Staging.clear_of(spots, Vector3(7.2, 0.0, 2.6)), "longe dos dois: pode")
+	t.ok(Staging.clear_of([], Vector3.ZERO), "sem figuras, livre")
