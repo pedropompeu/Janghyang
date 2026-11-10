@@ -388,7 +388,7 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 ### Em aberto
 
-- [2026-11-09] (i) **Movimento à vista:** as figuras da encenação continuam imóveis enquanto Elias olha, e o Gasto visto gira para acompanhá-lo ([[achados#a-030]]). Se algo deve se mexer à vista é regra de Pedro.
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**Movimento à vista:** as figuras da encenação continuam imóveis enquanto Elias olha, e o Gasto visto gira para acompanhá-lo ([[achados#a-030]]). Se algo deve se mexer à vista é regra de Pedro.~~ → Pedro: "pode girar mas nao se mexer" ([[decisoes#gira-nao-anda]]); A-030 fechado sem mudança de código.
 - [2026-11-09 ~superseded 2026-11-09] (i) ~~**Commit do passo:** espera o sinal de Pedro.~~ → Pedro: "perfeito"; o passo foi commitado, sem push.
 - [2026-11-09] (i) **D12, D7, D1, D3, D4, D5 e D10** continuam como em [[historico#sessao-2026-11-08-pausa-playtest-1]].
 

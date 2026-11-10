@@ -202,6 +202,8 @@ relacionado:
 - [2026-11-09 ~superseded 2026-11-09] ~~**Estado:** aberto.~~ → **Estado:** em parte corrigido. O assento foi resolvido (linha abaixo); seguem o vinco do sapato e o rosto do menino. (e)
 - [2026-11-09] (e) ← `Janghyang/scripts/mannequin.gd` (`set_seat`), `scripts/main.gd` (`_apply_pose`) Toda pose `sentado` da encenação traz um banquinho de madeira sob o quadril, que vem e vai com a pose. Selftest: "the sitting father has a stool under him" e "sitting again at the end, the stool came with him". Unidade 2573/0, selftest 452/0.
 
+## Fechados
+
 ### [A-030] O Gasto visto sob a luz continua girando para acompanhar Elias {#a-030}
 
 - [2026-11-09] (e) ← `Janghyang/scripts/gastos.gd` (`_process` chama `_face(i, pp)` a cada frame, visto ou não); spec `docs/superpowers/specs/2026-10-28-faz-de-conta-expansao-design.md` §"Como se movem" ("Olhar para eles com luz [...] os congela").
@@ -210,9 +212,7 @@ relacionado:
 - **Reprodução:** com um Gasto à vista e a lanterna acesa sobre ele, andar em círculo: o corpo gira para ficar de frente para Elias.
 - **Por que importa:** contradiz o congelar da spec, e pode ser lido como o Gasto se mexendo à vista. Ou pode ser o arrepio que se quer: decisão de Pedro, junto com a pergunta do movimento à vista ([[historico#sessao-2026-11-09-movimento]]).
 - **Fix recomendado:** girar só quando não é visto (`if not seen`), minutos; um teste de selftest que gira a câmera em volta de um Gasto visto e confere `rotation.y`.
-- **Estado:** aberto, à espera de Pedro.
-
-## Fechados
+- [2026-11-09 ~superseded 2026-11-09] ~~**Estado:** aberto, à espera de Pedro.~~ → **Estado:** fechado sem mudança: o giro é desejado ([[decisoes#gira-nao-anda]]). (d)
 
 ### [A-028] A figura que fica no final aparecia em pé em vez de sentada no chão {#a-028}
 
