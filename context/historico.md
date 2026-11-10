@@ -396,3 +396,34 @@ cd /home/usuario/Dev/Jogo && python lint.py
 
 1. [2026-11-09 ~superseded 2026-11-09] (i) ~~Pedro diz se algo se mexe à vista (encenação, o giro do Gasto) e se o passo vai para commit.~~ → o commit está feito; segue em aberto só o movimento à vista ([[achados#a-030]]).
 2. [2026-11-09] (i) Pedro conduz o playtest 1 ([[playtest-1]]).
+
+## [2026-11-09] Playtest 1 preparado {#sessao-2026-11-09-playtest-pronto}
+
+- [2026-11-09] (d) Pedro: "pode comitar e fazer o push"; depois, "vamos ao playtest 1".
+- [2026-11-09] (e) ← `git push` `582b8c7..ea9b0de` em `origin/main`.
+- [2026-11-09] (e) ← binários exportados, selftest no binário 454/0, smoke de 20 s do `--playtest` sem erro: [[playtest-1#rodar]].
+
+### Próximo passo
+
+1. [2026-11-09] (i) Pedro roda as sessões com 3 a 5 pessoas pelo roteiro [[playtest-1]] e põe os CSVs e as notas em `fontes/`; a triagem é a Tarefa 27.
+
+## [2026-11-09] Bot da noite 1 {#sessao-2026-11-09-bot-noite-1}
+
+- [2026-11-09] (d) Pedro: "voce não consegue fazer esse teste?".
+- [2026-11-09] (i) A IA não substitui o playtest humano, porque conhece a solução e não sente medo. Em vez disso, fez um bot que joga a noite 1 com as teclas de verdade ([[decisoes]]).
+- [2026-11-09] (e) ← `tests/bot_noite1.gd` A noite 1 fecha andando: carta 0,6 s, pistas até 6 s, cena até 19 s, painel 26 s, coroa 32 s, `voltar_terreo` 37 s, uns 40 s esperando o 03:33 no relógio, cartão em 81 s. Entrada 43 s, brincar 29 s, passagem 9 s; 0 capturas; CSV com 18 linhas, nenhuma `perdido`. Antes da correção, 76 s.
+- [2026-11-09] (e) ← capturas do bot O pai da pose 1 nascia dentro de Elias; corrigido ([[achados#a-031]]). Binários refeitos ([[playtest-1#rodar]]).
+- [2026-11-09] (e) ← rodada do bot Depois da coroa o relógio gira sem meta até o cartão ([[achados#a-032]]).
+- [2026-11-09] (i) Vistos de passagem, sem achado: sem olhar a cena, as quatro poses passam em uns 8 s; o painel pode ser quebrado antes do fim da cena e a noite fecha igual; olhar para baixo uma figura ao lado conta como vê-la.
+
+### Em aberto
+
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**A-032:** Pedro decide se o relógio aponta para o térreo e o relógio da entrada na fase "Antes do 03:33", ou se fica girando e o playtest observa.~~ → Pedro: "b" ([[decisoes#relogio-volta]]); corrigido.
+- [2026-11-09 ~superseded 2026-11-09] (i) ~~**Commit:** a correção de A-031, o bot e o `context/` estão sem commit, à espera do sinal de Pedro.~~ → Pedro: "pode comitar e fazer o push" (linhas abaixo).
+
+### Próximo passo
+
+1. [2026-11-09] (i) Pedro conduz o playtest 1 com os binários refeitos ([[playtest-1]]).
+
+- [2026-11-09] (d) Pedro: "b e pode comitar e fazer o push".
+- [2026-11-09] (e) ← `tests/bot_noite1.gd` Com o relógio apontando na volta, o bot fecha a noite 1 nos mesmos 81,2 s, com o ponteiro em `point` depois da coroa e no térreo. Unit 2616/0, selftest 457/0, binários refeitos ([[playtest-1#rodar]]).

@@ -204,6 +204,25 @@ relacionado:
 
 ## Fechados
 
+### [A-032] Depois da coroa o relógio gira sem meta, e o CSV não mede quem se perde na volta {#a-032}
+
+- [2026-11-09] (e) ← `Janghyang/scripts/main.gd` (`watch_goal()` só percorre `night.goals`; `voltar_terreo` e `dar_corda` ficam na fase "Antes do 03:33", `scripts/story/noites.gd:29`, fora das metas) e a rodada de `tests/bot_noite1.gd`: depois de "took the crown", o relógio passa a "points at <null>" e a coluna `meta` do CSV fica vazia até o cartão.
+- **Severidade:** baixo — não trava o caminho que o bot fez: o caderno lista "voltar ao térreo da casa" e "dar corda e acordar na oficina", e no térreo o 03:33 vem em uns 44 s e acaba sozinho em 90 s (`SHORT_HOUR`).
+- **Onde:** `Janghyang/scripts/main.gd` (`watch_goal`), `Janghyang/scripts/story/noites.gd:29` (`_HOME_STRETCH`).
+- **Reprodução:** jogar a noite 1 até pegar a coroa e abrir o relógio (T): o ponteiro gira devagar da passagem até o cartão. Ou o bot: `godot --headless --path . --fixed-fps 60 -s res://tests/bot_noite1.gd -- --playtest --night=1`.
+- **Por que importa:** a volta (passagem → térreo → relógio da entrada) é o único trecho da noite 1 em que o relógio não aponta, e o giro lento já quer dizer "sem caminho" na spec (§ bússola, `direcao-design.md:191`), mesmo havendo caminho. É também o único trecho que o "perdido" não mede ([[decisoes]], "sem meta, ninguém se perde"). Quem se perder ali só aparece nas notas de Pedro, não no CSV.
+- **Fix recomendado:** decisão de Pedro, entre (a) deixar girar e observar no playtest e (b) na fase "Antes do 03:33", apontar para o térreo e depois para o relógio da entrada, o que também liga o "perdido" ali (cerca de uma hora com testes).
+- [2026-11-09 ~superseded 2026-11-09] ~~**Estado:** aberto, à espera de Pedro. A observação entrou no roteiro ([[playtest-1#observar]]).~~ → **Estado:** corrigido pela opção (b) ([[decisoes#relogio-volta]]): depois da coroa, o relógio aponta para o `EntryClock` como `voltar_terreo` e, no térreo, como `dar_corda`. Selftest 457/0 com três checks novos ("noites: with the crown, the watch points the way back to the entry clock", "on the ground floor, the watch points at the clock to wind", "night 5 has no way home for the watch to point"). O bot vê o ponteiro em `point` nos dois trechos, e a coluna `meta` do CSV fica preenchida até o cartão. Binários refeitos, selftest no binário 457/0. (e)
+
+### [A-031] Uma pose da encenação podia nascer dentro do Elias {#a-031}
+
+- [2026-11-09] (e) ← `Janghyang/tests/bot_noite1.gd`, primeira rodada com capturas: o bot catalogou o desenho, deu as costas para a cena e, na pose 1, o pai surgiu a 0,12 m dele, em `(6,4; 0; 1,1)`, com a mão no painel. De frente, nenhuma figura aparecia. Olhando para baixo, só o quadril e as pernas, com a câmera dentro do tronco.
+- **Severidade:** médio — quem cataloga o desenho por último vira e acha a figura atravessada no próprio corpo. Isso lê como defeito, não como susto, e justo na cena que ensina que as figuras andam quando ninguém olha.
+- **Onde:** `Janghyang/scripts/main.gd` (`_tick_staging`); poses em `Janghyang/scripts/areas/casa.gd:36-48`. As figuras da encenação não têm colisão, e a troca de pose só checava se Elias estava olhando.
+- **Reprodução:** antes da correção, o bot (`godot --headless --path . --fixed-fps 60 -s res://tests/bot_noite1.gd -- --playtest --night=1`) dava "looked away (1) [...] nearest figure 0.12 m from Elias". À mão: catalogar o desenho de pé entre o painel e a mesinha e ficar 1,5 s de costas.
+- **Fix recomendado:** a próxima pose espera enquanto Elias estiver a menos de `CLEAR` (0,6 m, a cápsula dele mais um corpo) do ponto de qualquer figura nela; a conta de 1,5 s recomeça quando ele sai. Minutos.
+- **Estado:** corrigido. `staging_model.clear_of` e `main._staging_clear`, com o teste `test_a_pose_never_lands_on_elias`. Unit 2616/0, selftest 454/0. O bot agora sai do lugar na pose 1, e nenhuma figura aparece a menos de 2,8 m. Binários reexportados, selftest no binário 454/0. (e)
+
 ### [A-030] O Gasto visto sob a luz continua girando para acompanhar Elias {#a-030}
 
 - [2026-11-09] (e) ← `Janghyang/scripts/gastos.gd` (`_process` chama `_face(i, pp)` a cada frame, visto ou não); spec `docs/superpowers/specs/2026-10-28-faz-de-conta-expansao-design.md` §"Como se movem" ("Olhar para eles com luz [...] os congela").
