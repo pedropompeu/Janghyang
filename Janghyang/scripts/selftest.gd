@@ -660,9 +660,12 @@ func _nights() -> void:
 	main._complete(&"achar_passagem")
 	main._complete(&"coroa")
 	_record(main.visit.goals_met and not main.clock_model.can_stop and not main.quest.is_done(&"voltar_terreo"), "noites: the goals alone do not open the 03:33 away from the ground floor", str(main.level))
+	var clock_at: Vector3 = main.get_node("EntryClock").global_position
+	_record(main.pocket_watch.goal.get("task") == &"voltar_terreo" and main.pocket_watch.goal.get("at") == clock_at, "noites: with the crown, the watch points the way back to the entry clock", str(main.pocket_watch.goal))
 	main.player.global_position = main.SPAWN
 	await _frames(2)
 	_record(main.clock_model.can_stop and main.quest.is_done(&"voltar_terreo"), "noites: back on the ground floor, the 03:33 may come", str(main.level))
+	_record(main.pocket_watch.goal.get("task") == &"dar_corda" and main.pocket_watch.goal.get("at") == clock_at, "noites: on the ground floor, the watch points at the clock to wind", str(main.pocket_watch.goal))
 	var began := [0]
 	var count := func() -> void: began[0] += 1
 	main.hora_started.connect(count)
@@ -707,6 +710,7 @@ func _nights() -> void:
 	main._fresh_campaign_at(5)
 	main.begin_night(5)
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
+	_record(main._home_goal().is_empty(), "noites: night 5 has no way home for the watch to point", str(main._home_goal()))
 	await _frames(2)
 
 ## Task 23 (spec §6.1): night 1's first chapter. Its clues in, the scene

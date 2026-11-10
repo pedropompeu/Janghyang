@@ -22,6 +22,8 @@ const MirrorReflection = preload("res://scripts/mirror_reflection.gd")
 const HourEvent = preload("res://scripts/hour_event.gd")
 const Mannequin = preload("res://scripts/mannequin.gd")
 const StagingModel = preload("res://scripts/staging_model.gd")
+## The way home after the night's goals, in order (noites.gd _HOME_STRETCH).
+const HOME_TASKS: Array[StringName] = [&"voltar_terreo", &"dar_corda"]
 const Ending = preload("res://scripts/ending.gd")
 const Hands = preload("res://scripts/hands.gd")
 const DreadModel = preload("res://scripts/dread_model.gd")
@@ -1188,7 +1190,8 @@ func take_light(p) -> void:
 
 ## The first of the night's goals not met yet: where the watch points. While
 ## the chapter that leads to it has its scene open and not over, the watch
-## points at the figures instead ({"task": &"encenacao"}).
+## points at the figures instead ({"task": &"encenacao"}). With the goals met,
+## on a night that ends at home, it points the way back (_home_goal).
 func watch_goal() -> Dictionary:
 	for g in night.get("goals", []):
 		if not quest.is_done(g.task):
@@ -1196,6 +1199,21 @@ func watch_goal() -> Dictionary:
 				if ch.reward == g.task and ch.opened and not ch.staging.done() and _staging.has(ch.id):
 					return {"task": &"encenacao", "area": ch.area, "at": staging_center(ch.id)}
 			return g
+	return _home_goal()
+
+## The way back on a night that ends at home ("Antes do 03:33"): the entry
+## clock, first as "voltar_terreo" (it stands on the ground floor), then as
+## "dar_corda". Empty once both are struck, or on a night without them.
+func _home_goal() -> Dictionary:
+	var clock := get_node_or_null("EntryClock") as Node3D
+	if clock == null:
+		return {}
+	for task in HOME_TASKS:
+		if quest.is_done(task):
+			continue
+		for ph in night.get("phases", []):
+			if task in ph.get("tasks", []):
+				return {"task": task, "area": Registry.HOME, "at": clock.global_position}
 	return {}
 
 ## The figures of every area's staged scenes, in their first pose.
