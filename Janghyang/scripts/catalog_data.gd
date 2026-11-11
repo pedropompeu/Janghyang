@@ -13,7 +13,7 @@ const ITEMS := {
 	&"relogio_entrada": {"text": "relógio de caixa, ébano tingido, pêndulo de latão. O mostrador só tem marcas entre 03:00 e 03:33.", "page": &"p1", "gate": &""},
 	&"bola": {"text": "bola de madeira, faia, gasta de um lado só.", "page": &"", "gate": &""},
 	&"caixa_musica": {"text": "caixa de música, manivela de latão. A melodia sempre para na mesma nota.", "page": &"p2", "gate": &""},
-	&"desenho": {"text": "desenho a lápis de cera: esta casa, um menino, um relógio maior que a casa. Assinado \"Inácio, 7 anos\".", "page": &"", "gate": &""},
+	&"desenho": {"text": "desenho a lápis de cera: esta casa, um menino, um relógio maior que a casa. Assinado \"Inácio, 7 anos\".", "page": &"", "gate": &"chama_no_desenho"},
 	&"casinha": {"text": "casinha de brinquedo dentro da casa de brinquedo. Também tem relógio no telhado.", "page": &"", "gate": &"vitrine_aberta"},
 	&"vitrine": {"text": "armário de porta de vidro, trancado. Lá dentro, a casinha.", "page": &"", "gate": &""},
 	&"cabana": {"text": "cabana de parede dobrada, almofada, cobertor. Cheiro de cobre.", "page": &"", "gate": &"f1_folded"},

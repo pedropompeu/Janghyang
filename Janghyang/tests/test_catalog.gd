@@ -97,3 +97,13 @@ func test_key_note_glues_no_page(t) -> void:
 	var e: Dictionary = c.note(&"chave_vitrine")
 	t.eq(e.get("item"), &"chave_vitrine", "a chave vira nota do caderno")
 	t.ok(not c.pages.has(&""), "sem página do diário, nenhuma página vazia entra")
+
+# --- Noite 1, Tarefa 8: o desenho de cera só sob chama ---
+
+func test_drawing_waits_for_the_flame(t) -> void:
+	var c := Catalog.new()
+	t.ok(not c.can_catalog(&"desenho"), "sem chama, o papel está em branco")
+	c.set_flag(&"chama_no_desenho", true)
+	t.ok(c.can_catalog(&"desenho"), "com chama, a cera aparece")
+	c.set_flag(&"chama_no_desenho", false)
+	t.ok(not c.can_catalog(&"desenho"), "a chama apaga, some de novo")

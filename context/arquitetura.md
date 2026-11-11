@@ -231,3 +231,8 @@ DISPLAY=:0 godot --path . --resolution 1280x720 -- --shot-top
   - A chave fica meio debaixo da almofada da cabana (nota `chave_vitrine` em `CatalogData.NOTES`, flag de noite `chave_vitrine`); `catalog.note()` não cola página vazia.
   - Giz: `giz_figuras` deu lugar a `giz_vitrine` (corredor da frente → cabana, até a chave). `main.chalk_target` também resolve peça de cena pelo `at` da DEF. Batida da sala das figuras em `house_mirror.KNOCK_POINTS` foi para (15,28; 1,3; 7,0).
   - Contagens: unit 2944/0, selftest 475/0.
+- [2026-11-11] (e) ← `Janghyang/scripts/wax_model.gd`, `scripts/setpieces/desenho_cera.gd`, `scripts/areas/casa.gd`, `scripts/main.gd`, `scripts/catalog_data.gd`, `scripts/story/noites.gd` Noite 1, Tarefa 8, o desenho de cera:
+  - `wax_model.gd`: `REVEAL` 2,5 m; `shows(flames, at)`; `refill_due(matches, flame_near, cataloged, box_active, box_seen)`.
+  - `desenho_cera.gd` (peça de cena): a cada quadro liga `DrawingWax.visible` e a flag de catálogo `chama_no_desenho` (portão de `ITEMS.desenho`); chamas = o fósforo na mão enquanto `light.burning()` e toda `CandleLight` acesa além da `MatchGlow`. Reativa o pickup `fosforo_cabeceira` com `n = 1` quando `refill_due`. Fora da noite 1, cera sempre à vista.
+  - O desenho saiu da parede do painel (6,7; 1,6; 0) para a parede norte do quarto em x 14,05, com mesa de cabeceira, a caixa `fosforo_cabeceira` (3 fósforos) e um toco de vela. Material novo `main.mat_wax_lines`.
+  - Contagens: unit 2974/0, selftest 480/0.

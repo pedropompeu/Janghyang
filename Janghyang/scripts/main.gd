@@ -103,6 +103,8 @@ var mat_red: StandardMaterial3D
 var mat_dark: StandardMaterial3D
 var mat_glass: StandardMaterial3D
 var mat_chalk: StandardMaterial3D
+## The boy's wax lines on the bedroom drawing (setpieces/desenho_cera.gd).
+var mat_wax_lines: StandardMaterial3D
 
 var player: CharacterBody3D
 var prompt_label: Label
@@ -340,6 +342,7 @@ func _make_materials() -> void:
 	mat_red = _mat("#7d3a3f", 0.9)
 	mat_dark = _mat("#211a16", 1.0)
 	mat_candle = _mat("#f2d38a", 0.5)
+	mat_wax_lines = _mat("#b8742e", 0.35)
 	mat_candle.emission_enabled = true
 	mat_candle.emission = Color.html("#f2d38a")
 	mat_candle.emission_energy_multiplier = 2.0

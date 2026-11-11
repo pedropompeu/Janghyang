@@ -656,6 +656,7 @@ func _nights() -> void:
 	await _watch()
 	await _capitulo()
 	await _vitrine()
+	await _desenho()
 	main.player.global_position = main.night.goals[1].at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -692,6 +693,7 @@ func _nights() -> void:
 	_record(lit2 == 9, "bussola: night 2 wakes with the house lit", str(lit2))
 	await _abertura_noite2()
 	_vitrine_noite2()
+	_desenho_noite2()
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
 	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
@@ -716,6 +718,61 @@ func _nights() -> void:
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	_record(main._home_goal().is_empty(), "noites: night 5 has no way home for the watch to point", str(main._home_goal()))
 	await _frames(2)
+
+## Noite 1, Tarefa 8 (§6.2, item 1): the drawing at the bedroom's head is in
+## wax that only a flame shows; the bedside box gives one more match while
+## the drawing is missing and Elias has no flame.
+func _desenho() -> void:
+	print("SELFTEST: desenho")
+	var pl = main.player
+	var wax = main.find_child("DrawingWax", true, false) as Node3D
+	var piece = main.setpiece(&"desenho_cera")
+	var box = main.get_node_or_null("LightPickups/Pickup_fosforo_cabeceira")
+	if wax == null or piece == null or box == null:
+		for name in ["desenho: sob a lanterna o papel está em branco e Q não cataloga", "desenho: com fósforo aceso a cera aparece e Q cataloga",
+				"desenho: o fósforo apaga e a cera some de novo", "desenho: a caixa da cabeceira volta com um fósforo quando Elias fica sem chama"]:
+			_record(false, name, "%s %s %s" % [wax, piece, box])
+		return
+	var saved: Vector3 = pl.global_position
+	var saved_cat: bool = main.catalog.has(&"desenho")
+	main.catalog.entries = main.catalog.entries.filter(func(e) -> bool: return e.item != &"desenho")
+	var hm = pl.hands_model
+	while hm.count(&"fosforo") > 0:
+		hm.use_one(&"fosforo")
+	main.light._match_left = 0.0
+	pl.global_position = Vector3(14.0, 0.2, 1.2)
+	pl.rotation.y = 0.0
+	pl.camera.rotation.x = deg_to_rad(10.0)
+	pl.flashlight.visible = true
+	for i in 3:
+		await get_tree().physics_frame
+	_record(not wax.visible and not main.catalog.can_catalog(&"desenho"), "desenho: sob a lanterna o papel está em branco e Q não cataloga", str(piece._flames()) + " " + str(main.catalog.has(&"desenho")))
+	hm.take(&"fosforo", 1)
+	main.strike_match()
+	for i in 3:
+		await get_tree().physics_frame
+	_record(wax.visible and main.catalog.can_catalog(&"desenho"), "desenho: com fósforo aceso a cera aparece e Q cataloga", "")
+	main.light._match_left = 0.0
+	for i in 3:
+		await get_tree().physics_frame
+	_record(not wax.visible and not main.catalog.can_catalog(&"desenho"), "desenho: o fósforo apaga e a cera some de novo", "")
+	box.set_active(false)
+	pl.global_position = Vector3(11.5, 0.2, 3.0)
+	pl.rotation.y = PI * 0.5
+	pl.camera.rotation.x = 0.0
+	for i in 4:
+		await get_tree().physics_frame
+	_record(box.active and box.n == 1 and hm.count(&"fosforo") == 0, "desenho: a caixa da cabeceira volta com um fósforo quando Elias fica sem chama", "%s %d" % [box.active, box.n])
+	box.set_active(false)
+	if saved_cat:
+		main.catalog.set_flag(&"chama_no_desenho", true)
+		main.catalog.catalog(&"desenho")
+	pl.global_position = saved
+
+## Night 2 does not list the drawing piece: the wax shows, the flag is up.
+func _desenho_noite2() -> void:
+	var wax = main.find_child("DrawingWax", true, false) as Node3D
+	_record(wax != null and wax.visible and main.catalog.flags.get(&"chama_no_desenho", false), "desenho: na noite 2 a cera está sempre à vista", "")
 
 ## Noite 1, Tarefa 7 (§6.2): the figure room grows; the cabinet with the
 ## little house stays locked until the key under the cabana cushion, at the

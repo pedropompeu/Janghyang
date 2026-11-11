@@ -41,6 +41,7 @@ const DEF := {
 		{"id": &"luz_de_fora", "script": preload("res://scripts/setpieces/luz_de_fora.gd")},
 		{"id": &"vitrine", "script": preload("res://scripts/setpieces/vitrine.gd"), "at": Vector3(15.1, 0.0, 8.2)},
 		{"id": &"chave_vitrine", "script": preload("res://scripts/setpieces/chave_vitrine.gd"), "at": Vector3(1.78, 0.02, 3.5)},
+		{"id": &"desenho_cera", "script": preload("res://scripts/setpieces/desenho_cera.gd"), "at": Vector3(14.05, 1.5, 0.08)},
 	],
 	## The bench along the figure room's north wall (spec §6.2): where the
 	## figures sit, side by side, facing the room.
@@ -73,6 +74,7 @@ const DEF := {
 		{"id": &"vela_quarto", "kind": &"vela", "at": Vector3(11.0, 0.05, 5.0)},
 		{"id": &"fosforo_entrada", "kind": &"fosforo", "at": Vector3(0.6, 0.05, 8.6), "n": 4},
 		{"id": &"fosforo_corredor_sul", "kind": &"fosforo", "at": Vector3(9.8, 0.05, 8.6), "n": 4},
+		{"id": &"fosforo_cabeceira", "kind": &"fosforo", "at": Vector3(13.95, 0.62, 0.35), "n": 3},
 	],
 	## The boy's chalk trails (main._build_chalk_trails), seen with eyes closed.
 	"chalk": [
@@ -86,7 +88,7 @@ const DEF := {
 		{"item": &"relogio_entrada", "at": Vector3(3.1, 1.2, 8.8), "size": Vector3(0.55, 1.6, 0.4)},
 		{"item": &"bola", "node": "Ball", "size": Vector3(0.4, 0.4, 0.4)},
 		{"item": &"caixa_musica", "at": Vector3(3.35, 0.7, 4.45), "size": Vector3(0.45, 0.3, 0.35)},
-		{"item": &"desenho", "at": Vector3(6.7, 1.6, 0.1), "size": Vector3(0.8, 0.6, 0.15)},
+		{"item": &"desenho", "at": Vector3(14.05, 1.5, 0.12), "size": Vector3(0.8, 0.6, 0.15)},
 		{"item": &"casinha", "at": Vector3(15.05, 0.78, 8.2), "size": Vector3(0.45, 0.4, 0.6)},
 		{"item": &"vitrine", "at": Vector3(14.86, 1.35, 8.2), "size": Vector3(0.1, 0.4, 1.0)},
 		{"item": &"cabana", "at": Vector3(1.0, 0.4, 3.5), "size": Vector3(1.4, 0.8, 1.6)},
@@ -267,8 +269,15 @@ static func _build_furniture(main: Node3D) -> void:
 	# Playroom: rug, shelf, table, blocks, ball, music box.
 	main._box(main, Vector3(4.6, 0.03, 2.8), Vector3(3.8, 0.015, 4.4), main.mat_rug_play, false)
 	main._box(main, Vector3(2.2, 1.8, 0.35), Vector3(4.2, 0.9, 0.22), main.mat_wood_dark, true)
-	main._box(main, Vector3(0.8, 0.6, 0.04), Vector3(6.7, 1.6, 0.06), main.mat_cream, false)
-	main._box(main, Vector3(0.56, 0.38, 0.02), Vector3(6.7, 1.6, 0.02), main.mat_red, false)
+	# The boy's drawing, in white wax at the bedroom's head (setpieces/desenho_cera.gd):
+	# the paper is blank until a flame comes near; DrawingWax holds the lines.
+	main._box(main, Vector3(0.8, 0.6, 0.02), Vector3(14.05, 1.5, 0.08), main.mat_cream, false)
+	var wax: Node3D = main._box(main, Vector3(0.56, 0.38, 0.01), Vector3(14.05, 1.5, 0.095), main.mat_wax_lines, false)
+	wax.name = "DrawingWax"
+	# The bedside table, with its box of matches (a DEF pickup) and a burnt-out stub.
+	main._box(main, Vector3(0.5, 0.6, 0.5), Vector3(14.05, 0.3, 0.35), main.mat_wood, true)
+	main._box(main, Vector3(0.05, 0.04, 0.05), Vector3(14.2, 0.62, 0.3), main.mat_candle, false)
+	main._box(main, Vector3(0.08, 0.01, 0.08), Vector3(14.2, 0.605, 0.3), main.mat_wood_dark, false)
 	for i in range(5):
 		main._box(main, Vector3(0.16, 0.34, 0.06), Vector3(3.4 + i * 0.28, 1.22, 0.42), main.mat_red if i % 2 == 0 else main.mat_cream, false)
 	for i in range(4):
