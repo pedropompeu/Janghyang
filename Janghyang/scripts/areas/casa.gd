@@ -24,7 +24,7 @@ const DEF := {
 		{"id": &"brincar", "name": "quarto de brincar", "rect": Rect2(0.0, 0.0, 8.4, 7.0), "y": Vector2(-0.4, 2.8)},
 		{"id": &"corredor", "name": "corredor", "rect": Rect2(8.4, 0.0, 2.1, 7.7), "y": Vector2(-0.4, 2.8)},
 		{"id": &"quarto", "name": "quarto", "rect": Rect2(10.5, 0.0, 4.9, 5.6), "y": Vector2(-0.4, 2.8)},
-		{"id": &"figuras", "name": "sala das figuras", "rect": Rect2(10.5, 7.0, 2.8, 2.1), "y": Vector2(-0.4, 2.8)},
+		{"id": &"figuras", "name": "sala das figuras", "rect": Rect2(10.5, 5.6, 4.9, 3.5), "y": Vector2(-0.4, 2.8)},
 		{"id": &"corredor_sul", "name": "corredor da frente", "rect": Rect2(3.5, 7.7, 7.0, 1.4), "y": Vector2(-0.4, 2.8)},
 		{"id": &"beira_oeste", "name": "beira oeste", "rect": Rect2(-3.2, 0.0, 3.2, 9.1), "y": Vector2(-0.4, 2.8)},
 		{"id": &"beira_sul", "name": "beira sul", "rect": Rect2(0.0, 9.1, 15.4, 3.4), "y": Vector2(-0.4, 2.8)},
@@ -39,11 +39,16 @@ const DEF := {
 	## The scripted scenes (main._build_setpieces).
 	"setpieces": [
 		{"id": &"luz_de_fora", "script": preload("res://scripts/setpieces/luz_de_fora.gd")},
+		{"id": &"vitrine", "script": preload("res://scripts/setpieces/vitrine.gd"), "at": Vector3(15.1, 0.0, 8.2)},
+		{"id": &"chave_vitrine", "script": preload("res://scripts/setpieces/chave_vitrine.gd"), "at": Vector3(1.78, 0.02, 3.5)},
 	],
+	## The bench along the figure room's north wall (spec §6.2): where the
+	## figures sit, side by side, facing the room.
+	"bench": {"seats": [Vector3(11.3, 0.0, 5.95), Vector3(11.9, 0.0, 5.95), Vector3(12.5, 0.0, 5.95), Vector3(13.1, 0.0, 5.95), Vector3(13.7, 0.0, 5.95), Vector3(14.3, 0.0, 5.95), Vector3(14.9, 0.0, 5.95)], "face": Vector3(0.0, 0.0, 1.0)},
 	"staging": [
 		{"chapter": 1, "figures": [
 			{"style": {"coat": Color("#5a4636"), "skin": Color("#d1b195"), "hair": Color("#8a8378"), "trousers": Color("#2f2a26")}, "scale": 0.75, "poses": [
-				{"at": Vector3(6.1, 0.0, 2.4), "face": Vector3(7.5, 0.3, 1.0), "pose": &"sentado"},
+				{"at": Vector3(6.1, 0.0, 2.4), "face": Vector3(5.6, 0.4, 2.9), "pose": &"sentado"},
 				{"at": Vector3(6.4, 0.0, 1.1), "face": Vector3(6.7, 0.7, 0.0), "pose": &"em_pe", "reach": Vector3(6.7, 0.9, 0.0)},
 				{"at": Vector3(5.4, 0.0, 1.4), "face": Vector3(6.7, 0.4, 0.4), "pose": &"em_pe"},
 				{"at": Vector3(5.2, 0.0, 1.9), "face": Vector3(6.7, 0.4, 0.4), "pose": &"sentado"},
@@ -71,10 +76,10 @@ const DEF := {
 	],
 	## The boy's chalk trails (main._build_chalk_trails), seen with eyes closed.
 	"chalk": [
-		{"id": &"giz_figuras", "points": [Vector3(8.2, 0.006, 8.4), Vector3(10.0, 0.006, 8.4), Vector3(11.4, 0.006, 8.5), Vector3(12.2, 0.006, 8.6)], "leads_to": &"pilha_figuras"},
+		{"id": &"giz_vitrine", "points": [Vector3(14.6, 0.006, 8.2), Vector3(12.9, 0.006, 7.2), Vector3(10.9, 0.006, 8.0), Vector3(9.4, 0.006, 8.4), Vector3(6.0, 0.006, 8.4), Vector3(3.9, 0.006, 8.4), Vector3(2.4, 0.006, 7.7), Vector3(1.8, 0.006, 6.9), Vector3(1.8, 0.006, 5.4), Vector3(1.78, 0.006, 3.9)], "leads_to": &"chave_vitrine"},
 		{"id": &"giz_quarto", "points": [Vector3(9.45, 0.006, 5.0), Vector3(9.45, 0.006, 3.0), Vector3(10.9, 0.006, 1.6), Vector3(11.0, 0.006, 1.1)], "leads_to": &"pilha_quarto"},
 	],
-	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"},
+	"catalog": {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"casinha": &"cat_casinha", &"pagina_cabana": &"pagina"},
 	## What Elias can write down (main._build_catalog_targets). The page under
 	## the cabana cushion only shows after 03:33 (main.reveal_cabana_page).
 	"targets": [
@@ -82,7 +87,8 @@ const DEF := {
 		{"item": &"bola", "node": "Ball", "size": Vector3(0.4, 0.4, 0.4)},
 		{"item": &"caixa_musica", "at": Vector3(3.35, 0.7, 4.45), "size": Vector3(0.45, 0.3, 0.35)},
 		{"item": &"desenho", "at": Vector3(6.7, 1.6, 0.1), "size": Vector3(0.8, 0.6, 0.15)},
-		{"item": &"casinha", "at": Vector3(7.5, 0.3, 1.0), "size": Vector3(1.0, 0.8, 0.8)},
+		{"item": &"casinha", "at": Vector3(15.05, 0.78, 8.2), "size": Vector3(0.45, 0.4, 0.6)},
+		{"item": &"vitrine", "at": Vector3(14.86, 1.35, 8.2), "size": Vector3(0.1, 0.4, 1.0)},
 		{"item": &"cabana", "at": Vector3(1.0, 0.4, 3.5), "size": Vector3(1.4, 0.8, 1.6)},
 		{"item": &"cama", "at": Vector3(13.2, 0.5, 3.0), "size": Vector3(2.2, 0.6, 3.1)},
 		{"item": &"espelho", "at": Vector3(15.25, 1.35, 2.0), "size": Vector3(0.15, 1.6, 1.0)},
@@ -116,7 +122,7 @@ static func _build_house(main: Node3D) -> void:
 	main._floor(house, AreaGaveta.HOLE.position.x, AreaGaveta.HOLE.end.y, 15.4, 5.6, main.mat_floor_bed)
 	var hole: Rect2 = AreaGaveta.HOLE
 	main._breakable(house, "Trapdoor", &"alcapao", Vector3(hole.size.x, 0.12, hole.size.y), Vector3(hole.get_center().x, -0.06, hole.get_center().y), main.mat_wood_dark)
-	main._floor(house, 10.5, 7.0, 13.3, 9.1, main.mat_floor_figure)
+	main._floor(house, 10.5, 5.6, 15.4, 9.1, main.mat_floor_figure)
 	main._floor(house, 0.0, 7.0, 3.5, 9.1, main.mat_floor_entry)
 	main._floor(house, 3.5, 7.7, 10.5, 9.1, main.mat_floor_corridor)
 
@@ -124,7 +130,7 @@ static func _build_house(main: Node3D) -> void:
 	main._ceiling(house, 0.0, 0.0, 8.4, 7.0)
 	main._ceiling(house, 8.4, 0.0, 10.5, 7.7)
 	main._ceiling(house, 10.5, 0.0, 15.4, 5.6)
-	main._ceiling(house, 10.5, 7.0, 13.3, 9.1)
+	main._ceiling(house, 10.5, 5.6, 15.4, 9.1)
 	main._ceiling(house, 0.0, 7.0, 3.5, 9.1)
 	main._ceiling(house, 3.5, 7.7, 10.5, 9.1)
 
@@ -141,7 +147,7 @@ static func _build_house(main: Node3D) -> void:
 
 	# East side.
 	main._wall_x(house, 15.4, 0.0, 5.6, 0.0, main.WALL_H, main.mat_wall_bed)
-	main._wall_x(house, 13.3, 7.0, 9.1, 0.0, main.WALL_H, main.mat_wall_figure)
+	main._wall_x(house, 15.4, 5.6, 9.1, 0.0, main.WALL_H, main.mat_wall_figure)
 
 	# South facade with the front door opening.
 	main._wall_z(house, 9.1, 0.0, 1.12, 0.0, main.WALL_H, main.mat_wall_exterior)
@@ -170,9 +176,8 @@ static func _build_house(main: Node3D) -> void:
 	main._wall_x(house, 10.5, 7.56, 8.4, main.DOOR_H, main.WALL_H, main.mat_wall_figure)
 	main._wall_x(house, 10.5, 8.4, 9.1, 0.0, main.WALL_H, main.mat_wall_figure)
 
-	# Bedroom south and figure-room north.
+	# Bedroom south and figure-room north (one wall since the room grew, spec §6.2).
 	main._wall_z(house, 5.6, 10.5, 15.4, 0.0, main.WALL_H, main.mat_wall_bed)
-	main._wall_z(house, 7.0, 10.5, 13.3, 0.0, main.WALL_H, main.mat_wall_figure)
 
 	# Entry east side and passage north.
 	main._wall_x(house, 3.5, 7.0, 7.7, 0.0, main.WALL_H, main.mat_wall_entry)
@@ -281,12 +286,8 @@ static func _build_furniture(main: Node3D) -> void:
 	main._box(main, Vector3(1.4, 0.03, 1.2), Vector3(1.5, 0.015, 3.5), main.mat_rug_play, false)
 	main._box(main, Vector3(0.5, 0.12, 0.5), Vector3(1.5, 0.06, 3.5), main.mat_cream, false)
 
-	# A small house inside the house.
-	main._box(main, Vector3(0.9, 0.55, 0.7), Vector3(7.5, 0.275, 1.0), main.mat_wood, true)
-	main._box(main, Vector3(0.55, 0.05, 0.8), Vector3(7.25, 0.62, 1.0), main.mat_red, false, Vector3(0.0, 0.0, deg_to_rad(30.0)))
-	main._box(main, Vector3(0.55, 0.05, 0.8), Vector3(7.75, 0.62, 1.0), main.mat_red, false, Vector3(0.0, 0.0, deg_to_rad(-30.0)))
-	main._box(main, Vector3(0.18, 0.3, 0.02), Vector3(7.5, 0.2, 1.36), main.mat_dark, false)
-	main._box(main, Vector3(0.12, 0.12, 0.02), Vector3(7.2, 0.35, 1.36), main.mat_window, false)
+	# The little house moved into the figure room's cabinet (setpieces/vitrine.gd).
+	_build_bench(main)
 
 	var mb = preload("res://scripts/music_box.gd").new()
 	mb.name = "MusicBox"
@@ -596,3 +597,16 @@ static func _build_story_props(main: Node3D) -> void:
 	var page: Node3D = main._box(main, Vector3(0.22, 0.004, 0.29), Vector3(1.5, 0.13, 3.5), main.mat_cream, false, Vector3(0.0, deg_to_rad(-18.0), 0.0))
 	page.name = "CabanaPage"
 	page.visible = false
+
+## The figure room's bench (DEF.bench): plain dark wood along the north
+## wall, long enough for the seven seats, solid to walk into.
+static func _build_bench(main: Node3D) -> void:
+	var seats: Array = DEF.bench.seats
+	var x0: float = seats[0].x - 0.3
+	var x1: float = seats[-1].x + 0.3
+	var cx := (x0 + x1) * 0.5
+	var z: float = seats[0].z - 0.09
+	main._box(main, Vector3(x1 - x0, 0.06, 0.42), Vector3(cx, 0.43, z), main.mat_wood_dark, true)
+	main._box(main, Vector3(x1 - x0, 0.5, 0.05), Vector3(cx, 0.75, 5.66), main.mat_wood_dark, true)
+	for x in [x0 + 0.05, cx, x1 - 0.05]:
+		main._box(main, Vector3(0.06, 0.4, 0.38), Vector3(x, 0.2, z), main.mat_wood_dark, true)

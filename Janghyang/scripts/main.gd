@@ -1143,12 +1143,17 @@ func _build_chalk_trails() -> void:
 				_chalk(arrow, Vector3(0.22, 0.01, 0.04), Vector3(0.18, 0.0, 0.07), Vector3(0.0, 0.7, 0.0))
 				_chalk(arrow, Vector3(0.22, 0.01, 0.04), Vector3(0.18, 0.0, -0.07), Vector3(0.0, -0.7, 0.0))
 
-## Where a trail's `leads_to` stands: a light pickup or a catalog target
-## (Vector3.INF when neither exists).
+## Where a trail's `leads_to` stands: a light pickup, a setpiece placed by
+## its DEF `at` (read from the data, so it holds before the piece is built)
+## or a catalog target (Vector3.INF when none exists).
 func chalk_target(id: StringName) -> Vector3:
 	var p: Dictionary = LightModel.pickup(id)
 	if not p.is_empty():
 		return p.at
+	for def in Registry.defs():
+		for e in def.setpieces:
+			if e.id == id and e.has("at"):
+				return e.at
 	var n := find_child("Catalog_" + String(id), true, false) as Node3D
 	return n.global_position if n != null else Vector3.INF
 

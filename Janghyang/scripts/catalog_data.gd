@@ -14,7 +14,8 @@ const ITEMS := {
 	&"bola": {"text": "bola de madeira, faia, gasta de um lado só.", "page": &"", "gate": &""},
 	&"caixa_musica": {"text": "caixa de música, manivela de latão. A melodia sempre para na mesma nota.", "page": &"p2", "gate": &""},
 	&"desenho": {"text": "desenho a lápis de cera: esta casa, um menino, um relógio maior que a casa. Assinado \"Inácio, 7 anos\".", "page": &"", "gate": &""},
-	&"casinha": {"text": "casinha de brinquedo dentro da casa de brinquedo. Também tem relógio no telhado.", "page": &"", "gate": &""},
+	&"casinha": {"text": "casinha de brinquedo dentro da casa de brinquedo. Também tem relógio no telhado.", "page": &"", "gate": &"vitrine_aberta"},
+	&"vitrine": {"text": "armário de porta de vidro, trancado. Lá dentro, a casinha.", "page": &"", "gate": &""},
 	&"cabana": {"text": "cabana de parede dobrada, almofada, cobertor. Cheiro de cobre.", "page": &"", "gate": &"f1_folded"},
 	&"cama": {"text": "cama de criança, colcha bordada. No travesseiro, a marca de uma cabeça adulta.", "page": &"", "gate": &""},
 	&"espelho": {"text": "espelho oval, moldura de latão. O reflexo demora.", "page": &"", "gate": &""},
@@ -34,6 +35,7 @@ const ITEMS := {
 ## The four pieces of Inácio's pocket watch: Elias notes each one as he
 ## picks it up, and the diary page that was with it.
 const NOTES := {
+	&"chave_vitrine": {"text": "chave pequena, de latão, debaixo da almofada da cabana. O giz do menino ia até ela.", "page": &""},
 	&"coroa": {"text": "coroa de relógio de bolso, latão serrilhado. Estava no fim da passagem, onde o menino a deixou.", "page": &"p6"},
 	&"ponteiros": {"text": "par de ponteiros de aço azulado, presos atrás do mostrador da torre. Apontavam para as 03:33.", "page": &"p7"},
 	&"mostrador": {"text": "mostrador de esmalte, rachado entre o 3 e o 4. Guardado numa caixa de relógio maior que eu.", "page": &"p8"},

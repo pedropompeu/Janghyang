@@ -37,6 +37,13 @@ func get_prompt() -> String:
 func is_at_b() -> bool:
 	return _at_b
 
+## Sets the pose at once, with no sound and no signal (a night's reset).
+func snap(at_b: bool) -> void:
+	_busy = false
+	_at_b = at_b
+	rotation = rotation_b if _at_b else rotation_a
+	_apply_collision()
+
 func interact() -> void:
 	if _busy:
 		return

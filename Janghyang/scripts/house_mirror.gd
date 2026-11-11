@@ -11,7 +11,7 @@ const DOLL_EXPIRE := 30.0
 ## Wall surfaces inside the house the knocks can come from.
 const KNOCK_POINTS := [
 	Vector3(4.0, 1.3, 0.12), Vector3(9.4, 1.3, 0.12), Vector3(12.5, 1.3, 0.12),
-	Vector3(15.28, 1.3, 0.8), Vector3(13.0, 1.3, 5.48), Vector3(13.2, 1.3, 8.0),
+	Vector3(15.28, 1.3, 0.8), Vector3(13.0, 1.3, 5.48), Vector3(15.28, 1.3, 7.0),
 	Vector3(0.2, 1.3, 8.2), Vector3(6.0, 1.3, 7.6), Vector3(8.3, 1.3, 6.2),
 ]
 

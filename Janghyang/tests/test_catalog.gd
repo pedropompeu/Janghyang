@@ -82,3 +82,18 @@ func test_from_dict_without_entries_keeps_the_opening(t) -> void:
 	t.ok(cat.next_number() > 0, "o próximo número existe")
 	cat.from_dict({"entries": [{"text": "sem número"}, {"number": 300.0, "text": "certo", "author": "elias", "item": "bola"}]})
 	t.eq(cat.entries.map(func(e): return e.number), [300], "uma entrada incompleta é deixada de fora")
+
+# --- Noite 1, Tarefa 7: a casinha fica no armário trancado ---
+
+func test_casinha_waits_for_the_cabinet(t) -> void:
+	var c := Catalog.new()
+	t.ok(not c.can_catalog(&"casinha"), "com o armário fechado, a casinha não entra")
+	c.set_flag(&"vitrine_aberta", true)
+	t.ok(c.can_catalog(&"casinha"), "aberto o armário, entra")
+	t.ok(Data.ITEMS.has(&"vitrine"), "o armário trancado também se cataloga")
+
+func test_key_note_glues_no_page(t) -> void:
+	var c := Catalog.new()
+	var e: Dictionary = c.note(&"chave_vitrine")
+	t.eq(e.get("item"), &"chave_vitrine", "a chave vira nota do caderno")
+	t.ok(not c.pages.has(&""), "sem página do diário, nenhuma página vazia entra")

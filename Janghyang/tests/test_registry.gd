@@ -100,7 +100,7 @@ func test_the_maps_still_hold_todays_lots(t) -> void:
 	var catalog := Registry.merged("catalog")
 	t.eq(tasks, {&"passagem": &"achar_passagem", &"sotao": &"subir_sotao", &"mecanismo": &"entrar_mecanismo", &"gaveta": &"descer_gaveta", &"loja_varela": &"chegar_relojoaria"}, "lots struck by setting foot")
 	t.eq(breaks, {"HollowPanel": &"achar_passagem", "Trapdoor": &"achar_alcapao", "CrackedGlass": &"quebrar_redoma"}, "lots struck by breaking")
-	t.eq(catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
+	t.eq(catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"casinha": &"cat_casinha", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
 
 func test_passagem_def_matches_today(t) -> void:
 	var d := Registry.def(&"passagem")
@@ -201,7 +201,7 @@ const HOUSE_ROOMS := [
 	[&"brincar", "quarto de brincar", Rect2(0.0, 0.0, 8.4, 7.0)],
 	[&"corredor", "corredor", Rect2(8.4, 0.0, 2.1, 7.7)],
 	[&"quarto", "quarto", Rect2(10.5, 0.0, 4.9, 5.6)],
-	[&"figuras", "sala das figuras", Rect2(10.5, 7.0, 2.8, 2.1)],
+	[&"figuras", "sala das figuras", Rect2(10.5, 5.6, 4.9, 3.5)],
 	[&"corredor_sul", "corredor da frente", Rect2(3.5, 7.7, 7.0, 1.4)],
 	[&"beira_oeste", "beira oeste", Rect2(-3.2, 0.0, 3.2, 9.1)],
 	[&"beira_sul", "beira sul", Rect2(0.0, 9.1, 15.4, 3.4)],
@@ -221,7 +221,7 @@ func test_casa_def_matches_today(t) -> void:
 		t.eq(d.rooms[i].name, HOUSE_ROOMS[i][1], "name of %s" % HOUSE_ROOMS[i][0])
 		t.eq(d.rooms[i].rect, HOUSE_ROOMS[i][2], "rect of %s" % HOUSE_ROOMS[i][0])
 		t.eq(d.rooms[i].y, Vector2(-0.4, 2.8), "height band of %s" % HOUSE_ROOMS[i][0])
-	t.eq(d.catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
+	t.eq(d.catalog, {&"relogio_entrada": &"cat_relogio", &"desenho": &"cat_desenho", &"casinha": &"cat_casinha", &"pagina_cabana": &"pagina"}, "lots struck by cataloguing")
 
 func test_main_knows_no_area_by_name(t) -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/main.gd")
@@ -295,3 +295,46 @@ func test_main_keeps_the_setpiece_contract(t) -> void:
 		t.eq(methods.get(m, -1), want[m], "main has %s with its arity" % m)
 	t.ok(script.get_script_signal_list().any(func(s): return s.name == "night_flag_set"), "main signals night_flag_set")
 	t.ok(script.get_script_property_list().any(func(p): return p.name == "night_flags"), "main keeps night_flags")
+
+# --- Noite 1, Tarefa 7: a sala das figuras cresce; o giz leva à chave ---
+
+func test_figure_room_holds_the_bench(t) -> void:
+	var d := Registry.def(&"casa")
+	var found: Array = d.rooms.filter(func(r): return r.id == &"figuras")
+	t.eq(found.size(), 1, "a casa tem a sala das figuras")
+	if found.is_empty():
+		return
+	var room: Dictionary = found[0]
+	t.eq(room.rect, Rect2(10.5, 5.6, 4.9, 3.5), "a sala vai de x 10,5 a 15,4 e de z 5,6 a 9,1")
+	for r in Registry.rooms():
+		if r.id != &"figuras" and r.y.y > room.y.x and r.y.x < room.y.y:
+			t.ok(r.rect.intersection(room.rect).get_area() < 0.0001, "a sala não sobrepõe %s" % r.id)
+	var bench: Dictionary = d.get("bench", {})
+	var seats: Array = bench.get("seats", [])
+	t.eq(seats.size(), 7, "sete lugares no banco")
+	t.eq(bench.get("face"), Vector3(0.0, 0.0, 1.0), "as figuras do banco olham para o sul")
+	for i in seats.size():
+		t.ok(room.rect.has_point(Vector2(seats[i].x, seats[i].z)), "o lugar %d fica dentro da sala" % i)
+		for j in range(i + 1, seats.size()):
+			t.ok(seats[i].distance_to(seats[j]) >= 0.55, "os lugares %d e %d têm 0,55 m entre si" % [i, j])
+
+func test_chalk_trails_stay_inside_rooms(t) -> void:
+	var atlas := Atlas.new()
+	var leads := {}
+	for d in Registry.defs():
+		for p in d.pickups:
+			leads[p.id] = true
+		for s in d.setpieces:
+			leads[s.id] = true
+	for id in CatalogData.ITEMS:
+		leads[id] = true
+	for d in Registry.defs():
+		var own: Array = d.rooms.map(func(r): return r.id)
+		for trail in d.chalk:
+			t.ok(leads.has(trail.leads_to), "o rastro %s leva a um pickup, item ou peça (%s)" % [trail.id, trail.leads_to])
+			var pts: Array = trail.points
+			for i in pts.size():
+				t.ok(own.has(atlas.room_at(pts[i])), "o ponto %d de %s cai num cômodo de %s" % [i, trail.id, d.id])
+				if i > 0:
+					var mid: Vector3 = (pts[i - 1] + pts[i]) * 0.5
+					t.ok(own.has(atlas.room_at(mid)), "o meio do trecho %d de %s cai num cômodo de %s" % [i, trail.id, d.id])

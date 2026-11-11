@@ -655,6 +655,7 @@ func _nights() -> void:
 	await _light()
 	await _watch()
 	await _capitulo()
+	await _vitrine()
 	main.player.global_position = main.night.goals[1].at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -690,6 +691,7 @@ func _nights() -> void:
 	var lit2: int = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible).size()
 	_record(lit2 == 9, "bussola: night 2 wakes with the house lit", str(lit2))
 	await _abertura_noite2()
+	_vitrine_noite2()
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
 	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
@@ -714,6 +716,71 @@ func _nights() -> void:
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	_record(main._home_goal().is_empty(), "noites: night 5 has no way home for the watch to point", str(main._home_goal()))
 	await _frames(2)
+
+## Noite 1, Tarefa 7 (§6.2): the figure room grows; the cabinet with the
+## little house stays locked until the key under the cabana cushion, at the
+## end of the boy's chalk, is picked up.
+func _vitrine() -> void:
+	print("SELFTEST: vitrine")
+	var piece = main.setpiece(&"vitrine")
+	var key = main.setpiece(&"chave_vitrine")
+	var door = main.get_node_or_null("CabinetDoor")
+	if piece == null or key == null or door == null:
+		_record(false, "vitrine: sem a chave o armário não abre e a casinha não entra no caderno", "%s %s %s" % [piece, key, door])
+		_record(false, "vitrine: a chave fica no fim do giz, dentro da cabana", "")
+		_record(false, "vitrine: com a chave, E abre e a casinha pode ser catalogada", "")
+	else:
+		var prompt_locked: String = piece.get_prompt()
+		piece.interact()
+		await get_tree().create_timer(1.3).timeout
+		_record(prompt_locked == "abrir o armário" and not door.is_at_b() and not main.catalog.can_catalog(&"casinha"), "vitrine: sem a chave o armário não abre e a casinha não entra no caderno", prompt_locked)
+		var trail: Array = []
+		for d in main.Registry.defs():
+			for tr in d.chalk:
+				if tr.id == &"giz_vitrine":
+					trail = tr.points
+		var cab: Area3D = main.get_node("HideCabana")
+		var box: AABB = AABB(cab.global_position - cab.get_child(0).shape.size * 0.5, cab.get_child(0).shape.size)
+		var at: Vector3 = key.global_position
+		_record(not trail.is_empty() and (trail[-1] as Vector3).distance_to(at) <= 0.5 and box.has_point(at) and key.get_prompt() == "pegar a chave", "vitrine: a chave fica no fim do giz, dentro da cabana", str(at))
+		key.interact()
+		var prompt_open: String = piece.get_prompt()
+		piece.interact()
+		await get_tree().create_timer(1.3).timeout
+		_record(main.step_done(&"chave_vitrine") and not key.visible and prompt_open == "destrancar o armário" and door.is_at_b() and main.catalog.can_catalog(&"casinha") and main.catalog.has(&"chave_vitrine"),
+				"vitrine: com a chave, E abre e a casinha pode ser catalogada", prompt_open)
+	var room_of := func(n: Node3D) -> StringName:
+		return main.atlas.room_at(n.global_position) if n != null else &""
+	var sat := true
+	for id in [&"figura_inacio_a", &"figura_inacio_b", &"figura_catalogador"]:
+		var n := main.find_child("Catalog_" + String(id), true, false) as Node3D
+		sat = sat and room_of.call(n) == &"figuras" and (main.catalog.has(id) or main.catalog.can_catalog(id))
+	for w in ["PocketWatchA", "PocketWatchB"]:
+		sat = sat and room_of.call(main.find_child(w, true, false)) == &"figuras"
+	_record(sat, "sala: as três figuras sentadas e os relógios de bolso continuam catalogáveis", "")
+	var space := main.get_world_3d().direct_space_state
+	var far := []
+	var pts: Array = []
+	pts.append_array(main.HouseMirror.KNOCK_POINTS.map(func(p): return p))
+	pts.append_array(main.HourEvent.CRACK_ANCHORS.map(func(p): return p + Vector3(0.0, 0.5, 0.0)))
+	for p in pts:
+		if main.atlas.room_at(p) != &"figuras":
+			continue
+		var best := INF
+		for dir in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
+			var q := PhysicsRayQueryParameters3D.create(p, p + dir * 1.0)
+			q.exclude = [main.player.get_rid()]
+			var hit := space.intersect_ray(q)
+			if not hit.is_empty():
+				best = minf(best, p.distance_to(hit.position))
+		if best > 0.3:
+			far.append(p)
+	_record(far.is_empty(), "sala: nenhum ponto de batida nem âncora de fresta fica a mais de 0,3 m de uma parede", str(far))
+
+## Night 2 does not list the cabinet: it stands open, the little house free.
+func _vitrine_noite2() -> void:
+	var door = main.get_node_or_null("CabinetDoor")
+	_record(door != null and door.is_at_b() and main.catalog.flags.get(&"vitrine_aberta", false), "vitrine: na noite 2 o armário já está aberto", "")
 
 ## Noite 1, Tarefa 6 (§6.1): putting the letter away puts out the light
 ## outside, the warm windows and the workshop's lamp, with one click; the

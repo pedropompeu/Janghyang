@@ -39,7 +39,7 @@ func note(item: StringName) -> Dictionary:
 	var data: Dictionary = Data.NOTES[item]
 	var entry := {"number": next_number(), "text": data.text, "author": &"elias", "item": item}
 	entries.append(entry)
-	if not pages.has(data.page):
+	if data.page != &"" and not pages.has(data.page):
 		pages.append(data.page)
 	return entry
 

@@ -18,6 +18,7 @@ const PHASES := [
 const TASKS := {
 	&"cat_relogio": "catalogar o relógio da entrada",
 	&"cat_desenho": "catalogar o desenho do menino",
+	&"cat_casinha": "catalogar a casinha",
 	&"achar_passagem": "achar o que o desenho esconde",
 	&"coroa": "a coroa do relógio de bolso",
 	&"subir_sotao": "subir ao sótão",
