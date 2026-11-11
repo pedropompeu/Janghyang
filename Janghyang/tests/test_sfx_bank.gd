@@ -13,7 +13,7 @@ func test_every_kind_is_wav(t) -> void:
 		var w: AudioStreamWAV = Sfx.make(k)
 		t.ok(w != null and w.data.size() > 0, "%s has data" % k)
 		t.eq(w.format, AudioStreamWAV.FORMAT_16_BITS, "%s is 16-bit" % k)
-		t.eq(w.loop_mode != AudioStreamWAV.LOOP_DISABLED, k in [&"rain", &"hum", &"breath", &"ticks"], "%s loop flag" % k)
+		t.eq(w.loop_mode != AudioStreamWAV.LOOP_DISABLED, k in [&"rain", &"hum", &"breath", &"ticks", &"arrastar"], "%s loop flag" % k)
 
 func test_no_loud_sting(t) -> void:
 	for k in Sfx.KINDS:

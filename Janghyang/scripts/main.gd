@@ -986,6 +986,7 @@ func begin_night(n: int) -> void:
 	hour_event.reset()
 	if dread != null:
 		dread.director.new_night()
+		dread.director.muted.assign(night.get("mute_scares", []))
 	player.global_position = SPAWN
 	player.velocity = Vector3.ZERO
 	player.respawn_point = SPAWN

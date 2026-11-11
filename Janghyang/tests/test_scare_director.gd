@@ -77,3 +77,74 @@ func test_no_scare_past_the_bank_peak(t) -> void:
 		for i in range(0, w.data.size(), 2):
 			peak = maxi(peak, absi(w.data.decode_s16(i)))
 		t.ok(peak <= int(Director.PEAK * 32767.0) + 1, "%s não passa do pico 0,5" % kind)
+
+# --- Noite 1, Tarefa 5: sustos de roteiro e tipos novos ---
+
+const NEW_KINDS := [&"bola_quica", &"olho_fresta", &"figura_painel", &"reflexo_fica", &"figura_some", &"catalogo_muda"]
+
+func test_new_kinds_are_known(t) -> void:
+	for k in NEW_KINDS:
+		t.ok(Director.KINDS.has(k), "%s é um tipo de susto" % k)
+
+func test_force_passes_cold(t) -> void:
+	var d = Director.new()
+	d.new_night()
+	t.ok(d.force(&"bola_quica"), "de roteiro passa sem silêncio nem tensão")
+
+func test_force_refused_in_the_hour(t) -> void:
+	var d = Director.new()
+	d.set_hour(true)
+	t.ok(not d.force(&"bola_quica"), "no 03:33, nem o de roteiro")
+	d.set_hour(false)
+	t.ok(d.force(&"bola_quica"), "recusado na hora, não ficou usado")
+
+func test_force_only_once(t) -> void:
+	var d = Director.new()
+	t.ok(d.force(&"figura_painel"), "a primeira vez")
+	t.ok(not d.force(&"figura_painel"), "a segunda não, na mesma noite")
+	t.ok(not d.force(&"grito"), "tipo desconhecido, não")
+
+func test_force_makes_room(t) -> void:
+	var d = Director.new()
+	_quiet(d, 100.0)
+	t.ok(d.force(&"bola_quica"), "o de roteiro")
+	t.ok(not d.request(&"pose", false, 1.0), "logo depois, nenhum fraco")
+	d.update(Director.WEAK_GAP, false)
+	t.ok(d.request(&"pose", false, 1.0), "depois de WEAK_GAP, o fraco passa")
+	t.ok(not d.request(&"olho_fresta", true, 1.0), "o forte ainda espera")
+	d.update(Director.STRONG_GAP, false)
+	t.ok(d.request(&"olho_fresta", true, 1.0), "depois de STRONG_GAP, o forte passa")
+
+func test_strong_new_kinds_once_weak_ones_repeat(t) -> void:
+	var d = Director.new()
+	_quiet(d, 100.0)
+	t.ok(d.request(&"olho_fresta", true, 1.0), "o olho na fresta uma vez")
+	_quiet(d, 100.0)
+	t.ok(not d.request(&"olho_fresta", true, 1.0), "não volta na noite")
+	t.ok(d.request(&"figura_some", false, 0.5), "a figura some (fraco)")
+	_quiet(d, Director.WEAK_GAP + Director.QUIET_BEFORE)
+	t.ok(d.request(&"figura_some", false, 0.5), "e pode sumir de novo")
+
+func test_muted_kind_is_refused_but_force_passes(t) -> void:
+	var d = Director.new()
+	d.muted.assign([&"lanterna_pisca"])
+	_quiet(d, 100.0)
+	t.ok(not d.request(&"lanterna_pisca", true, 1.0), "mudo, o pedido é negado")
+	t.ok(d.force(&"lanterna_pisca"), "mas o roteiro passa (e não estava usado)")
+
+func test_max_db_is_the_rule(t) -> void:
+	t.eq(Director.MAX_DB, 0.0, "MAX_DB 0 dB")
+	t.eq(Director.PEAK, 0.5, "PEAK 0,5")
+
+func test_new_sounds_are_clipped(t) -> void:
+	for kind in [&"interruptor", &"quique", &"arrastar", &"caixa_frase", &"madeira"]:
+		t.ok(SfxBank.KINDS.has(kind), "%s está no banco" % kind)
+		var w: AudioStreamWAV = SfxBank.make(kind, 1) if SfxBank.KINDS.has(kind) else null
+		t.ok(w != null and w.data.size() > 0, "%s tem amostras" % kind)
+		if w == null:
+			continue
+		var peak := 0
+		for i in range(0, w.data.size(), 2):
+			peak = maxi(peak, absi(w.data.decode_s16(i)))
+		t.ok(peak <= int(Director.PEAK * 32767.0) + 1, "%s não passa do pico 0,5" % kind)
+		t.eq(SfxBank.make(kind, 1).data, w.data, "%s: mesma semente, mesmo som" % kind)

@@ -4,8 +4,13 @@ extends Node
 ## Two layers: "Mundo" (rain, breath; never muted) and "Casa" (the house).
 
 const KINDS := [&"tick", &"click", &"knock", &"step", &"pencil", &"fold", &"rain", &"hum", &"breath", &"creak", &"swish",
-	&"door", &"slam", &"porcelain", &"shatter", &"glass", &"tink", &"oco", &"crumble", &"land", &"step_metal", &"rung", &"ticks", &"crack", &"porcelain_muffled"]
-const LOOPED := [&"rain", &"hum", &"breath", &"ticks"]
+	&"door", &"slam", &"porcelain", &"shatter", &"glass", &"tink", &"oco", &"crumble", &"land", &"step_metal", &"rung", &"ticks", &"crack", &"porcelain_muffled",
+	&"interruptor", &"quique", &"arrastar", &"caixa_frase", &"madeira"]
+const LOOPED := [&"rain", &"hum", &"breath", &"ticks", &"arrastar"]
+## The music box's phrase (caixa_frase): it always stops on the same note,
+## before the tune resolves. [seconds, Hz].
+const PHRASE := [[0.0, 659.3], [0.32, 784.0], [0.64, 880.0], [0.96, 1046.5], [1.28, 987.8], [1.6, 880.0],
+	[1.92, 784.0], [2.24, 659.3], [2.56, 587.3], [2.88, 659.3], [3.2, 740.0]]
 const RATE := 22050
 const POOL_SIZE := 12
 const PENCIL_PATTERN := [0.0, 0.18, 0.31, 0.55, 0.7]
@@ -167,6 +172,44 @@ static func make(kind: StringName, seed: int = 7) -> AudioStreamWAV:
 					var local := fmod(t + c[1], c[0])
 					v += (sin(TAU * c[2] * local) * 0.7 + rng.randf_range(-1.0, 1.0) * 0.3) * exp(-local * 110.0) * 0.06
 				return v)
+		&"interruptor":
+			# An old switch somewhere: a low, heavy click and the box it sits in.
+			samples = _render(0.12, func(t: float) -> float:
+				var snap := rng.randf_range(-1.0, 1.0) * exp(-t * 180.0)
+				var box := sin(TAU * 170.0 * t) * exp(-t * 55.0)
+				return (snap * 0.55 + box * 0.5) * 0.4)
+		&"quique":
+			# A rubber ball on floorboards: one short, hollow bounce.
+			samples = _render(0.08, func(t: float) -> float:
+				var body := sin(TAU * 210.0 * t) + sin(TAU * 470.0 * t) * 0.35
+				var tap := rng.randf_range(-1.0, 1.0) * exp(-t * 300.0)
+				return (body * exp(-t * 60.0) * 0.6 + tap * 0.35) * 0.4)
+		&"arrastar":
+			# Something heavy dragged over wood, low and grainy; it loops.
+			var grit := 0.0
+			samples = _render(1.5, func(t: float) -> float:
+				grit = lerpf(grit, rng.randf_range(-1.0, 1.0), 0.12)
+				var judder := 0.75 + 0.25 * sin(TAU * t * 6.0 / 1.5)
+				return (grit * 0.7 + sin(TAU * 64.0 * t) * 0.3) * judder * 0.22)
+		&"caixa_frase":
+			# The music box: bright, bell-like comb notes, each ringing out.
+			samples = _render(4.0, func(t: float) -> float:
+				var v := 0.0
+				for n in PHRASE:
+					var lt: float = t - n[0]
+					if lt < 0.0:
+						continue
+					var f: float = n[1]
+					v += (sin(TAU * f * lt) + sin(TAU * f * 3.0 * lt) * 0.25 + sin(TAU * f * 5.4 * lt) * 0.1) * exp(-lt * 5.0)
+				return v * 0.16)
+		&"madeira":
+			# A floorboard giving under weight: a dry crack and a falling groan.
+			var phase := 0.0
+			samples = _render(0.3, func(t: float) -> float:
+				phase += TAU * (140.0 - 160.0 * t) / RATE
+				var crack := rng.randf_range(-1.0, 1.0) * exp(-t * 90.0)
+				var groan := sin(phase) * exp(-t * 12.0)
+				return (crack * 0.5 + groan * 0.45) * 0.4)
 		_:
 			push_error("sfx_bank: unknown kind %s" % kind)
 			return null

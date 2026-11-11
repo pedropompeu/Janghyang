@@ -41,6 +41,10 @@ var shock := 0.0
 ## Says when a scare may come (scare_director.gd).
 var director = ScareDirector.new()
 
+## A scene's scare, from its script (scare_director.force): true when it may play.
+func scripted(kind: StringName) -> bool:
+	return director.force(kind)
+
 var _lights: Array[OmniLight3D] = []
 var _base: Array[float] = []
 var _dip: Array[float] = []
