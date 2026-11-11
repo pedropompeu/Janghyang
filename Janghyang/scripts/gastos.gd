@@ -184,10 +184,11 @@ func _build_graphs_when_solid() -> void:
 func _build_graphs() -> void:
 	var atlas := Atlas.new()
 	# The workshop's giant lamps light the room outside the model, not its
-	# rooms: they would make every point of the house "lit" for them.
+	# rooms: they would make every point of the house "lit" for them. The
+	# light outside the windows does not light the rooms either.
 	var oficina := main.get_node_or_null("Oficina")
 	for l in main.find_children("*", "OmniLight3D", true, false):
-		if oficina == null or not oficina.is_ancestor_of(l):
+		if (oficina == null or not oficina.is_ancestor_of(l)) and not l.is_in_group(&"OutsideLight"):
 			add_lamp(l)
 	for d in main.find_children("Door*", "AnimatableBody3D", true, false):
 		_doors.append(d)

@@ -36,6 +36,10 @@ const DEF := {
 	## Each figure: a style, a scale, a body (mannequin.BODIES, adulto when
 	## left out) and one pose per step ({at, face, pose, reach}). Meshes only:
 	## nothing to bump into, no Gasto graph changes.
+	## The scripted scenes (main._build_setpieces).
+	"setpieces": [
+		{"id": &"luz_de_fora", "script": preload("res://scripts/setpieces/luz_de_fora.gd")},
+	],
 	"staging": [
 		{"chapter": 1, "figures": [
 			{"style": {"coat": Color("#5a4636"), "skin": Color("#d1b195"), "hair": Color("#8a8378"), "trousers": Color("#2f2a26")}, "scale": 0.75, "poses": [
@@ -232,7 +236,11 @@ static func _build_house(main: Node3D) -> void:
 	main._box(house, Vector3(0.12, 0.02, 1.4), Vector3(10.5, 0.01, 4.62), main.mat_brass, false)
 
 	# Bedroom window (visual; the wall stays solid).
-	main._box(house, Vector3(2.0, 1.3, 0.04), Vector3(12.5, 1.65, 0.04), main.mat_window, false)
+	var bedroom_window: Node3D = main._box(house, Vector3(2.0, 1.3, 0.04), Vector3(12.5, 1.65, 0.04), main.mat_window, false)
+	bedroom_window.name = "BedroomWindow"
+	bedroom_window.get_child(0).add_to_group(&"HouseWindow")
+	# The street lamp behind it: night 1 puts it out (setpieces/luz_de_fora.gd).
+	main._omni(house, Vector3(12.5, 2.0, -0.9), Color(1.0, 0.78, 0.5), 0.9, 3.0, false).add_to_group(&"OutsideLight")
 	main._box(house, Vector3(2.2, 0.08, 0.08), Vector3(12.5, 1.0, 0.06), main.mat_wood, false)
 	main._box(house, Vector3(2.2, 0.08, 0.08), Vector3(12.5, 2.3, 0.06), main.mat_wood, false)
 	main._box(house, Vector3(0.08, 1.3, 0.08), Vector3(11.5, 1.65, 0.06), main.mat_wood, false)

@@ -927,7 +927,7 @@ func _wire_story() -> void:
 	night_card.player = player
 	add_child(night_card)
 	night_card.closed.connect(func() -> void: begin_night(campaign.night))
-	night_card.letter_closed.connect(_house_goes_dark)
+	# letter_closed belongs to setpieces/luz_de_fora.gd, which then calls _house_goes_dark.
 
 ## `--night N` or `--night=N`: 0 when absent, else clamped to the campaign.
 static func night_arg(args: PackedStringArray) -> int:
@@ -1004,8 +1004,9 @@ func begin_night(n: int) -> void:
 	if n == 1:
 		night_card.show_letter(CatalogData.LETTER)
 
-## Night 1 (spec §7.3), once the letter is down: the house's lamps flicker
-## and go out, all but the playroom's, where the drawing is.
+## Night 1 (spec §7.3), once the letter is down and the light outside is
+## out (setpieces/luz_de_fora.gd): the house's lamps flicker and go out, all
+## but the playroom's, where the drawing is.
 func _house_goes_dark() -> void:
 	for l in get_tree().get_nodes_in_group(&"HouseLight"):
 		if l.name == "PlayroomLamp":

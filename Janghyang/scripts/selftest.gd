@@ -689,6 +689,7 @@ func _nights() -> void:
 	_record(is_equal_approx(main.pocket_watch.spring_scale, 1.0) and main.pocket_watch.goal.get("task") == &"alcapao" and not main.night_card.is_letter(), "bussola: night 2 winds the watch whole, sets it on the trapdoor, and brings no letter", str(main.pocket_watch.goal))
 	var lit2: int = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible).size()
 	_record(lit2 == 9, "bussola: night 2 wakes with the house lit", str(lit2))
+	await _abertura_noite2()
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
 	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
@@ -713,6 +714,39 @@ func _nights() -> void:
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	_record(main._home_goal().is_empty(), "noites: night 5 has no way home for the watch to point", str(main._home_goal()))
 	await _frames(2)
+
+## Noite 1, Tarefa 6 (§6.1): putting the letter away puts out the light
+## outside, the warm windows and the workshop's lamp, with one click; the
+## glass goes black, then the house's lamps go as before, but the playroom's.
+func _abertura() -> void:
+	print("SELFTEST: abertura")
+	var outs: Array = get_tree().get_nodes_in_group(&"OutsideLight")
+	_record(outs.any(func(l) -> bool: return l.visible and l.light_energy > 0.0), "abertura: antes da carta há luz de fora", str(outs.size()))
+	var piece = main.setpiece(&"luz_de_fora")
+	main.night_card.close()
+	await get_tree().create_timer(0.85).timeout
+	_record(not outs.is_empty() and outs.all(func(l) -> bool: return l.light_energy == 0.0) and piece != null and piece.is_out(), "abertura: guardar a carta apaga a luz de fora", str(outs.map(func(l): return l.light_energy)))
+	var glass: Array = get_tree().get_nodes_in_group(&"HouseWindow")
+	var black := func(g) -> bool:
+		var m = g.material_override
+		return m != null and m != main.mat_window and m.emission_energy_multiplier == 0.0
+	_record(not glass.is_empty() and glass.all(black) and main.mat_window.emission_energy_multiplier > 0.0, "abertura: os vidros ficam pretos", str(glass.size()))
+	await get_tree().create_timer(1.6).timeout
+	var lamps: Array = get_tree().get_nodes_in_group(&"HouseLight")
+	var on := lamps.filter(func(l) -> bool: return l.visible and l.light_energy > 0.0)
+	_record(on.size() == 1 and on[0].name == "PlayroomLamp", "abertura: só a lâmpada da sala de brincar fica", str(on.map(func(l): return l.name)))
+
+## Night 2 does not list the piece: the letter's signal leaves every light as it is.
+func _abertura_noite2() -> void:
+	var outs: Array = get_tree().get_nodes_in_group(&"OutsideLight")
+	var piece = main.setpiece(&"luz_de_fora")
+	main.night_card.letter_closed.emit()
+	await get_tree().create_timer(0.85).timeout
+	var lit: int = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible).size()
+	var glass: Array = get_tree().get_nodes_in_group(&"HouseWindow")
+	_record(piece != null and not piece.is_out() and not outs.is_empty() and outs.all(func(l) -> bool: return l.light_energy > 0.0)
+			and not glass.is_empty() and glass.all(func(g) -> bool: return g.material_override == main.mat_window) and lit == 9,
+			"abertura: na noite 2 a peça não mexe nas luzes", str(lit))
 
 ## Noite 1, Tarefa 4 (§6.6, §8.2): with the lantern out Elias sees no point, so
 ## the Gasto may step onto one ahead of him; a match still lights; the lure
@@ -1578,8 +1612,7 @@ func _watch() -> void:
 	await get_tree().create_timer(1.0).timeout
 	_record(ticks[0] >= 1 and ticks[1] == 0, "bussola: it ticks in his pocket while he reads", str(ticks))
 	_record(absf(w.tick_period() - main.clock_model.audio_tick_period()) > 0.2, "bussola: the pocket tick is off the entry clock's beat", "%.2f vs %.2f" % [w.tick_period(), main.clock_model.audio_tick_period()])
-	main.night_card.close()
-	await get_tree().create_timer(1.8).timeout
+	await _abertura()
 	var lit: Array = get_tree().get_nodes_in_group(&"HouseLight").filter(func(l) -> bool: return l.visible)
 	_record(lit.size() == 1 and lit[0].name == "PlayroomLamp", "bussola: the lamps go out but the playroom's", str(lit.map(func(l): return l.name)))
 	_record(not main.night_card.is_open() and main.night.n == 1, "bussola: putting the letter down does not start another night", str(main.night.n))

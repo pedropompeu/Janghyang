@@ -58,4 +58,7 @@ static func _build_oficina(main: Node3D) -> void:
 	shade.bottom_radius = 0.28 * main.GIANT
 	shade.height = 0.22 * main.GIANT
 	main._add_mesh(oficina, shade, Vector3(6.0, 19.2, 16.0), main.mat_cream)
-	main._omni(oficina, Vector3(6.0, 18.0, 16.0), Color(1.0, 0.74, 0.45), 1.6, 45.0, false)
+	var lamp: OmniLight3D = main._omni(oficina, Vector3(6.0, 18.0, 16.0), Color(1.0, 0.74, 0.45), 1.6, 45.0, false)
+	lamp.name = "WorkshopLamp"
+	# Night 1 puts it out with the windows (setpieces/luz_de_fora.gd).
+	lamp.add_to_group(&"OutsideLight")
