@@ -93,9 +93,14 @@ func test_short_nights_end_at_home(t) -> void:
 		if not night.final:
 			t.eq(night.phases[-1].tasks, [&"voltar_terreo", &"dar_corda"], "noite %d termina em casa" % night.n)
 
+## Every chapter's reward is a goal, in the chapters' order; night 1 also
+## points at each clue of its first chapter before the reward (Tarefa 9).
 func test_goals_follow_the_chapters(t) -> void:
 	for night in Noites.NOITES:
-		t.eq(night.goals.map(func(g): return g.task), night.chapters.map(func(c): return c.reward), "noite %d: uma meta por capítulo, na ordem" % night.n)
+		var rewards: Array = night.goals.map(func(g): return g.task).filter(func(id): return night.chapters.any(func(c): return c.reward == id))
+		t.eq(rewards, night.chapters.map(func(c): return c.reward), "noite %d: uma meta por capítulo, na ordem" % night.n)
+		if night.n != 1:
+			t.eq(night.goals.size(), night.chapters.size(), "noite %d: só as metas dos capítulos" % night.n)
 
 func test_get_night_gives_a_copy(t) -> void:
 	var n1 := Noites.get_night(1)
@@ -103,3 +108,22 @@ func test_get_night_gives_a_copy(t) -> void:
 	n1.phases[-1].tasks.append(&"x")
 	t.eq(Noites.get_night(1).n, 1, "mexer na noite devolvida não muda a tabela")
 	t.eq(Noites.get_night(2).phases[-1].tasks, [&"voltar_terreo", &"dar_corda"], "nem a fase final das outras noites")
+
+# --- Noite 1, Tarefa 9: o relógio aponta para cada pista ---
+
+func test_night1_goals_walk_the_clues_in_order(t) -> void:
+	var n1 := Noites.get_night(1)
+	t.eq(n1.goals.map(func(g): return g.task), [&"cat_relogio", &"cat_desenho", &"cat_casinha", &"achar_passagem", &"coroa"], "noite 1: relógio, desenho, casinha, passagem, coroa")
+	var atlas := Atlas.new()
+	for g in n1.goals:
+		var room: StringName = atlas.room_at(g.at)
+		t.ok(room != &"" and atlas.level_of(room) == g.area, "a meta %s cai num cômodo de %s (%s)" % [g.task, g.area, room])
+	t.eq(n1.phases[0].tasks, [&"cat_relogio", &"cat_desenho", &"cat_casinha", &"achar_passagem"], "fase 1 com as três pistas e a passagem")
+
+func test_every_chapter1_clue_has_a_goal(t) -> void:
+	var n1 := Noites.get_night(1)
+	var lots: Dictionary = Registry.def(&"casa").catalog
+	var tasks: Array = n1.goals.map(func(g): return g.task)
+	for clue in n1.chapters[0].clues:
+		t.ok(lots.has(clue), "a pista %s risca uma tarefa ao entrar no caderno" % clue)
+		t.ok(tasks.has(lots.get(clue, &"")), "a tarefa da pista %s tem meta" % clue)

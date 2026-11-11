@@ -643,6 +643,13 @@ func _run() -> void:
 	print("SELFTEST RESULT: %d checks, %d failures" % [checks, failures])
 	get_tree().quit(0 if failures == 0 else 1)
 
+## The current night's goal for `task` ({} when it has none).
+func _goal(task: StringName) -> Dictionary:
+	for g in main.night.get("goals", []):
+		if g.task == task:
+			return g
+	return {}
+
 ## The nights (Tarefa 12): night 1 from its goals to the card, night 2 to the
 ## card on time, then night 5 with the whole pocket watch, where the old flow
 ## (03:33, the exit, what stays) goes on unchanged.
@@ -657,7 +664,7 @@ func _nights() -> void:
 	await _capitulo()
 	await _vitrine()
 	await _desenho()
-	main.player.global_position = main.night.goals[1].at
+	main.player.global_position = _goal(&"coroa").at
 	await _frames(2)
 	main._complete(&"achar_passagem")
 	main._complete(&"coroa")
@@ -886,7 +893,7 @@ func _escuro(g) -> void:
 	var saved_pitch: float = pl.camera.rotation.x
 	var fl_was: bool = fl.visible
 	var passage: Array = g.graph(&"passagem").points
-	pl.global_position = passage[0] if not passage.is_empty() else main.night.goals[0].at
+	pl.global_position = passage[0] if not passage.is_empty() else _goal(&"achar_passagem").at
 	await _frames(3)
 	await get_tree().process_frame
 	g.spawn_now()
@@ -1067,10 +1074,24 @@ func _capitulo() -> void:
 	main.chapters[0] = ch
 	main._apply_pose(ch.id, 0)
 	_record(main.night.chapters[0].clues.size() == 3 and main.night.chapters[1].clues.size() == 2, "capitulo: chapters 1 and 2 have their clues", "")
-	for id in ch.clues.slice(0, ch.clues.size() - 1):
+	# Tarefa 9: the watch walks the clues in order (entry clock, drawing, little
+	# house), then the scene; the log's meta column follows it.
+	var plog = preload("res://scripts/playtest_log.gd").new()
+	plog.main = main
+	add_child(plog)
+	var walk := [main.watch_goal().get("task")]
+	var metas := [plog.sample().meta]
+	var order := [&"relogio_entrada", &"desenho", &"casinha"]
+	for id in order:
+		if id == order[-1]:
+			_record(not ch.opened and main.watch_goal().get("task") == &"cat_casinha", "capitulo: one clue short, the scene stays shut", str(main.watch_goal().get("task")))
+		main._complete(main.CATALOG_TASKS[id])
 		main._chapters_on_cataloged({"item": id})
-	_record(not ch.opened and main.watch_goal().get("task") == &"achar_passagem", "capitulo: one clue short, the scene stays shut", str(main.watch_goal().get("task")))
-	main._chapters_on_cataloged({"item": ch.clues[-1]})
+		walk.append(main.watch_goal().get("task"))
+		metas.append(plog.sample().meta)
+	_record(walk == [&"cat_relogio", &"cat_desenho", &"cat_casinha", &"encenacao"], "watch: aponta para o relógio da entrada, depois o desenho, depois a casinha, depois a cena", str(walk))
+	_record(metas == walk, "registro: a coluna meta muda a cada pista", str(metas))
+	plog.queue_free()
 	_record(ch.opened and main.watch_goal().get("task") == &"encenacao", "capitulo: the last clue opens the scene and the watch turns to the figures", str(main.watch_goal().get("task")))
 	var c: Vector3 = main.staging_center(ch.id)
 	pl.global_position = Vector3(3.6, 0.2, 4.2)
@@ -1094,7 +1115,8 @@ func _capitulo() -> void:
 	var last: Dictionary = main._staging[ch.id].figures[1][1][-1]
 	_record(ch.staging.done() and ch.staging.pose == 3 and boy.position.distance_to(last.at) < 0.01, "capitulo: four looks away bring the scene to its end", "%d" % ch.staging.pose)
 	_record(stool != null and stool.visible, "capitulo: sitting again at the end, the stool came with him", "")
-	_record(boy.position.distance_to(main.night.goals[0].at) < 1.0, "capitulo: the scene ends at the panel", "%.2f m" % boy.position.distance_to(main.night.goals[0].at))
+	var panel_goal: Dictionary = main.night.goals.filter(func(g) -> bool: return g.task == &"achar_passagem")[0]
+	_record(boy.position.distance_to(panel_goal.at) < 1.0, "capitulo: the scene ends at the panel", "%.2f m" % boy.position.distance_to(panel_goal.at))
 	_record(main.watch_goal().get("task") == &"achar_passagem" and main.pocket_watch.goal.get("task") == &"achar_passagem", "capitulo: then the watch points at the passage", str(main.pocket_watch.goal.get("task")))
 	var nb = main.notebook
 	var wrong: int = (ch.right + 1) % 3
@@ -1103,7 +1125,7 @@ func _capitulo() -> void:
 	_record(nb.choose_hypothesis(ch, ch.right) and nb.page_text().contains(ch.hypothesis[ch.right]) and not nb.page_text().contains(ch.hypothesis[wrong]), "capitulo: the right line is written out clean, alone", "")
 	_record(main.chapter_pages().get("1", {}).get("chosen") == ch.right, "capitulo: the page goes with the night", str(main.chapter_pages()))
 	var crown: Dictionary = main._staging[2].figures[0][1][-1]
-	_record(crown.at.distance_to(main.night.goals[1].at) < 0.6, "capitulo: chapter 2's scene ends by the crown", "%.2f m" % crown.at.distance_to(main.night.goals[1].at))
+	_record(crown.at.distance_to(_goal(&"coroa").at) < 0.6, "capitulo: chapter 2's scene ends by the crown", "%.2f m" % crown.at.distance_to(_goal(&"coroa").at))
 	pl.global_position = saved
 	pl.rotation.y = saved_yaw
 	pl.camera.rotation.x = 0.0
@@ -1728,7 +1750,7 @@ func _watch() -> void:
 	var w = main.pocket_watch
 	var pl = main.player
 	_record(main.night_card.is_letter() and main.night_card.text() == main.CatalogData.LETTER, "bussola: night 1 begins with the letter in hand", main.night_card.text())
-	_record(not w.is_open and w.goal.get("task") == &"achar_passagem", "bussola: the watch starts shut, set on what the drawing hides", str(w.goal))
+	_record(not w.is_open and w.goal.get("task") == &"cat_relogio", "bussola: the watch starts shut, set on the entry clock", str(w.goal))
 	var ticks := [0, 0]
 	var on_tick := func(_at: Vector3, open: bool) -> void:
 		ticks[1 if open else 0] += 1
@@ -1752,11 +1774,11 @@ func _watch() -> void:
 	t_key.pressed = true
 	pl._unhandled_input(t_key)
 	await get_tree().create_timer(0.8).timeout
-	var drawing: Vector3 = Vector3(6.7, 1.6, 0.1) - pl.global_position
+	var drawing: Vector3 = Vector3(3.1, 1.0, 8.6) - pl.global_position
 	drawing.y = 0.0
 	var off := rad_to_deg(w.pointing().angle_to(drawing)) if w.pointing() != Vector3.ZERO else 180.0
 	_record(w.is_open and w.visible and w.aim_now().mode == &"point", "bussola: T opens the watch and the hand points", str(w.aim_now()))
-	_record(off < 10.0, "bussola: from the entry it points at the drawing", "%.1f°" % off)
+	_record(off < 10.0, "bussola: from the entry it points at the entry clock", "%.1f°" % off)
 	_record(ticks[1] >= 1, "bussola: open, the tick can be heard by the Gastos", str(ticks))
 	_record(markers.call() == before and w.find_children("*", "", true, false).all(func(c) -> bool: return not (c is VisualInstance3D) or c.layers == 1 << (main.Hands.HANDS_LAYER - 1)), "bussola: the open watch adds no marker to the scene", "%d -> %d" % [before, markers.call()])
 	var night_goal: Dictionary = w.goal

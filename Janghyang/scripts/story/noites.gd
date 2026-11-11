@@ -45,13 +45,17 @@ const NOITES := [
 					"Pela parede, o menino aprendeu com o pai que tudo que tem corda para.",
 				]},
 		],
+		## Tarefa 9 (§6.2, §11): the watch points at each clue of chapter 1 in turn.
 		"goals": [
+			{"task": &"cat_relogio", "area": &"casa", "at": Vector3(3.1, 1.0, 8.6)},
+			{"task": &"cat_desenho", "area": &"casa", "at": Vector3(14.05, 1.5, 0.4)},
+			{"task": &"cat_casinha", "area": &"casa", "at": Vector3(14.6, 0.6, 8.2)},
 			{"task": &"achar_passagem", "area": &"casa", "at": Vector3(6.7, 0.6, 0.3)},
 			{"task": &"coroa", "area": &"passagem", "at": Vector3(0.75, 0.2, -0.65)},
 		],
 		"pieces": [&"coroa"],
 		"phases": [
-			{"id": &"1", "title": "1. A casa da rua do Porto", "tasks": [&"cat_relogio", &"cat_desenho", &"achar_passagem"]},
+			{"id": &"1", "title": "1. A casa da rua do Porto", "tasks": [&"cat_relogio", &"cat_desenho", &"cat_casinha", &"achar_passagem"]},
 			{"id": &"2", "title": "2. O menino que escutava", "tasks": [&"coroa"]},
 			_HOME_STRETCH,
 		],
