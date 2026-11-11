@@ -696,6 +696,7 @@ func _nights() -> void:
 	_record(torre.active and not vela1.active and not vela1.lit, "luz: night 2 lays out its own light, none of night 1's", "")
 	_record(is_equal_approx(main.light.battery, main.light.BATTERY) and main.light.spare == 0 and main.player.hands_model.count(&"fosforo") == 0, "luz: night 2 starts on one battery and no matches", "%.1f %d" % [main.light.battery, main.light.spare])
 	_record(not main.hour_event.is_active() and main.hour_event.echoes.is_empty() and not main.clock_model.can_stop, "noites: night 2 starts with no echoes and a closed 03:33", "")
+	await _escuro(main.gastos)
 	await _frames(2)
 	main._complete(&"alcapao")
 	main._complete(&"ponteiros")
@@ -712,6 +713,188 @@ func _nights() -> void:
 	_record(main.quest.all_pieces() and not main.visit.is_short(), "noites: night 5 starts with the whole pocket watch and the full 03:33", "")
 	_record(main._home_goal().is_empty(), "noites: night 5 has no way home for the watch to point", str(main._home_goal()))
 	await _frames(2)
+
+## Noite 1, Tarefa 4 (§6.6, §8.2): with the lantern out Elias sees no point, so
+## the Gasto may step onto one ahead of him; a match still lights; the lure
+## calls it to a point and lets it go there; crouched under a low ceiling
+## its body bars the way. Played in the passage on night 2, which has a Gasto (the attic is lit by
+## the house below it that night).
+func _escuro(g) -> void:
+	print("SELFTEST: escuro")
+	var pl = main.player
+	var fl: SpotLight3D = pl.flashlight
+	var saved: Vector3 = pl.global_position
+	var saved_yaw: float = pl.rotation.y
+	var saved_pitch: float = pl.camera.rotation.x
+	var fl_was: bool = fl.visible
+	var passage: Array = g.graph(&"passagem").points
+	pl.global_position = passage[0] if not passage.is_empty() else main.night.goals[0].at
+	await _frames(3)
+	await get_tree().process_frame
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		_record(false, "escuro: a Gasto stands in the passage", str(g.level))
+		pl.global_position = saved
+		return
+	var oficina: Node = main.get_node_or_null("Oficina")
+	var giant: Array = g._lamps.filter(func(l) -> bool: return oficina != null and oficina.is_ancestor_of(l))
+	_record(oficina != null and giant.is_empty(), "escuro: the workshop's giant lamps do not light the model for the Gastos", str(giant.size()))
+	var i: int = at[0]
+	var m = g._models[i]
+	var pts: Array = g.graph(g.level).points
+	# A line a -> b -> c with Elias at c looking at b, the Gasto at a, all dark.
+	var path := []
+	for a in pts.size():
+		if not path.is_empty():
+			break
+		if g._lamp_lit(pts[a] + Vector3(0.0, g.HEAD, 0.0)):
+			continue
+		for b in m.links[a]:
+			for c in m.links[b]:
+				if c != a and not m.links[a].has(c) and (pts[c] as Vector3).distance_to(pts[b]) > g.NEAR + 0.3 and not g._lamp_lit(pts[c] + Vector3(0.0, 1.5, 0.0)) and not g._safe.has(b):
+					path = [a, b, c]
+					break
+			if not path.is_empty():
+				break
+	if path.is_empty():
+		var lit_n := 0
+		for q in pts:
+			if g._lamp_lit(q + Vector3(0.0, g.HEAD, 0.0)):
+				lit_n += 1
+		_record(false, "escuro: three dark lurk points in a row", "%s %d pts, %d lit, safe %s" % [g.level, pts.size(), lit_n, g._safe])
+		pl.global_position = saved
+		return
+	var pa: Vector3 = pts[path[0]]
+	var pb: Vector3 = pts[path[1]]
+	var pc: Vector3 = pts[path[2]]
+	pl.global_position = pc
+	var to: Vector3 = pb - pc
+	pl.rotation.y = atan2(-to.x, -to.z)
+	pl.camera.rotation.x = 0.0
+	pl.set_crouched(true)
+	# The player's physics is off here: put the eye at the crouch at once.
+	var eye_was: float = pl.camera.position.y
+	pl.camera.position.y = pl.CROUCH_EYE
+	fl.visible = true
+	main.lantern_dim = 1.0
+	m.place(path[0])
+	g._show(i)
+	await _frames(2)
+	g._refresh_view()
+	var b_seen: bool = g._in_view.has(path[1])
+	main.lantern_dim = 0.0
+	main._tick_light(0.01)
+	_record(main.lantern_dark() and fl.visible and not g._lit(pb + Vector3(0.0, 1.0, 0.0)), "escuro: lantern_dim 0 counts as the lantern off", "%s" % b_seen)
+	m._clock = 99.0
+	var stepped := false
+	for k in 10:
+		await get_tree().physics_frame
+		if m.at == path[1]:
+			stepped = true
+			break
+	_record(b_seen and stepped, "escuro: with the lantern out the Gasto steps onto a point ahead of Elias", "%s %d path %s" % [b_seen, m.at, path])
+	pl.hands_model.take(&"fosforo", 1)
+	main.strike_match()
+	await get_tree().physics_frame
+	_record(main.light.burning() and g._lit(pl.camera.global_position), "escuro: with a match burning the blackout does not blind", "")
+	main.light._match_left = 0.0
+	main._match_glow.visible = false
+	# The lure: called back to a, it goes there in the dark and the lure ends.
+	m.place(path[1])
+	g._show(i)
+	g.lure(pa, 30.0)
+	var arrived := false
+	for k in 30:
+		m._clock = 99.0
+		await get_tree().physics_frame
+		if m.at == path[0]:
+			arrived = true
+			break
+	_record(arrived and not g.lured(), "isca: the Gasto goes to the lure's point and stops there", "%d %s" % [m.at, g.lured()])
+	g._lure_left = 0.0
+	main.lantern_dim = 1.0
+	main._tick_light(0.01)
+	fl.visible = fl_was
+	g.scatter()
+	await _corpo(g)
+	pl.set_crouched(false)
+	pl.camera.position.y = eye_was
+	pl.global_position = saved
+	pl.rotation.y = saved_yaw
+	pl.camera.rotation.x = saved_pitch
+	await _frames(3)
+
+## Elias walks 2 s against a crouched Gasto in the passage and does not get
+## past it.
+func _corpo(g) -> void:
+	var pl = main.player
+	var passage: Array = g.graph(&"passagem").points
+	if passage.is_empty():
+		_record(false, "corpo: the passage has lurk points", "")
+		return
+	pl.global_position = passage[0]
+	await _frames(3)
+	await get_tree().process_frame
+	g.spawn_now()
+	await get_tree().physics_frame
+	var at: Array = g.placed()
+	if at.is_empty():
+		_record(false, "corpo: a Gasto stands in the passage", str(g.level))
+		return
+	var i: int = at[0]
+	var m = g._models[i]
+	var k := -1
+	for j in passage.size():
+		var lo: bool = g._low_ceiling(passage[j])
+		if lo and passage.size() > 1:
+			k = j
+			break
+	if k < 0:
+		_record(false, "corpo: a lurk point under a low ceiling in the passage", "")
+		g.scatter()
+		return
+	var spot: Vector3 = passage[k]
+	# Elias 1.5 m along the passage's long side, facing the Gasto.
+	var dirs := [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]
+	var start := Vector3.INF
+	for d in dirs:
+		var p: Vector3 = spot + d * 1.5
+		if _hits_shape(p + Vector3(0.0, 0.9, 0.0), _capsule()).is_empty():
+			start = p
+			break
+	if start == Vector3.INF:
+		_record(false, "corpo: room beside the Gasto to walk at it", str(spot))
+		g.scatter()
+		return
+	m.place(k)
+	m.hold_step()
+	g._show(i)
+	pl.global_position = start
+	var to: Vector3 = spot - start
+	pl.rotation.y = atan2(-to.x, -to.z)
+	pl.set_crouched(true)
+	var phys: bool = pl.is_physics_processing()
+	pl.set_physics_process(true)
+	await _frames(2)
+	_key_event(KEY_W, true)
+	for f in 120:
+		m.hold_step()
+		await get_tree().physics_frame
+	_key_event(KEY_W, false)
+	await _frames(2)
+	pl.set_physics_process(phys)
+	var dir: Vector3 = to.normalized()
+	var past: float = (pl.global_position - spot).dot(dir)
+	_record(past < 0.0 and m.at == k, "corpo: Elias does not walk through a Gasto in the passage", "%.2f m past, pose %s" % [past, g._bodies[i]._pose])
+	g.scatter()
+
+func _capsule() -> Shape3D:
+	var c := CapsuleShape3D.new()
+	c.radius = 0.3
+	c.height = 1.0
+	return c
 
 ## Task 23 (spec §6.1): night 1's first chapter. Its clues in, the scene
 ## opens and the watch turns to the figures; watched they keep still, out of

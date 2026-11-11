@@ -160,6 +160,9 @@ var _listen_from_db := 0.0
 ## Each creak heard through the wall: where the Gasto stands.
 signal listened(at: Vector3)
 var _lantern_energy := 0.0
+## 0..1: how much of the lantern's light a scene lets through (a blackout
+## brings it to 0). Below 0.2 the Gastos count the lantern as off.
+var lantern_dim := 1.0
 var _light_time := 0.0
 var _dark: Array[Tween] = []
 var pretend
@@ -1183,8 +1186,11 @@ func _tick_light(delta: float) -> void:
 	_light_time += delta
 	if light.battery <= 0.0:
 		fl.visible = false
-	fl.light_energy = _lantern_energy * light.flicker(_light_time)
+	fl.light_energy = _lantern_energy * light.flicker(_light_time) * lantern_dim
 	_match_glow.visible = light.burning()
+
+func lantern_dark() -> bool:
+	return lantern_dim < 0.2
 
 ## A match from the pockets; it lights the nearest unlit candle within reach.
 func strike_match() -> bool:
@@ -1589,6 +1595,8 @@ func _on_catalog_requested(target: Area3D) -> void:
 func _build_player() -> void:
 	player = CharacterBody3D.new()
 	player.name = "Player"
+	# The Gastos' bodies bar him under a low ceiling (gastos.gd BODY_LAYER).
+	player.collision_mask = 1 | Gastos.BODY_LAYER
 	player.set_script(preload("res://scripts/player.gd"))
 	player.position = SPAWN
 	player.rotation.y = 0.0

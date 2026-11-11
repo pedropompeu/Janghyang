@@ -224,3 +224,77 @@ func test_letting_breath_go_restarts_the_search(t) -> void:
 	t.eq(_run_hidden(s, 2.0, false), [], "2 s sem prender: ainda não")
 	t.eq(_run_hidden(s, 2.0, true), [], "prender a respiração zera a busca")
 	t.eq(_run_hidden(s, Stalker.HIDE_FOUND - 0.2, false), [], "soltar recomeça a conta do zero")
+
+## The passage: four lurk points in a row, 2.2 m apart. Elias hides beside
+## point 2; the lure calls the Gasto to point 0, past him.
+func _passage() -> Stalker:
+	var pts: Array[Vector3] = []
+	for i in 4:
+		pts.append(Vector3(i * 2.2, 0.0, 0.0))
+	var s := Stalker.new(pts, [[1], [0, 2], [1, 3], [2]])
+	s.place(2)
+	return s
+
+## Ticks in the dark with Elias near; every event with the second it came at.
+func _run_passing(s: Stalker, seconds: float, hidden: bool, breath: bool, passing: bool, seen := false) -> Array:
+	var evs: Array = []
+	var t := 0.0
+	while t < seconds - 0.0001:
+		var ev: StringName = s.update(0.1, seen, true, 0, true, hidden, [], [], false, breath, passing)
+		t += 0.1
+		if ev != &"":
+			evs.append([ev, t])
+	return evs
+
+func test_passing_walks_by_a_hidden_elias(t) -> void:
+	var s := _passage()
+	var evs := _run_passing(s, Stalker.STEP_TIME_BLIND, true, true, true)
+	t.eq(evs.size(), 1, "um evento no passo do escuro")
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"moved", "atraído, passa por Elias escondido e sem ar")
+	t.eq(s.at, 1, "um ponto adiante, rumo à isca")
+
+func test_passing_without_breath_still_finds(t) -> void:
+	var s := _passage()
+	t.eq(_run_passing(s, Stalker.HIDE_FOUND - 0.2, true, false, true), [], "antes de HIDE_FOUND, nada: nem anda")
+	t.eq(s.at, 2, "parado ao lado dele")
+	var evs := _run_passing(s, 0.4, true, false, true)
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"caught", "respirando, é achado mesmo com a isca")
+
+func test_not_passing_waits_as_today(t) -> void:
+	var s := _passage()
+	var evs := _run_passing(s, Stalker.HIDE_GIVE_UP + Stalker.STEP_TIME_BLIND + 0.5, true, true, false)
+	t.eq(evs.size(), 1, "um evento só: não andou")
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"gave_up", "sem isca, espera e desiste")
+	t.ok(evs.size() > 0 and evs[0][1] >= Stalker.HIDE_GIVE_UP - 0.0001, "não antes de HIDE_GIVE_UP")
+
+func test_passing_still_catches_in_the_open(t) -> void:
+	var s := _passage()
+	var evs := _run_passing(s, Stalker.STEP_TIME_BLIND, false, true, true)
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"caught", "fora do esconderijo a isca não salva")
+	t.eq(s.at, 2, "não passou")
+
+func test_hold_step_keeps_it_still(t) -> void:
+	var s := _passage()
+	var moved := false
+	for i in 100:
+		s.hold_step()
+		moved = moved or s.update(0.1, false, false, 0, false, false, []) != &""
+	t.ok(not moved and s.at == 2, "10 s segurando o passo: não sai do lugar")
+	t.eq(_run(s, Stalker.STEP_TIME + 0.2, 0), &"moved", "solto, anda em STEP_TIME")
+	t.eq(s.at, 1, "um ponto")
+
+func test_hold_step_does_not_stop_the_search(t) -> void:
+	var s := _passage()
+	var ev: StringName = &""
+	for i in int(Stalker.HIDE_FOUND / 0.1) + 2:
+		s.hold_step()
+		ev = s.update(0.1, false, false, 0, true, true, [], [], false, false, true)
+		if ev != &"":
+			break
+	t.eq(ev, &"caught", "passo seguro, mas quem respira é achado")
+
+func test_flame_stare_still_undoes(t) -> void:
+	var s := _passage()
+	var evs := _run_passing(s, Stalker.STARE_TIME + 0.3, true, true, true, true)
+	t.eq(evs[0][0] if evs.size() > 0 else &"", &"undone", "olhado à luz da chama, desfaz mesmo atraído")
+	t.eq(s.at, -1, "sumiu")

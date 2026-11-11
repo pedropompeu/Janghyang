@@ -204,6 +204,16 @@ relacionado:
 
 ## Fechados
 
+### [A-033] O abajur gigante da Oficina "acendia" a casa inteira para os Gastos {#a-033}
+
+- [2026-11-11] (e) ← `Janghyang/scripts/selftest.gd` (`_escuro`) Com a lanterna apagada, os quatro pontos da passagem e os 18 do sótão contavam como iluminados. A luz responsável era `/root/Main/Oficina` em (6; 18; 16), energia 1,6 e alcance 45 m: `gastos._lamp_lit` aceita qualquer lâmpada com energia > 0,25 a menos de 60% do alcance, ou seja, 27 m em volta do abajur.
+- **Severidade:** alto — o Gasto nunca ficava "cego" nem andava no escuro, e qualquer Gasto olhado contava como visto à luz. O escuro da noite 1 refeita (§6.6, §8.2) não existiria no jogo.
+- **Onde:** `Janghyang/scripts/gastos.gd` (`_build_graphs`, lista `_lamps`), luz criada em `Janghyang/scripts/areas/tampo.gd:61`.
+- **Reprodução:** antes do fix, na noite 2, ponha Elias na passagem, apague a lanterna e chame `gastos._lamp_lit` num ponto do grafo: devolve verdadeiro.
+- **Por que importa:** muda o equilíbrio de todas as noites: antes, olhar para um Gasto em cômodo escuro e fora do cone da lanterna já o congelava; agora não congela.
+- **Fix recomendado:** as luzes sob o nó `Oficina` (a sala gigante fora da maquete) ficam fora de `_lamps`. Aplicado na Tarefa 4 da noite 1; checagem `escuro: the workshop's giant lamps do not light the model for the Gastos`. A luz ambiente de `leste.gd:78` (energia 0,35, alcance 16 m) segue contando e merece o mesmo olhar no playtest.
+- **Estado:** verificado no selftest; o efeito no equilíbrio das noites 2 a 5 vai para o playtest.
+
 ### [A-032] Depois da coroa o relógio gira sem meta, e o CSV não mede quem se perde na volta {#a-032}
 
 - [2026-11-09] (e) ← `Janghyang/scripts/main.gd` (`watch_goal()` só percorre `night.goals`; `voltar_terreo` e `dar_corda` ficam na fase "Antes do 03:33", `scripts/story/noites.gd:29`, fora das metas) e a rodada de `tests/bot_noite1.gd`: depois de "took the crown", o relógio passa a "points at <null>" e a coluna `meta` do CSV fica vazia até o cartão.

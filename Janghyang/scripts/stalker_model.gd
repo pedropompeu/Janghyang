@@ -5,7 +5,8 @@ extends RefCounted
 ## Looked at, it freezes; looked at long enough in light, it comes apart and
 ## stays away for a while. Near and unseen, it hugs him; if he hides, it finds
 ## him in HIDE_FOUND seconds, unless he holds his breath: then it waits and
-## gives up.
+## gives up. Called somewhere else (`passing`), it walks by a hidden Elias who
+## holds his breath instead of waiting beside him.
 
 const STEP_TIME := 5.0
 ## Eyes closed or no light: it does not wait for long.
@@ -40,6 +41,11 @@ func place(i: int) -> void:
 	_hidden_for = 0.0
 	_found_for = 0.0
 
+## It does not step on this tick: the step clock starts over. Staring at it
+## and finding a hidden Elias keep running.
+func hold_step() -> void:
+	_clock = 0.0
+
 ## Struck by the stick: it comes apart at once.
 func hit() -> void:
 	_undo()
@@ -58,8 +64,10 @@ func is_away() -> bool:
 ## `safe`: points it must never step onto (safety_model.gd); `elias_safe`:
 ## Elias stands where it cannot reach him, so it never hugs him there.
 ## `breath_held`: hidden Elias holds his breath (else it finds him).
+## `passing`: something calls it to `goal`, so a hidden Elias who holds his
+## breath is walked by, not waited on; in the open it hugs him all the same.
 ## Returns &"moved", &"caught", &"undone", &"gave_up", &"returned" or &"".
-func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: bool, in_view: Array, safe: Array = [], elias_safe := false, breath_held := true) -> StringName:
+func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: bool, in_view: Array, safe: Array = [], elias_safe := false, breath_held := true, passing := false) -> StringName:
 	if at < 0:
 		_away -= dt
 		if _away > 0.0:
@@ -89,7 +97,7 @@ func update(dt: float, seen: bool, blind: bool, goal: int, near: bool, hidden: b
 	if _clock < interval - 0.0001:
 		return &""
 	_clock = 0.0
-	if near:
+	if near and not (passing and hidden and breath_held):
 		if elias_safe:
 			_hidden_for = 0.0
 			return &""

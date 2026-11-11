@@ -15,6 +15,7 @@ const Safety = preload("res://scripts/safety_model.gd")
 const Registry = preload("res://scripts/areas/registry.gd")
 const Capture = preload("res://scripts/capture_model.gd")
 const NoiseModel = preload("res://scripts/noise_model.gd")
+const Staging = preload("res://scripts/staging_model.gd")
 
 ## Night 5 asks for three.
 const MAX := 3
@@ -34,6 +35,9 @@ const VIEW_EVERY := 0.12
 const STYLE := {"coat": Color("#56504a"), "skin": Color("#ece6d8"), "hair": Color("#ece6d8"), "trousers": Color("#38332e")}
 ## Layer of their hitboxes: the stick finds them, bodies and sight lines don't.
 const HIT_LAYER := 8
+## Layer of their bodies under a low ceiling: Elias (and only he) bumps into
+## them there, so a crouched Gasto bars the passage.
+const BODY_LAYER := 16
 
 ## The night being played (noites.gd); empty on today's single visit.
 var night: Dictionary = {}
@@ -81,6 +85,12 @@ var _heard := {}
 ## already born at its `birth` point this night (_birth).
 var _wanted_before := 0
 var _born := {}
+## The lure (lure()): where it calls them, and for how long still.
+var _lure_at := Vector3.ZERO
+var _lure_left := 0.0
+## Gasto index -> its body that bars Elias; whether its point is under a low ceiling.
+var _blocks: Array[StaticBody3D] = []
+var _low: Array[bool] = []
 
 func _ready() -> void:
 	name = "Gastos"
@@ -111,6 +121,21 @@ func _ready() -> void:
 		hb.add_child(cs)
 		body.add_child(hb)
 		_hitboxes.append(hb)
+		var block := StaticBody3D.new()
+		block.name = "Body"
+		block.collision_layer = BODY_LAYER
+		block.collision_mask = 0
+		var bs := CollisionShape3D.new()
+		var bcap := CapsuleShape3D.new()
+		bcap.radius = 0.3
+		bcap.height = 1.2
+		bs.shape = bcap
+		bs.position.y = 0.6
+		bs.disabled = true
+		block.add_child(bs)
+		body.add_child(block)
+		_blocks.append(block)
+		_low.append(false)
 	_build_graphs_when_solid()
 
 ## Cracks and long hands over the box body: a person turned into a piece
@@ -158,8 +183,12 @@ func _build_graphs_when_solid() -> void:
 
 func _build_graphs() -> void:
 	var atlas := Atlas.new()
+	# The workshop's giant lamps light the room outside the model, not its
+	# rooms: they would make every point of the house "lit" for them.
+	var oficina := main.get_node_or_null("Oficina")
 	for l in main.find_children("*", "OmniLight3D", true, false):
-		add_lamp(l)
+		if oficina == null or not oficina.is_ancestor_of(l):
+			add_lamp(l)
 	for d in main.find_children("Door*", "AnimatableBody3D", true, false):
 		_doors.append(d)
 		_door_rids.append((d as CollisionObject3D).get_rid())
@@ -501,8 +530,21 @@ func hear(at: Vector3, level: int, radius := -1.0) -> void:
 		if _bodies[i].global_position.distance_to(at) < r:
 			_heard[i] = {"at": at, "left": NoiseModel.NOISE_MEMORY}
 
-## The point Gasto `i` heads for: the last noise it heard, else Elias.
+## Every Gasto heads for the point nearest `at` for `seconds` (or until one
+## gets there), walking by a hidden Elias who holds his breath. While Elias
+## can see, they keep still: one point for each blackout.
+func lure(at: Vector3, seconds: float) -> void:
+	_lure_at = at
+	_lure_left = seconds
+
+func lured() -> bool:
+	return _lure_left > 0.0
+
+## The point Gasto `i` heads for: the lure, else the last noise it heard,
+## else Elias.
 func goal_of(i: int) -> int:
+	if lured():
+		return _nearest_point(_lure_at)
 	if _heard.has(i):
 		return _nearest_point(_heard[i].at)
 	return _goal()
@@ -592,6 +634,10 @@ func _process(delta: float) -> void:
 	var hidden := _hidden()
 	var held: bool = main.player.get("breath") != null and main.player.breath.holding
 	var pp: Vector3 = main.player.global_position
+	# Blind, he sees no point: every one may be stepped onto (§0.5, choice 1).
+	var view: Array = [] if blind else _in_view
+	var passing := lured()
+	_lure_left = maxf(_lure_left - delta, 0.0)
 	for i in _heard.keys():
 		_heard[i].left -= delta
 		if _heard[i].left <= 0.0:
@@ -605,7 +651,11 @@ func _process(delta: float) -> void:
 		if not m.is_away() and not veiled:
 			seen = main.is_seen(head_of(i)) and _lit(head_of(i))
 		var near: bool = not m.is_away() and m.points[m.at].distance_to(pp) < NEAR
-		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, _in_view, _safe, _elias_safe, held)
+		if passing and not blind:
+			m.hold_step()
+		var r: StringName = m.update(delta, seen, blind, goal, near, hidden, view, _safe, _elias_safe, held, passing)
+		if passing and r == &"moved" and m.at == goal:
+			_lure_left = 0.0
 		match r:
 			&"undone":
 				main.sfx.play_at(&"shatter", head_of(i), &"Mundo", -6.0)
@@ -615,6 +665,7 @@ func _process(delta: float) -> void:
 			_show(i)
 		if not m.is_away():
 			_face(i, pp)
+		_update_block(i, pp)
 		if capture != null and capture.is_grabbed():
 			return
 	_tick_in -= delta
@@ -663,7 +714,8 @@ func _show(i: int) -> void:
 	if here:
 		var moved: bool = not _bodies[i].global_position.is_equal_approx(m.points[m.at])
 		_bodies[i].global_position = m.points[m.at]
-		_bodies[i].set_pose(&"agachado" if _low_ceiling(m.points[m.at]) else &"em_pe")
+		_low[i] = _low_ceiling(m.points[m.at])
+		_bodies[i].set_pose(&"agachado" if _low[i] else &"em_pe")
 		# It moved while nobody looked: it is caught mid-step, a new stride
 		# each time.
 		if moved:
@@ -671,6 +723,22 @@ func _show(i: int) -> void:
 			_bodies[i].set_stride(lead + _stride_rng.randf_range(-0.35, 0.35), _stride_rng.randf_range(0.65, 1.0))
 	_bodies[i].visible = here and not veiled
 	_set_hittable(i, here)
+	_update_block(i, main.player.global_position if main != null and main.player != null else Vector3.INF)
+
+## Under a low ceiling its body bars Elias, but it is never switched on
+## within Staging.CLEAR of him (he would be stuck inside it).
+func _update_block(i: int, pp: Vector3) -> void:
+	var m = _models[i] if i < _models.size() else null
+	var here: bool = m != null and not m.is_away() and i < wanted()
+	var shape := _blocks[i].get_child(0) as CollisionShape3D
+	if not (here and _low[i]):
+		if not shape.disabled:
+			shape.set_deferred(&"disabled", true)
+		return
+	if shape.disabled:
+		var at: Vector3 = m.points[m.at]
+		if Vector2(at.x - pp.x, at.z - pp.z).length() >= Staging.CLEAR:
+			shape.set_deferred(&"disabled", false)
 
 func _set_hittable(i: int, on: bool) -> void:
 	_hitboxes[i].get_child(0).set_deferred(&"disabled", not on)
@@ -716,7 +784,7 @@ func _nearest_point(p: Vector3) -> int:
 ## Lit: in the lantern's cone, or near a lamp that is on.
 func _lit(p: Vector3) -> bool:
 	var fl: SpotLight3D = main.player.flashlight
-	if fl.visible and fl.is_visible_in_tree():
+	if fl.visible and fl.is_visible_in_tree() and not main.lantern_dark():
 		var to := p - fl.global_position
 		if to.length() < fl.spot_range and (-fl.global_basis.z).angle_to(to) < deg_to_rad(fl.spot_angle):
 			return true
