@@ -665,6 +665,7 @@ func _nights() -> void:
 	await _vitrine()
 	await _desenho()
 	await _bola()
+	await _banco()
 	main.player.global_position = _goal(&"coroa").at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -702,6 +703,7 @@ func _nights() -> void:
 	await _abertura_noite2()
 	_vitrine_noite2()
 	_desenho_noite2()
+	_banco_noite2()
 	_record(main.pockets.size() == 1 and main.pockets.has(&"espelho"), "noites: the mirror carries, batteries and matches do not", str(main.pockets))
 	_record(main.quest.has_piece(&"coroa") and main.player.global_position.distance_to(main.SPAWN) < 0.05, "noites: night 2 wakes at the spawn holding the crown", "")
 	var torre = main.get_node("LightPickups/Pickup_pilha_torre")
@@ -833,6 +835,80 @@ func _bola() -> void:
 	_record(ball.visible and not piece.is_bouncing() and not piece.is_waiting() and absf(d - 0.6) < 0.05, names[3], "d %.3f" % d)
 	pl.camera.rotation.x = 0.0
 	pl.global_position = saved
+
+## Noite 1, Tarefa 11 (§6.2, §8.3, item 4): seven figures on the bench; one
+## leaves each time Elias leaves the room, never in sight, never onto him.
+func _banco() -> void:
+	print("SELFTEST: banco")
+	var pl = main.player
+	var piece = main.setpiece(&"banco")
+	var names := ["banco: sete sentadas na primeira visita", "banco: Elias sai e volta, faltam uma e ela está na cama do menino",
+			"banco: ninguém se move enquanto é visto", "banco: com Elias parado no destino a figura espera",
+			"banco: a cabeça vira para Elias quando ele não olha"]
+	if piece == null:
+		for name in names:
+			_record(false, name, "no piece")
+		return
+	var saved: Vector3 = pl.global_position
+	var director = main.dread.director
+	var stand := func(at: Vector3, yaw: float) -> void:
+		pl.global_position = at
+		pl.rotation.y = yaw
+		pl.camera.rotation.x = 0.0
+	piece.on_night(main.night)
+	var model = piece.model
+	var shown: int = piece.figures().filter(func(m) -> bool: return m.visible).size()
+	_record(model.seated() == 7 and shown == 7, names[0], "%d %d" % [model.seated(), shown])
+	stand.call(Vector3(13.1, 0.2, 8.6), PI)
+	await _frames(3)
+	stand.call(Vector3(9.0, 0.2, 8.4), PI * 0.5)
+	var waited := 0
+	while model.seated() == 7 and waited < 120:
+		director.update(100.0, false)
+		await _frames(1)
+		waited += 1
+	stand.call(Vector3(13.1, 0.2, 8.6), PI)
+	await _frames(3)
+	var gone := -1
+	for i in model.spots.size():
+		if not model.spots[i].seated:
+			gone = i
+	var on_bed: bool = gone >= 0 and piece.figures()[gone].global_position.distance_to(Vector3(12.0, 0.0, 3.0)) < 0.05 and model.spots[gone].pose == &"sentado"
+	_record(model.seated() == 6 and on_bed, names[1], "seated %d gone %d frames %d" % [model.seated(), gone, waited])
+	stand.call(Vector3(13.1, 0.2, 8.6), 0.0)
+	await _frames(2)
+	model.on_leave_room()
+	var armed: int = model.pending()
+	for i in 600:
+		director.update(100.0, false)
+		await _frames(1)
+	_record(armed >= 0 and model.seated() == 6 and model.pending() == armed, names[2], "armed %d seated %d" % [armed, model.seated()])
+	var dest: Vector3 = model.target_of(armed).get("at", Vector3.ZERO)
+	stand.call(dest + Vector3(0.0, 0.2, 0.4), PI)
+	for i in 120:
+		director.update(100.0, false)
+		await _frames(1)
+	var held: bool = model.seated() == 6
+	stand.call(dest + Vector3(0.0, 0.2, 1.8), PI)
+	waited = 0
+	while model.seated() == 6 and waited < 120:
+		director.update(100.0, false)
+		await _frames(1)
+		waited += 1
+	_record(held and model.seated() == 5 and Vector2(model.spots[armed].at.x, model.spots[armed].at.z).distance_to(Vector2(dest.x, dest.z)) < 0.01,
+			names[3], "held %s seated %d at %s" % [held, model.seated(), dest])
+	stand.call(Vector3(15.0, 0.2, 8.6), PI)
+	await _frames(3)
+	var fig = piece.figures()[1]
+	var turned := wrapf(fig.rotation.y - PI, -PI, PI)
+	_record(model.spots[1].seated and turned > 0.6 and turned <= deg_to_rad(70.0) + 0.01, names[4], "turned %.3f" % turned)
+	pl.global_position = saved
+
+## Night 2 does not list the bench piece: the bench is empty.
+func _banco_noite2() -> void:
+	var piece = main.setpiece(&"banco")
+	var shown: int = -1 if piece == null else piece.figures().filter(func(m) -> bool: return m.visible).size()
+	_record(shown == 0, "banco: na noite 2 o banco está vazio", str(shown))
 
 ## Night 2 does not list the drawing piece: the wax shows, the flag is up.
 func _desenho_noite2() -> void:

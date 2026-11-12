@@ -15,6 +15,14 @@ const CRACKED_Z := Vector2(9.1, 12.5)
 ## The entry clock, against the facade beside the front door.
 const ENTRY_CLOCK := Vector3(3.1, 1.0, 8.88)
 
+## The street door's hinge, and the house's hiding places (name -> centre,
+## size): the bench's figures keep clear of both (bench_model.may_land).
+const DOOR_FRONT := Vector3(1.12, 0.0, 9.1)
+const HIDEOUTS := {
+	"HideCabana": [Vector3(1.0, 0.5, 3.5), Vector3(1.8, 1.0, 2.4)],
+	"HideCama": [Vector3(14.85, 0.5, 2.7), Vector3(0.9, 1.0, 2.2)],
+}
+
 const DEF := {
 	"id": &"casa",
 	"maquete": &"item_214",
@@ -42,12 +50,19 @@ const DEF := {
 		{"id": &"vitrine", "script": preload("res://scripts/setpieces/vitrine.gd"), "at": Vector3(15.1, 0.0, 8.2)},
 		{"id": &"chave_vitrine", "script": preload("res://scripts/setpieces/chave_vitrine.gd"), "at": Vector3(1.78, 0.02, 3.5)},
 		{"id": &"desenho_cera", "script": preload("res://scripts/setpieces/desenho_cera.gd"), "at": Vector3(14.05, 1.5, 0.08)},
+		{"id": &"banco", "script": preload("res://scripts/setpieces/banco.gd"), "at": Vector3(13.1, 0.0, 5.95)},
 		{"id": &"bola_quica", "script": preload("res://scripts/setpieces/bola_quica.gd"), "at": Vector3(9.45, 0.0, 0.5),
 				"ends": [Vector3(9.45, 0.0, 0.5), Vector3(9.45, 0.0, 6.9)]},
 	],
 	## The bench along the figure room's north wall (spec §6.2): where the
 	## figures sit, side by side, facing the room.
-	"bench": {"seats": [Vector3(11.3, 0.0, 5.95), Vector3(11.9, 0.0, 5.95), Vector3(12.5, 0.0, 5.95), Vector3(13.1, 0.0, 5.95), Vector3(13.7, 0.0, 5.95), Vector3(14.3, 0.0, 5.95), Vector3(14.9, 0.0, 5.95)], "face": Vector3(0.0, 0.0, 1.0)},
+	"bench": {"seats": [Vector3(11.3, 0.0, 5.95), Vector3(11.9, 0.0, 5.95), Vector3(12.5, 0.0, 5.95), Vector3(13.1, 0.0, 5.95), Vector3(13.7, 0.0, 5.95), Vector3(14.3, 0.0, 5.95), Vector3(14.9, 0.0, 5.95)], "face": Vector3(0.0, 0.0, 1.0),
+		## Where the figures go, in this order (setpieces/banco.gd, bench_model.gd).
+		"away": [
+			{"at": Vector3(12.0, 0.0, 3.0), "face": Vector3(11.0, 0.0, 3.0), "pose": &"sentado"},
+			{"at": Vector3(9.45, 0.0, 0.5), "face": Vector3(9.45, 0.0, 1.5), "pose": &"em_pe"},
+			{"at": Vector3(0.5, 0.0, 0.5), "face": Vector3(0.0, 0.0, 0.0), "pose": &"em_pe"},
+		]},
 	"staging": [
 		{"chapter": 1, "figures": [
 			{"style": {"coat": Color("#5a4636"), "skin": Color("#d1b195"), "hair": Color("#8a8378"), "trousers": Color("#2f2a26")}, "scale": 0.75, "poses": [
@@ -226,7 +241,7 @@ static func _build_house(main: Node3D) -> void:
 			false, false, false, main.mat_door)
 
 	var front_door: Node3D = main._hinge("DoorFront", Vector3(1.4, main.DOOR_H, 0.08), Vector3(0.7, main.DOOR_H * 0.5, 0.0),
-			Vector3(1.12, 0.0, 9.1), Vector3.ZERO, Vector3(0.0, deg_to_rad(-110.0), 0.0),
+			DOOR_FRONT, Vector3.ZERO, Vector3(0.0, deg_to_rad(-110.0), 0.0),
 			"abrir a porta da rua", "fechar a porta da rua",
 			true, false, false, main.mat_door)
 	var knob := MeshInstance3D.new()
@@ -436,8 +451,8 @@ static func _build_furniture(main: Node3D) -> void:
 
 	# Hiding places in the house: under the folded wall of the cabana, and
 	# the gap between the bed and the east wall, by the mirror.
-	main._hideout(main, "HideCabana", Vector3(1.0, 0.5, 3.5), Vector3(1.8, 1.0, 2.4))
-	main._hideout(main, "HideCama", Vector3(14.85, 0.5, 2.7), Vector3(0.9, 1.0, 2.2))
+	for h in HIDEOUTS:
+		main._hideout(main, h, HIDEOUTS[h][0], HIDEOUTS[h][1])
 
 	var figure = preload("res://scripts/figure.gd").new()
 	figure.name = "Figure"
