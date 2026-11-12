@@ -61,7 +61,7 @@ const NOITES := [
 		],
 		"safety": &"casa_toda",
 		"stalkers": [{"after": &"", "n": 0}, {"after": &"coroa", "n": 1}],
-		"setpieces": [&"luz_de_fora", &"vitrine", &"chave_vitrine", &"desenho_cera"],
+		"setpieces": [&"luz_de_fora", &"vitrine", &"chave_vitrine", &"desenho_cera", &"bola_quica"],
 		"anchor_time": 90.0, "entry_clock_scale": 1.0, "capture_clicks": 10,
 		"pickups": [&"pilha_brincar", &"pilha_quarto", &"pilha_figuras", &"vela_brincar", &"vela_corredor", &"vela_quarto", &"fosforo_entrada", &"fosforo_corredor_sul", &"fosforo_cabeceira", &"pilha_passagem", &"vela_passagem", &"fosforo_passagem"], "final": false,
 	},

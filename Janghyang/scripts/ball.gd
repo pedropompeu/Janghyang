@@ -26,6 +26,13 @@ func _physics_process(delta: float) -> void:
 		if _trail.size() > ROLL_BACK_SECONDS + 1:
 			_trail.pop_front()
 
+## Put somewhere by a scene (setpieces/bola_quica.gd): the trail starts over
+## there, so 03:33 never rolls it back across the house to where it was put from.
+func place(at: Vector3) -> void:
+	global_position = at
+	_trail.clear()
+	_trail_acc = 0.0
+
 func get_prompt() -> String:
 	return "rolar a bola"
 

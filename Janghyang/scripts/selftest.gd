@@ -664,6 +664,7 @@ func _nights() -> void:
 	await _capitulo()
 	await _vitrine()
 	await _desenho()
+	await _bola()
 	main.player.global_position = _goal(&"coroa").at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -774,6 +775,63 @@ func _desenho() -> void:
 	if saved_cat:
 		main.catalog.set_flag(&"chama_no_desenho", true)
 		main.catalog.catalog(&"desenho")
+	pl.global_position = saved
+
+## Noite 1, Tarefa 10 (§6.2, item 8): the first time Elias enters the dark
+## corridor the wooden ball bounces out of its far end and stops 0.6 m short
+## of him; refused (in 03:33) it is just there, at rest, silent.
+func _bola() -> void:
+	print("SELFTEST: bola")
+	var pl = main.player
+	var piece = main.setpiece(&"bola_quica")
+	var ball = main.get_node_or_null("Ball")
+	var names := ["bola: a primeira entrada no corredor traz a bola até 0,6 m de Elias", "bola: a segunda entrada não repete",
+			"bola: catalogável onde parou", "bola: pedida no 03:33, aparece parada ao lado dele, sem quicar"]
+	if piece == null or ball == null:
+		for name in names:
+			_record(false, name, "%s %s" % [piece, ball])
+		return
+	var saved: Vector3 = pl.global_position
+	var director = main.dread.director
+	var flat := func(a: Vector3, b: Vector3) -> float: return Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z))
+	director._used.erase(&"bola_quica")
+	piece.on_night(main.night)
+	pl.global_position = Vector3(9.45, 0.2, 8.4)
+	await _frames(2)
+	var hidden: bool = piece.is_waiting() and not ball.visible
+	pl.global_position = Vector3(9.45, 0.2, 6.0)
+	await _frames(2)
+	var started: bool = piece.is_bouncing()
+	var waited := 0
+	while piece.is_bouncing() and waited < 300:
+		await _frames(1)
+		waited += 1
+	await _frames(10)
+	var d: float = flat.call(ball.global_position, pl.global_position)
+	_record(hidden and started and piece._next == 5 and absf(d - 0.6) < 0.05 and ball.global_position.z < 6.0,
+			names[0], "hidden %s started %s hops %d d %.3f at %s frames %d" % [hidden, started, piece._next, d, ball.global_position, waited])
+	var rest: Vector3 = ball.global_position
+	pl.global_position = Vector3(9.45, 0.2, 8.4)
+	await _frames(3)
+	pl.global_position = Vector3(9.45, 0.2, 6.0)
+	await _frames(3)
+	_record(not piece.is_bouncing() and ball.global_position.distance_to(rest) < 0.05, names[1], str(ball.global_position))
+	var eye: Vector3 = pl.camera.global_position
+	var to: Vector3 = ball.global_position - eye
+	pl.rotation.y = atan2(-to.x, -to.z)
+	pl.camera.rotation.x = atan2(to.y, Vector2(to.x, to.z).length())
+	await _frames(3)
+	var seen = pl.catalog_target_in_view()
+	_record(seen != null and seen.item_id == &"bola" and main.catalog.can_catalog(&"bola") != main.catalog.has(&"bola"), names[2], str(seen))
+	director._used.erase(&"bola_quica")
+	piece.on_night(main.night)
+	director.set_hour(true)
+	piece.play(pl.global_position)
+	director.set_hour(false)
+	await _frames(2)
+	d = flat.call(ball.global_position, pl.global_position)
+	_record(ball.visible and not piece.is_bouncing() and not piece.is_waiting() and absf(d - 0.6) < 0.05, names[3], "d %.3f" % d)
+	pl.camera.rotation.x = 0.0
 	pl.global_position = saved
 
 ## Night 2 does not list the drawing piece: the wax shows, the flag is up.

@@ -42,6 +42,8 @@ const DEF := {
 		{"id": &"vitrine", "script": preload("res://scripts/setpieces/vitrine.gd"), "at": Vector3(15.1, 0.0, 8.2)},
 		{"id": &"chave_vitrine", "script": preload("res://scripts/setpieces/chave_vitrine.gd"), "at": Vector3(1.78, 0.02, 3.5)},
 		{"id": &"desenho_cera", "script": preload("res://scripts/setpieces/desenho_cera.gd"), "at": Vector3(14.05, 1.5, 0.08)},
+		{"id": &"bola_quica", "script": preload("res://scripts/setpieces/bola_quica.gd"), "at": Vector3(9.45, 0.0, 0.5),
+				"ends": [Vector3(9.45, 0.0, 0.5), Vector3(9.45, 0.0, 6.9)]},
 	],
 	## The bench along the figure room's north wall (spec §6.2): where the
 	## figures sit, side by side, facing the room.
