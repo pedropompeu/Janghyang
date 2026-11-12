@@ -80,6 +80,14 @@ var pretending := false
 var ladders := 0
 ## While true (notebook open, ending) only Tab is read.
 var input_locked := false
+## Peeking through something E holds (setpieces/fresta.gd): true while held.
+var peeking := false
+## What E holds: an object with hold_begin() and hold_end(), or null. It is
+## let go by E again, E released after HOLD_TAP s, walking, being grabbed
+## or the notebook (anything that locks the input).
+var _held: Object = null
+var _held_for := 0.0
+const HOLD_TAP := 0.3
 ## Where a fall or a restart puts the player back; set by main.
 var respawn_point := Vector3(1.8, 0.2, 8.3)
 var _bob_time := 0.0
@@ -128,6 +136,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		pushed.emit()
 	if input_locked:
 		return
+	if event is InputEventKey and not event.pressed and event.physical_keycode == KEY_E:
+		if _held != null and _held_for > HOLD_TAP:
+			release_hold()
+		return
+	if event is InputEventMouseMotion and _held != null and _held.has_method("hold_look"):
+		_held.hold_look(event.relative * mouse_sensitivity * Vector2(1.0, -1.0 if invert_y else 1.0))
+		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotation.y -= event.relative.x * mouse_sensitivity
 		var pitch_sign := -1.0 if invert_y else 1.0
@@ -145,7 +160,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_E:
-				_interact()
+				if _held != null:
+					release_hold()
+				else:
+					_interact()
 			KEY_Q:
 				var target := catalog_target_in_view()
 				if target != null:
@@ -174,6 +192,10 @@ func _physics_process(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_D):
 		input_dir.x += 1.0
 	input_dir = Vector2.ZERO if input_locked else input_dir.normalized()
+	if _held != null:
+		_held_for += delta
+		if input_locked or input_dir != Vector2.ZERO:
+			release_hold()
 	if breath.breath(delta, not input_locked and Input.is_physical_key_pressed(KEY_H)) == &"gasp":
 		gasped.emit()
 		noised.emit(global_position, NoiseModel.Level.LOUD)
@@ -342,10 +364,26 @@ func _can_stand() -> bool:
 	params.exclude = [get_rid()]
 	return get_world_3d().direct_space_state.intersect_shape(params, 1).is_empty()
 
+## Lets go of what E holds (setpieces/fresta.gd), if anything.
+func release_hold() -> void:
+	if _held == null:
+		return
+	var h := _held
+	_held = null
+	peeking = false
+	if is_instance_valid(h):
+		h.hold_end()
+
 func _interact() -> void:
 	if ray == null or not ray.is_colliding():
 		return
 	var collider := ray.get_collider()
+	if collider != null and collider.has_method("hold_begin") and collider.has_method("hold_end"):
+		if collider.hold_begin():
+			_held = collider
+			_held_for = 0.0
+			peeking = true
+		return
 	if collider != null and collider.has_method("interact"):
 		collider.interact()
 		if hands != null:

@@ -51,6 +51,8 @@ const DEF := {
 		{"id": &"chave_vitrine", "script": preload("res://scripts/setpieces/chave_vitrine.gd"), "at": Vector3(1.78, 0.02, 3.5)},
 		{"id": &"desenho_cera", "script": preload("res://scripts/setpieces/desenho_cera.gd"), "at": Vector3(14.05, 1.5, 0.08)},
 		{"id": &"banco", "script": preload("res://scripts/setpieces/banco.gd"), "at": Vector3(13.1, 0.0, 5.95)},
+		{"id": &"presenca", "script": preload("res://scripts/setpieces/presenca.gd"), "at": Vector3(8.6, 0.3, -0.65)},
+		{"id": &"fresta", "script": preload("res://scripts/setpieces/fresta.gd"), "at": Vector3(2.6, 1.1, 0.075)},
 		{"id": &"bola_quica", "script": preload("res://scripts/setpieces/bola_quica.gd"), "at": Vector3(9.45, 0.0, 0.5),
 				"ends": [Vector3(9.45, 0.0, 0.5), Vector3(9.45, 0.0, 6.9)]},
 	],

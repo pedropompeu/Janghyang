@@ -667,6 +667,7 @@ func _nights() -> void:
 	await _bola()
 	await _banco()
 	await _catalogo_banco()
+	await _parede()
 	main.player.global_position = _goal(&"coroa").at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -962,6 +963,142 @@ func _catalogo_banco() -> void:
 	main.notebook.close()
 	await _frames(2)
 	pl.global_position = saved
+
+## Noite 1, Tarefa 13 (§6.2, §8.4, itens 5 e 11): something drags behind the
+## playroom's north wall while Elias listens there, and the crack in it shows
+## what it shows while E holds it; the look never takes his body away.
+func _parede() -> void:
+	print("SELFTEST: parede")
+	var pl = main.player
+	var presence = main.setpiece(&"presenca")
+	var crack = main.setpiece(&"fresta")
+	var names := ["parede: escutando na parede norte, o arrastar toca; soltando L, para em 0,1 s",
+			"parede: longe da parede norte não há arrastar",
+			"fresta: E na fresta troca a câmera e soltar devolve", "fresta: o controle não é tirado",
+			"fresta: ser agarrado no meio da olhada devolve a câmera e a luta começa",
+			"fresta: abrir o caderno devolve a câmera"]
+	if presence == null or crack == null:
+		for name in names:
+			_record(false, name, "%s %s" % [presence, crack])
+		return
+	var saved: Vector3 = pl.global_position
+	# These checks drive Elias with keys: his body runs, unlocked, and both
+	# are put back as they were.
+	var was_locked: bool = pl.input_locked
+	var was_running: bool = pl.is_physics_processing()
+	pl.input_locked = false
+	pl.set_physics_process(true)
+	# The breakables check broke the panel long ago; night 1 meets it whole,
+	# and both pieces start the night over with it.
+	var panel = main.find_child("HollowPanel", true, false)
+	var was_broken: bool = panel != null and panel.broken
+	if panel != null:
+		panel.broken = false
+	presence.on_night(main.night)
+	crack.on_night(main.night)
+	var stand := func(at: Vector3, yaw: float) -> void:
+		pl.global_position = at
+		pl.velocity = Vector3.ZERO
+		pl.rotation.y = yaw
+		pl.camera.rotation.x = 0.0
+	# Ear to the north wall: the creak, the drag; let go and it stops.
+	stand.call(Vector3(2.6, 0.2, 0.6), 0.0)
+	await _frames(2)
+	var x0: float = presence.model.x
+	var hit: Dictionary = pl._wall_hit(1.5, true)
+	var diag := "pos %s hit %s" % [pl.global_position, hit.get("position")]
+	_key_event(KEY_L, true)
+	await _frames(60)
+	var heard: bool = pl.listening and presence.at_wall() and presence.is_dragging()
+	var x1: float = presence.model.x
+	_key_event(KEY_L, false)
+	await _frames(6)
+	_record(heard and x1 < x0 - 0.1 and not presence.is_dragging(), names[0],
+			"listening %s heard %s x %.2f -> %.2f dragging %s %s" % [pl.listening, heard, x0, x1, presence.is_dragging(), diag])
+	# Ear to the playroom's east wall, far from the north one.
+	stand.call(Vector3(7.95, 0.2, 3.5), -PI / 2.0)
+	await _frames(2)
+	_key_event(KEY_L, true)
+	await _frames(40)
+	var far_listen: bool = pl.listening
+	var far_drag: bool = presence.is_dragging()
+	_key_event(KEY_L, false)
+	await _frames(3)
+	_record(far_listen and not far_drag and not presence.at_wall(), names[1], "listening %s dragging %s" % [far_listen, far_drag])
+	# E on the crack: the view goes behind the wall; holding then letting go brings it back.
+	var aim := func() -> void:
+		stand.call(Vector3(2.6, 0.2, 0.75), 0.0)
+		await _frames(1)
+		var to: Vector3 = crack.MARK_AT - pl.camera.global_position
+		pl.camera.rotation.x = atan2(to.y, Vector2(to.x, to.z).length())
+		await _frames(2)
+	await aim.call()
+	var own = pl.camera
+	var aimed = pl.ray.get_collider() if pl.ray.is_colliding() else null
+	var adiag := "ray %s" % [aimed]
+	_key_event(KEY_E, true)
+	await _frames(2)
+	var swapped: bool = get_viewport().get_camera_3d() == crack.camera and pl.peeking
+	var first: StringName = crack.showing
+	var shape_up: bool = crack._shape.visible
+	await _frames(30)
+	_key_event(KEY_E, false)
+	await _frames(2)
+	_record(swapped and first == &"forma" and shape_up and get_viewport().get_camera_3d() == own and not pl.peeking
+			and crack.showing == &"" and not crack._shape.visible, names[2],
+			"swapped %s first %s shape %s back %s %s" % [swapped, first, shape_up, get_viewport().get_camera_3d() == own, adiag])
+	# A tap keeps the look; walking ends it and he walks.
+	await aim.call()
+	_key_event(KEY_E, true)
+	await _frames(2)
+	_key_event(KEY_E, false)
+	await _frames(2)
+	var still: bool = pl.peeking and get_viewport().get_camera_3d() == crack.camera
+	var from: Vector3 = pl.global_position
+	_key_event(KEY_S, true)
+	await _frames(20)
+	_key_event(KEY_S, false)
+	var moved: float = pl.global_position.distance_to(from)
+	await _frames(3)
+	_record(still and not pl.peeking and get_viewport().get_camera_3d() == own and moved > 0.1, names[3],
+			"tap kept %s peeking %s moved %.2f" % [still, pl.peeking, moved])
+	# Grabbed in the middle of a look: the view comes back and the fight is on.
+	await aim.call()
+	_key_event(KEY_E, true)
+	await _frames(2)
+	_key_event(KEY_E, false)
+	var g = main.gastos
+	var peeked: bool = pl.peeking
+	g._grab(0)
+	await _frames(2)
+	var fight: bool = g.is_grabbed() and main.capture_fx.is_active() and pl.input_locked
+	_record(peeked and fight and not pl.peeking and get_viewport().get_camera_3d() == own, names[4],
+			"peeked %s fight %s peeking %s" % [peeked, fight, pl.peeking])
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	for k in int(main.night.get("capture_clicks", 10)) + 2:
+		pl._unhandled_input(click)
+	await _frames(3)
+	if g.is_grabbed():
+		_record(false, "parede: free again after the grab at the crack", str(g.capture.state))
+	await get_tree().create_timer(g.Capture.STAGGER + 0.1).timeout
+	# The notebook ends the look.
+	await aim.call()
+	_key_event(KEY_E, true)
+	await _frames(2)
+	_key_event(KEY_E, false)
+	var peeked2: bool = pl.peeking
+	main.notebook.open()
+	await _frames(2)
+	_record(peeked2 and not pl.peeking and get_viewport().get_camera_3d() == own, names[5], "peeked %s peeking %s" % [peeked2, pl.peeking])
+	main.notebook.close()
+	await _frames(2)
+	stand.call(saved, 0.0)
+	pl.input_locked = was_locked
+	pl.set_physics_process(was_running)
+	if panel != null:
+		panel.broken = was_broken
 
 ## Night 2 does not list the bench piece: the bench is empty.
 func _banco_noite2() -> void:
