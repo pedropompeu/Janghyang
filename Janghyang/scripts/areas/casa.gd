@@ -114,6 +114,7 @@ const DEF := {
 		{"item": &"boneco", "node": "Doll", "at": Vector3(0.0, 0.3, 0.0), "size": Vector3(0.55, 1.0, 0.35)},
 		{"item": &"vela", "at": Vector3(11.85, 0.6, 7.7), "size": Vector3(0.25, 0.3, 0.25)},
 		{"item": &"casaco", "at": Vector3(0.2, 1.2, 7.6), "size": Vector3(0.25, 0.9, 0.5)},
+		{"item": &"banco_figuras", "at": Vector3(13.1, 0.75, 5.86), "size": Vector3(3.4, 0.7, 0.5)},
 		{"item": &"figura_inacio_a", "at": Vector3(11.15, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},
 		{"item": &"figura_inacio_b", "at": Vector3(11.85, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},
 		{"item": &"figura_catalogador", "at": Vector3(12.55, 0.7, 8.35), "size": Vector3(0.45, 1.3, 0.45)},

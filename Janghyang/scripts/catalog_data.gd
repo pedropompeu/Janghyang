@@ -22,6 +22,8 @@ const ITEMS := {
 	&"boneco": {"text": "boneco de pano, casaco cinza-azulado igual ao meu. A costura é nova.", "page": &"", "gate": &"doll_sat"},
 	&"vela": {"text": "vela de cera, acesa. Não diminui.", "page": &"", "gate": &""},
 	&"casaco": {"text": "casaco de lã pendurado na entrada. Do meu tamanho, na escala da casa.", "page": &"", "gate": &""},
+	## Draft copy (D9); %s is how many sit there when he writes it (catalog.counts).
+	&"banco_figuras": {"text": "banco comprido contra a parede, %s figuras de porcelana sentadas lado a lado. Nenhuma olha para a outra.", "page": &"", "gate": &""},
 	&"figura_inacio_a": {"text": "figura sentada, cabelo branco, relógio de bolso parado às 03:33.", "page": &"p4", "gate": &""},
 	&"figura_inacio_b": {"text": "figura sentada, mais gasta que a do lado. O mesmo relógio de bolso.", "page": &"", "gate": &""},
 	&"figura_catalogador": {"text": "figura sentada, sem relógio de bolso. No colo, um caderno igual ao meu.", "page": &"p5", "gate": &""},

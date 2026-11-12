@@ -107,3 +107,47 @@ func test_drawing_waits_for_the_flame(t) -> void:
 	t.ok(c.can_catalog(&"desenho"), "com chama, a cera aparece")
 	c.set_flag(&"chama_no_desenho", false)
 	t.ok(not c.can_catalog(&"desenho"), "a chama apaga, some de novo")
+
+# --- Noite 1, Tarefa 12: o catálogo muda sozinho (§6.9, §8.7) ---
+
+func test_the_entry_counts_the_bench(t) -> void:
+	var c = Catalog.new()
+	c.counts[&"banco_figuras"] = 7
+	t.ok(Catalog.format(c.catalog(&"banco_figuras")).contains("sete figuras"), "seven when he writes it")
+	var d = Catalog.new()
+	d.counts[&"banco_figuras"] = 6
+	t.ok(Catalog.format(d.catalog(&"banco_figuras")).contains("seis figuras"), "six when one is gone")
+
+func test_recount_rules(t) -> void:
+	var c = Catalog.new()
+	c.counts[&"banco_figuras"] = 7
+	c.catalog(&"banco_figuras")
+	t.ok(not c.recount(&"banco_figuras", 6, true), "never with the notebook open")
+	t.ok(Catalog.format(c.entries[-1]).contains("sete figuras"), "open: still seven")
+	t.ok(c.recount(&"banco_figuras", 6, false), "closed: seven becomes six")
+	t.ok(Catalog.format(c.entries[-1]).contains("seis figuras"), "in his hand, no erasure")
+	t.ok(not c.recount(&"banco_figuras", 7, false), "it never counts up")
+	t.ok(Catalog.format(c.entries[-1]).contains("seis figuras"), "still six")
+	t.ok(c.recount(&"banco_figuras", 5, false), "a second time")
+	t.ok(not c.recount(&"banco_figuras", 4, false), "at most twice a night")
+	t.ok(Catalog.format(c.entries[-1]).contains("cinco figuras"), "it stays at five")
+
+func test_recount_before_cataloguing_does_nothing(t) -> void:
+	t.ok(not Catalog.new().recount(&"banco_figuras", 6, false), "no entry, no change")
+
+func test_recount_survives_roundtrip(t) -> void:
+	var c = Catalog.new()
+	c.counts[&"banco_figuras"] = 7
+	c.catalog(&"banco_figuras")
+	c.recount(&"banco_figuras", 6, false)
+	var d = Catalog.new()
+	d.from_dict(JSON.parse_string(JSON.stringify(c.to_dict())))
+	t.ok(Catalog.format(d.entries[-1]).contains("seis figuras"), "the text comes back")
+	t.ok(d.recount(&"banco_figuras", 5, false), "one rewrite left")
+	t.ok(not d.recount(&"banco_figuras", 4, false), "the ceiling came back too")
+
+func test_an_uncounted_bench_is_not_written(t) -> void:
+	var c = Catalog.new()
+	t.ok(not c.can_catalog(&"banco_figuras"), "nobody counted: the empty bench is not an entry")
+	c.counts[&"banco_figuras"] = 7
+	t.ok(c.can_catalog(&"banco_figuras"), "counted: it is")

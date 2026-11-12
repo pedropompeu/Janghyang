@@ -666,6 +666,7 @@ func _nights() -> void:
 	await _desenho()
 	await _bola()
 	await _banco()
+	await _catalogo_banco()
 	main.player.global_position = _goal(&"coroa").at
 	await _frames(2)
 	main._complete(&"achar_passagem")
@@ -902,6 +903,64 @@ func _banco() -> void:
 	var fig = piece.figures()[1]
 	var turned := wrapf(fig.rotation.y - PI, -PI, PI)
 	_record(model.spots[1].seated and turned > 0.6 and turned <= deg_to_rad(70.0) + 0.01, names[4], "turned %.3f" % turned)
+	pl.global_position = saved
+
+## Noite 1, Tarefa 12 (§6.9, §8.7): the bench entry says how many sit when
+## Elias writes it, and says one fewer when one leaves, never in front of him.
+func _catalogo_banco() -> void:
+	print("SELFTEST: catalogo banco")
+	var pl = main.player
+	var piece = main.setpiece(&"banco")
+	var names := ["catalogo: o banco catalogado com seis sentadas diz seis", "catalogo: uma figura sai, o caderno fechado, a entrada passa a dizer uma a menos ao abrir",
+			"catalogo: com o caderno aberto a entrada não muda na frente dele"]
+	if piece == null or main.notebook == null:
+		for name in names:
+			_record(false, name, "%s %s" % [piece, main.notebook])
+		return
+	var saved: Vector3 = pl.global_position
+	var director = main.dread.director
+	var cat = main.catalog
+	var text := func() -> String:
+		for e in cat.entries:
+			if e.item == &"banco_figuras":
+				return e.text
+		return ""
+	cat.entries = cat.entries.filter(func(e) -> bool: return e.item != &"banco_figuras")
+	piece.on_night(main.night)
+	var model = piece.model
+	model.on_leave_room()
+	var first: int = model.pending()
+	model.move(first)
+	piece._place(first)
+	cat.counts[&"banco_figuras"] = model.seated()
+	cat.catalog(&"banco_figuras")
+	_record(text.call().contains("seis figuras"), names[0], text.call())
+	if main.notebook.is_open():
+		main.notebook.close()
+	pl.global_position = Vector3(9.0, 0.2, 8.4)
+	pl.rotation.y = PI * 0.5
+	pl.camera.rotation.x = 0.0
+	model.on_leave_room()
+	var waited := 0
+	while not text.call().contains("cinco") and waited < 300:
+		director.update(100.0, false)
+		await _frames(1)
+		waited += 1
+	main.notebook.open()
+	await _frames(2)
+	_record(model.seated() == 5 and text.call().contains("cinco figuras"), names[1], "seated %d frames %d: %s" % [model.seated(), waited, text.call()])
+	model.on_leave_room()
+	waited = 0
+	while model.seated() == 5 and waited < 300:
+		director.update(100.0, false)
+		await _frames(1)
+		waited += 1
+	for i in 60:
+		director.update(100.0, false)
+		await _frames(1)
+	_record(model.seated() == 4 and text.call().contains("cinco figuras"), names[2], "seated %d: %s" % [model.seated(), text.call()])
+	main.notebook.close()
+	await _frames(2)
 	pl.global_position = saved
 
 ## Night 2 does not list the bench piece: the bench is empty.

@@ -6,12 +6,19 @@ extends Node3D
 ## there instead. Every figure he is not looking at turns its head toward him,
 ## up to 70 degrees either way. Meshes only, no collision. On a night that does
 ## not list it the bench is empty: its resolved state.
+##
+## The catalogue counts them (spec §6.9, §8.7): catalog.counts follows how many
+## sit, and once the bench entry is written, each time the number falls the
+## entry says one fewer, but only while the notebook is shut and the director
+## allows it (catalogo_muda, weak); refused, it asks again next tick.
 
 const Bench = preload("res://scripts/bench_model.gd")
 const Mannequin = preload("res://scripts/mannequin.gd")
 const Gastos = preload("res://scripts/gastos.gd")
 const ROOM := &"figuras"
 const KIND := &"figura_some"
+const ITEM := &"banco_figuras"
+const RECOUNT := &"catalogo_muda"
 const SCALE := 1.02
 const TURN := deg_to_rad(70.0)
 ## Where on a figure the eye is checked: about chest high.
@@ -35,6 +42,10 @@ func on_night(night: Dictionary) -> void:
 	for i in _figures.size():
 		_figures[i].visible = _active
 		_place(i)
+	if _active:
+		main.catalog.counts[ITEM] = model.seated()
+	else:
+		main.catalog.counts.erase(ITEM)
 
 func figures() -> Array:
 	return _figures
@@ -85,6 +96,7 @@ func _physics_process(_delta: float) -> void:
 		model.on_leave_room()
 	_was_in = inside
 	_try_move(elias)
+	_try_recount()
 	_turn_heads(elias)
 
 ## The armed figure goes when both ends are out of sight and legal, and the
@@ -105,6 +117,22 @@ func _try_move(elias: Vector3) -> void:
 		return
 	model.move(i)
 	_place(i)
+	main.catalog.counts[ITEM] = model.seated()
+
+## The written entry says more than sit there: rewrite it, unseen.
+func _try_recount() -> void:
+	var n: int = model.seated()
+	var entry := {}
+	for e in main.catalog.entries:
+		if e.item == ITEM:
+			entry = e
+	if entry.is_empty() or int(entry.get("count", 0)) <= n or int(entry.get("rewrites", 0)) >= main.catalog.RECOUNT_MAX:
+		return
+	if main.notebook != null and main.notebook.is_open():
+		return
+	if not main.dread.director.request(RECOUNT, false, main.dread.tension):
+		return
+	main.catalog.recount(ITEM, n, false)
 
 func _turn_heads(elias: Vector3) -> void:
 	for i in _figures.size():
